@@ -10,14 +10,15 @@ import platform
 import subprocess
 import psutil
 import os
+from utils.i18n import t
 
 def get_system_details() -> dict:
     hostname = platform.node()
     os_name = platform.system()
     os_release = platform.release()
-    processor = platform.processor() or "Unknown"
-    
-    # Recupera l'indirizzo IP locale se connesso
+    processor = platform.processor() or t('unknown_processor')
+
+    # Tries to retrieve the IP address of the Raspberry Pi
     ip_address = "N/A"
     try:
         s = psutil.net_if_addrs()
@@ -32,7 +33,7 @@ def get_system_details() -> dict:
     except Exception:
         pass
 
-    # Temperatura CPU
+    # Tries to retrieve the CPU temperature
     cpu_temp = "N/A"
     temp_path = "/sys/class/thermal/thermal_zone0/temp"
     if os.path.exists(temp_path):
@@ -44,23 +45,25 @@ def get_system_details() -> dict:
             pass
 
     return {
-        "Hostname": hostname,
-        "OS": f"{os_name} {os_release}",
-        "IP Address": ip_address,
-        "Processor": processor,
-        "CPU Temperature": cpu_temp
+        t('sys_hostname'): hostname,
+        t('sys_os'): f"{os_name} {os_release}",
+        t('sys_ip_address'): ip_address,
+        t('sys_processor'): processor,
+        t('sys_cpu_temperature'): cpu_temp
     }
 
 def run():
+    print(t('msg_fetching_sys_info'))
+
     os.system('clear' if os.name == 'posix' else 'cls')
-    print("=== SYSTEM INFORMATION ===")
+    print(t('msg_system_info_title'))
     
     details = get_system_details()
     for key, value in details.items():
         print(f"{key}: {value}")
         
     print("\n-------------------------")
-    input("Press Enter to return to settings...")
+    input(t('msg_press_enter_return'))
 
 if __name__ == "__main__":
     run()

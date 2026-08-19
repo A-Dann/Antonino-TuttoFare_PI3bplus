@@ -1,52 +1,33 @@
-import sys
+#!/usr/bin/env python3
 from settings_modules import system_info
 import settings_modules.sync_time_and_place as sync_time_and_place
-
-def show_system_info():
-    print("Fetching system information...")
-    system_info.run()
-
-def connect_to_wifi():
-    print("Connect to Wi-Fi feature is not implemented yet.")
-    return
-
-def start_syncronization():
-    success = sync_time_and_place.run()
-    if(success):
-        print("Time and place synchronized successfully.")
-    else:
-        print("Failed to synchronize time and place.")
-    return
-
-def change_language():
-    print("Change Language feature is not implemented yet.")
-    return
-
-def back_to_menu():
-    print("Returning to the main menu...")
-    return
+import settings_modules.change_language as change_language
+from utils.i18n import t
 
 def run():
-    while True:
-        print("\n--- SETTINGS ---")
-        print("1. System Info")
-        print("2. Connect to Wi-fi")
-        print("3. Sync Time & Place")
-        print("4. Change Language")
-        print("5. Back to Menu")
+    print(t('msg_settings'))
 
-        choice = input("Enter your choice (1-5): ").strip()
+    while True:
+        print(f"\n--- {t('settings_title')} ---")
+        print(f"1. {t('settings_sys_info')}")
+        print(f"2. {t('settings_wifi')}")
+        print(f"3. {t('settings_sync')}")
+        print(f"4. {t('settings_change_lang')}")
+        print(f"5. {t('settings_back')}")
+
+        choice = input(f"{t('settings_prompt_choice')} ").strip()
 
         if choice == '1':
-            show_system_info()
+            system_info.run()
         elif choice == '2':
-            connect_to_wifi()
+            print(t('msg_wifi_not_implemented'))
+            # Implement connect_to_wifi.run()
         elif choice == '3':
-            start_syncronization()
+            sync_time_and_place.run()
         elif choice == '4':
-            change_language()
+            change_language.run()
         elif choice == '5':
-            back_to_menu()
-            break
+            print(t('msg_back_to_menu'))
+            return
         else:
-            print("Invalid choice. Please try again.")
+            print(t('msg_invalid_choice'))

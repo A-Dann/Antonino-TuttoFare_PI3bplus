@@ -1,0 +1,98 @@
+{
+    "menu_modules": {
+        "main_menu": {
+            "menu_title": "MENÚ PRINCIPAL",
+            "menu_desktop_mode": "Modo Escritorio",
+            "menu_dual_audio": "Audio Dual",
+            "menu_settings": "Ajustes",
+            "menu_exit": "Salir",
+            "menu_prompt_choice": "Selecciona una opción:",
+            "msg_desktop_mode": "Iniciando modo escritorio...",
+            "msg_dual_audio": "Abriendo audio dual...",
+            "msg_settings": "Abriendo ajustes...",
+            "msg_exit": "Saliendo...",
+            "msg_invalid_choice": "Opción no válida. Por favor, inténtalo de nuevo."
+        },
+        "desktop_mode": {
+            "reconnect_wifi": "Conexión Wi-Fi perdida. Por favor, reconéctate.",
+            "unknown_city": "Ciudad Desconocida",
+            "key_date": "Fecha",
+            "key_time": "Hora",
+            "key_timezone": "Zona horaria",
+            "key_city": "Ciudad",
+            "key_country": "País",
+            "key_outdoor_temperature": "Temperatura Exterior",
+            "key_cpu_usage": "Uso de CPU",
+            "key_memory_usage": "Uso de Memoria",
+            "key_disk_usage": "Uso de Disco",
+            "key_uptime": "Tiempo de actividad",
+            "key_temperature": "Temperatura de CPU",
+            "msg_config_not_found": "Archivo de configuración no encontrado. Iniciando sincronización inicial...",
+            "msg_init_failed": "La inicialización falló.",
+            "msg_desktop_cannot_start": "El modo escritorio no puede iniciarse sin configuración.",
+            "msg_desktop_starting": "Iniciando modo escritorio...",
+            "desktop_mode_header": "=== MODO ESCRITORIO ===",
+            "label_info": "--- INFORMACIÓN DEL SISTEMA ---",
+            "label_stats": "--- ESTADÍSTICAS DEL SISTEMA ---",
+            "press_any_key_footer": "\nPresiona cualquier tecla para salir del modo escritorio...",
+            "msg_exiting_desktop": "Saliendo del modo escritorio..."
+        },
+        "dual_audio": {
+            "dual_audio_title": "AUDIO DUAL",
+            "dual_audio_dev": "Ajustes de audio dual en desarrollo.",
+            "press_enter_return": "Presiona Enter para volver..."
+        },
+        "turn_off": {
+            "msg_shutting_down": "Apagando el sistema..."
+        }
+    },
+    "settings_modules": {
+        "settings": {
+            "settings_title": "AJUSTES",
+            "settings_sys_info": "Información del Sistema",
+            "settings_wifi": "Configuración de Wi-Fi",
+            "settings_sync": "Sincronizar Hora y Lugar",
+            "settings_change_lang": "Cambiar Idioma",
+            "settings_back": "Volver al Menú Principal",
+            "settings_prompt_choice": "Selecciona una opción:",
+            "msg_fetching_sys_info": "Obteniendo información del sistema...",
+            "msg_wifi_not_implemented": "Configuración de Wi-Fi aún no implementada.",
+            "msg_sync_success": "Sincronización completada con éxito.",
+            "msg_sync_failed": "La sincronización falló.",
+            "msg_change_lang": "Cambio de idioma...",
+            "msg_back_to_menu": "Volviendo al menú principal..."
+        },
+        "system_info": {
+            "unknown_processor": "Desconocido",
+            "sys_hostname": "Nombre de host",
+            "sys_os": "SO",
+            "sys_ip_address": "Dirección IP",
+            "sys_processor": "Procesador",
+            "sys_cpu_temperature": "Temperatura de CPU",
+            "msg_system_info_title": "=== INFORMACIÓN DEL SISTEMA ===",
+            "msg_press_enter_return": "Presiona Enter para volver a los ajustes..."
+        },
+        "sync_time_and_place": {
+            "sync_completed_successfully": "Hora y lugar sincronizados con éxito.",
+            "sync_failed": "La sincronización falló.",
+            "critical_sync_error": "Error crítico de sincronización: {e}",
+            "press_any_key_to_return": "Presiona cualquier tecla para volver al menú..."
+        }
+    },
+    "utils": {
+        "sync_engine": {
+            "currently_offline": "Actualmente sin conexión. Intentando reconexión automática a redes conocidas...",
+            "wifi_scan_error": "Error al escanear redes Wi-Fi: {e}",
+            "mozilla_geo_error": "Error del servicio de geolocalización de Mozilla: {e}",
+            "nominatim_error": "Error de geolocalización inversa de Nominatim: {e}",
+            "ip_fallback_error": "Error al obtener la ubicación alternativa por IP: {e}",
+            "attempting_wifi_geo": "Intentando geolocalización Wi-Fi de alta precisión...",
+            "wifi_geo_fallback": "Geolocalización Wi-Fi no disponible o fallida. Usando ubicación basada en IP...",
+            "syncing_time_place": "Sincronizando hora y lugar...",
+            "failed_retrieve_location": "No se pudieron recuperar los datos de ubicación.",
+            "location_found": "Ubicación encontrada: {city}, {country}, Zona horaria: {timezone}",
+            "sync_success": "Hora y lugar sincronizados con éxito.",
+            "no_internet_available": "No se puede sincronizar: no hay conexión a internet disponible.\nPor favor, conéctate a una red Wi-Fi en los ajustes."
+        }
+    }
+}

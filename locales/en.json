@@ -1,0 +1,98 @@
+{
+    "menu_modules": {
+        "main_menu": {
+            "menu_title": "MAIN MENU",
+            "menu_desktop_mode": "Desktop Mode",
+            "menu_dual_audio": "Dual Audio",
+            "menu_settings": "Settings",
+            "menu_exit": "Exit",
+            "menu_prompt_choice": "Select an option:",
+            "msg_desktop_mode": "Starting Desktop Mode...",
+            "msg_dual_audio": "Opening Dual Audio...",
+            "msg_settings": "Opening Settings...",
+            "msg_exit": "Exiting...",
+            "msg_invalid_choice": "Invalid choice. Please try again."
+        },
+        "desktop_mode": {
+            "reconnect_wifi": "Wi-Fi connection lost. Please reconnect.",
+            "unknown_city": "Unknown City",
+            "key_date": "Date",
+            "key_time": "Time",
+            "key_timezone": "Timezone",
+            "key_city": "City",
+            "key_country": "Country",
+            "key_outdoor_temperature": "Outdoor Temperature",
+            "key_cpu_usage": "CPU Usage",
+            "key_memory_usage": "Memory Usage",
+            "key_disk_usage": "Disk Usage",
+            "key_uptime": "Uptime",
+            "key_temperature": "CPU Temperature",
+            "msg_config_not_found": "Configuration file not found. Starting initial synchronization...",
+            "msg_init_failed": "Initialization failed.",
+            "msg_desktop_cannot_start": "Desktop mode cannot start without configuration.",
+            "msg_desktop_starting": "Starting desktop mode...",
+            "desktop_mode_header": "=== DESKTOP MODE ===",
+            "label_info": "--- SYSTEM INFO ---",
+            "label_stats": "--- SYSTEM STATS ---",
+            "press_any_key_footer": "\nPress any key to exit desktop mode...",
+            "msg_exiting_desktop": "Exiting desktop mode..."
+        },
+        "dual_audio": {
+            "dual_audio_title": "DUAL AUDIO",
+            "dual_audio_dev": "Dual audio settings under development.",
+            "press_enter_return": "Press Enter to return..."
+        },
+        "turn_off": {
+            "msg_shutting_down": "Shutting down system..."
+        }
+    },
+    "settings_modules": {
+        "settings": {
+            "settings_title": "SETTINGS",
+            "settings_sys_info": "System Information",
+            "settings_wifi": "Wi-Fi Configuration",
+            "settings_sync": "Synchronize Time and Place",
+            "settings_change_lang": "Change Language",
+            "settings_back": "Back to Main Menu",
+            "settings_prompt_choice": "Select an option:",
+            "msg_fetching_sys_info": "Fetching system information...",
+            "msg_wifi_not_implemented": "Wi-Fi configuration not implemented yet.",
+            "msg_sync_success": "Synchronization completed successfully.",
+            "msg_sync_failed": "Synchronization failed.",
+            "msg_change_lang": "Changing language...",
+            "msg_back_to_menu": "Returning to main menu..."
+        },
+        "system_info": {
+            "unknown_processor": "Unknown",
+            "sys_hostname": "Hostname",
+            "sys_os": "OS",
+            "sys_ip_address": "IP Address",
+            "sys_processor": "Processor",
+            "sys_cpu_temperature": "CPU Temperature",
+            "msg_system_info_title": "=== SYSTEM INFORMATION ===",
+            "msg_press_enter_return": "Press Enter to return to settings..."
+        },
+        "sync_time_and_place": {
+            "sync_completed_successfully": "Time and place synchronized successfully.",
+            "sync_failed": "Synchronization failed.",
+            "critical_sync_error": "Critical synchronization error: {e}",
+            "press_any_key_to_return": "Press any key to return to the menu..."
+        }
+    },
+    "utils": {
+        "sync_engine": {
+            "currently_offline": "Currently offline. Attempting automatic reconnection to known networks...",
+            "wifi_scan_error": "Error scanning Wi-Fi networks: {e}",
+            "mozilla_geo_error": "Mozilla Location Service error: {e}",
+            "nominatim_error": "Nominatim reverse geocoding error: {e}",
+            "ip_fallback_error": "Error fetching IP location fallback: {e}",
+            "attempting_wifi_geo": "Attempting high-precision Wi-Fi geolocation...",
+            "wifi_geo_fallback": "Wi-Fi geolocation unavailable or failed. Falling back to IP-based location...",
+            "syncing_time_place": "Synchronizing time and place...",
+            "failed_retrieve_location": "Failed to retrieve location data.",
+            "location_found": "Location found: {city}, {country}, Timezone: {timezone}",
+            "sync_success": "Time and place synchronized successfully.",
+            "no_internet_available": "Unable to synchronize: no internet connection available.\nPlease connect to a Wi-Fi network in the settings."
+        }
+    }
+}

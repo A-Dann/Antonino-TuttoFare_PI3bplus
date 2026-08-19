@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-RICONTROLLA TUTTA L'IMPLEMENTAZIONE
-
 Desktop Mode Engine
 
 This module provides utility functions to retrieve system statistics (CPU, memory,
@@ -25,6 +22,7 @@ import tty
 import requests
 import config
 import settings_modules.sync_time_and_place as sync_time_and_place
+from utils.i18n import t
 
 # Global variables to cache outdoor temperature, track last fetch time, and track last success
 cached_outdoor_temp = "N/A"
@@ -37,7 +35,7 @@ def fetch_outdoor_temperature() -> str:
     current_time = time.time()
     
     if last_successful_fetch > 0 and (current_time - last_successful_fetch > 3600):
-        return "Reconnect to Wi-Fi"
+        return t('reconnect_wifi')
 
     if current_time - last_outdoor_temp_fetch < 3600 and cached_outdoor_temp != "N/A":
         return cached_outdoor_temp
@@ -68,7 +66,7 @@ def fetch_outdoor_temperature() -> str:
     if last_successful_fetch > 0 and (current_time - last_successful_fetch <= 3600):
         return cached_outdoor_temp
 
-    return "Reconnect to Wi-Fi"
+    return t('reconnect_wifi')
 
 def get_info() -> dict:
     now = datetime.datetime.now()
@@ -76,13 +74,13 @@ def get_info() -> dict:
     current_time_zone = time.tzname[time.daylight]
     current_time = now.strftime("%H:%M:%S")
 
-    city = "Unknown"
+    city = t('unknown_city')
     country = ""
     if os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         try:
             with open(config.TIME_PLACE_JSON_CONFIG_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                city = data.get("city", "Unknown")
+                city = data.get("city", t('unknown_city'))
                 country = data.get("country", "")
         except Exception:
             pass
@@ -90,12 +88,12 @@ def get_info() -> dict:
     outdoor_temp = fetch_outdoor_temperature()
 
     return {
-        'date': current_date,
-        'time': current_time,
-        'timezone': current_time_zone,
-        'city': city,
-        'country': country,
-        'outdoor_temperature': outdoor_temp
+        t('key_date'): current_date,
+        t('key_time'): current_time,
+        t('key_timezone'): current_time_zone,
+        t('key_city'): city,
+        t('key_country'): country,
+        t('key_outdoor_temperature'): outdoor_temp
     }
 
 def get_stats() -> dict:
@@ -119,23 +117,23 @@ def get_stats() -> dict:
             pass
 
     return {
-        'CPU Usage': f"{cpu_percent}%",
-        'Memory Usage': f"{memory_percent}%",
-        'Disk Usage': f"{disk_percent}%",
-        'Uptime': uptime_string,
-        'Temperature': cpu_temp
+        t('key_cpu_usage'): f"{cpu_percent}%",
+        t('key_memory_usage'): f"{memory_percent}%",
+        t('key_disk_usage'): f"{disk_percent}%",
+        t('key_uptime'): uptime_string,
+        t('key_temperature'): cpu_temp
     }
 
 def ensure_synchronized() -> bool:
     if os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         return True
 
-    print("Configuration file not found. Attempting initial synchronization...")
+    print(t('msg_config_not_found'))
     success = sync_time_and_place.run()
 
     if not success or not os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
-        print("\nInitialization failed: Unable to synchronize location and time.")
-        print("Desktop Mode cannot start until at least one successful synchronization is completed.")
+        print(t('msg_init_failed'))
+        print(t('msg_desktop_cannot_start'))
         return False
 
     return True
@@ -145,6 +143,8 @@ def is_key_pressed() -> bool:
     return bool(dr)
 
 def run():
+    print(t('msg_desktop_mode'))
+
     if not ensure_synchronized():
         return
 
@@ -153,25 +153,25 @@ def run():
     
     try:
         tty.setcbreak(fd)
-        print("Starting Desktop Mode. Press any key to return to the menu...\n")
+        print(t('msg_desktop_starting'))
         time.sleep(1)
         
         while True:
             os.system('clear' if os.name == 'posix' else 'cls')
             
-            print("=== DESKTOP MODE ===")
-            print("Info:")
+            print(t('desktop_mode_header'))
+            print(t('label_info'))
             print(json.dumps(get_info(), indent=4, ensure_ascii=False))
-            print("\nStats:")
+            print(t('label_stats'))
             print(json.dumps(get_stats(), indent=4, ensure_ascii=False))
-            print("\n[Press any key to return to the menu]")
+            print(t('press_any_key_footer'))
 
             start_time = time.time()
             while time.time() - start_time < 5:
                 if is_key_pressed():
                     sys.stdin.read(1)
                     os.system('clear' if os.name == 'posix' else 'cls')
-                    print("Exiting Desktop Mode, returning to menu...")
+                    print(t('msg_exiting_desktop'))
                     return
                 time.sleep(0.1)
 

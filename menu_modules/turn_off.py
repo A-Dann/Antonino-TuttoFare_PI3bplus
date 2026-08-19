@@ -1,20 +1,21 @@
 import subprocess
 import time
 import os
+from utils.i18n import t
 
 ascii_font = {
     'G': [
         " ######  ",
         " ##      ",
         " ##  ### ",
-        " ##   ## ",
+        " ##  ## ",
         "  ###### "
     ],
     'O': [
         "  ###### ",
-        " ##   ## ",
-        " ##   ## ",
-        " ##   ## ",
+        " ##  ## ",
+        " ##  ## ",
+        " ##  ## ",
         " ######  "
     ],
     'D': [
@@ -66,10 +67,12 @@ def print_letter_by_letter(word, font):
             time.sleep(0.3)
 
 def run():
+    print(t('msg_exit'))
+
     print_letter_by_letter("GOODBYE", ascii_font)
 
     print("\n" * 2)
-    print("Shutting down...", flush=True)
+    print(t('msg_shutting_down'), flush=True)
     time.sleep(2)
 
     subprocess.run(["sudo", "shutdown", "now"])
