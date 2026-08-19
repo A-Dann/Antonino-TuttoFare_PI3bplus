@@ -1,10 +1,11 @@
 import subprocess
 import sys
-import sync_time_and_place
+import config
+import settings_modules.sync_time_and_place as sync_time_and_place
 
 def show_system_info():
     print("Fetching system information...")
-    subprocess.run([sys.executable, "system_info.py"])
+    subprocess.run([sys.executable, config.SYSTEM_INFO_PATH])
 
 def connect_to_wifi():
     print("Connect to Wi-Fi feature is not implemented yet.")

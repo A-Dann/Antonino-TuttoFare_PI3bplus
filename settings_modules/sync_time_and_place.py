@@ -254,7 +254,7 @@ def save_location_config(location_info):
         "last_sync": datetime.datetime.now().isoformat()
     }
     # Open the configuration file in write mode and dump the dictionary as formatted JSON
-    with open(config.TIME_PLACE_CONFIG_PATH, "w") as f:
+    with open(config.TIME_PLACE_JSON_CONFIG_PATH, "w") as f:
         json.dump(data_config, f, indent=4)
 
 def sync_time_and_place():

@@ -22,10 +22,9 @@ import sys
 import select
 import termios
 import tty
-
 import requests
 import config
-from sync_time_and_place import handle_time_sync_action
+from settings_modules.sync_time_and_place import handle_time_and_place_sync_action
 
 # Global variables to cache outdoor temperature, track last fetch time, and track last success
 cached_outdoor_temp = "N/A"
@@ -79,9 +78,9 @@ def get_info() -> dict:
 
     city = "Unknown"
     country = ""
-    if os.path.exists(config.TIME_PLACE_CONFIG_PATH):
+    if os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         try:
-            with open(config.TIME_PLACE_CONFIG_PATH, "r", encoding="utf-8") as f:
+            with open(config.TIME_PLACE_JSON_CONFIG_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 city = data.get("city", "Unknown")
                 country = data.get("country", "")
@@ -128,13 +127,13 @@ def get_stats() -> dict:
     }
 
 def ensure_synchronized() -> bool:
-    if os.path.exists(config.TIME_PLACE_CONFIG_PATH):
+    if os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         return True
 
     print("Configuration file not found. Attempting initial synchronization...")
-    success = handle_time_sync_action()
+    success = handle_time_and_place_sync_action()
     
-    if not success or not os.path.exists(config.TIME_PLACE_CONFIG_PATH):
+    if not success or not os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         print("\nInitialization failed: Unable to synchronize location and time.")
         print("Desktop Mode cannot start until at least one successful synchronization is completed.")
         return False

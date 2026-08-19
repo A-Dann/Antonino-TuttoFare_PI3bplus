@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Build / Setuptools
+*.egg-info/
+dist/
+build/
+
+# Sensitive data or local folders
+data/
+_Progetto Audio/
