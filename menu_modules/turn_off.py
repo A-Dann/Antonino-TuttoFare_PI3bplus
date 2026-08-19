@@ -65,11 +65,11 @@ def print_letter_by_letter(word, font):
             
             time.sleep(0.3)
 
-# --- Execution ---
-print_letter_by_letter("GOODBYE", ascii_font)
+def run():
+    print_letter_by_letter("GOODBYE", ascii_font)
 
-print("\n" * 2)
-print("Shutting down...", flush=True)
-time.sleep(2)
+    print("\n" * 2)
+    print("Shutting down...", flush=True)
+    time.sleep(2)
 
-subprocess.run(["sudo", "shutdown", "now"])
+    subprocess.run(["sudo", "shutdown", "now"])

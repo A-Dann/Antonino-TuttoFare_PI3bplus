@@ -1,23 +1,7 @@
 #!/usr/bin/env python3
-import subprocess
-import sys
-import config
-
-def desktop_mode():
-    print("Switching to Desktop Mode...")
-    subprocess.run([sys.executable, config.DESKTOP_MODE_PATH])
-
-def app_bluetooth_dual_audio():
-    print("Starting Dual Audio application...")
-    subprocess.run([sys.executable, config.DUAL_AUDIO_PATH])
-
-def settings():
-    print("Opening Settings...")
-    subprocess.run([sys.executable, config.SETTINGS_PATH])
-
-def turn_off():
-    subprocess.run([sys.executable, config.TURN_OFF_PATH])
-    sys.exit(0)
+from menu_modules import desktop_mode, turn_off
+from menu_modules import dual_audio
+import settings
 
 def main():
     while True:
@@ -30,13 +14,18 @@ def main():
         choice = input("Enter your choice (1-4): ").strip()
 
         if choice == '1':
-            desktop_mode()
+            print("Switching to Desktop Mode...")
+            desktop_mode.run()
         elif choice == '2':
-            app_bluetooth_dual_audio()
+            print("Starting Dual Audio application...")
+            dual_audio.run()
         elif choice == '3':
-            settings()
+            print("Opening Settings...")
+            settings.run()
         elif choice == '4':
-            turn_off()
+            print("Exiting...")
+            turn_off.run()
+            break
         else:
             print("Invalid choice. Please try again.")
 

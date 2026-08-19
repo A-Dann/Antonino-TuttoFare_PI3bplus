@@ -24,7 +24,7 @@ import termios
 import tty
 import requests
 import config
-from settings_modules.sync_time_and_place import handle_time_and_place_sync_action
+import settings_modules.sync_time_and_place as sync_time_and_place
 
 # Global variables to cache outdoor temperature, track last fetch time, and track last success
 cached_outdoor_temp = "N/A"
@@ -131,8 +131,8 @@ def ensure_synchronized() -> bool:
         return True
 
     print("Configuration file not found. Attempting initial synchronization...")
-    success = handle_time_and_place_sync_action()
-    
+    success = sync_time_and_place.run()
+
     if not success or not os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         print("\nInitialization failed: Unable to synchronize location and time.")
         print("Desktop Mode cannot start until at least one successful synchronization is completed.")
@@ -144,7 +144,7 @@ def is_key_pressed() -> bool:
     dr, _, _ = select.select([sys.stdin], [], [], 0)
     return bool(dr)
 
-def run_desktop_mode():
+def run():
     if not ensure_synchronized():
         return
 
@@ -179,4 +179,4 @@ def run_desktop_mode():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 if __name__ == "__main__":
-    run_desktop_mode()
+    run()

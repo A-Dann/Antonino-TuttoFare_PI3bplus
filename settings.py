@@ -1,18 +1,17 @@
-import subprocess
 import sys
-import config
+from settings_modules import system_info
 import settings_modules.sync_time_and_place as sync_time_and_place
 
 def show_system_info():
     print("Fetching system information...")
-    subprocess.run([sys.executable, config.SYSTEM_INFO_PATH])
+    system_info.run()
 
 def connect_to_wifi():
     print("Connect to Wi-Fi feature is not implemented yet.")
     return
 
 def start_syncronization():
-    success = sync_time_and_place.handle_time_and_place_sync_action()
+    success = sync_time_and_place.run()
     if(success):
         print("Time and place synchronized successfully.")
     else:
@@ -25,9 +24,10 @@ def change_language():
 
 def back_to_menu():
     print("Returning to the main menu...")
-    sys.exit(1)
+    return
 
-while True:
+def run():
+    while True:
         print("\n--- SETTINGS ---")
         print("1. System Info")
         print("2. Connect to Wi-fi")
@@ -47,5 +47,6 @@ while True:
             change_language()
         elif choice == '5':
             back_to_menu()
+            break
         else:
             print("Invalid choice. Please try again.")

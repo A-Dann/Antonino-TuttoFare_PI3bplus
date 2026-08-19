@@ -282,7 +282,7 @@ def sync_time_and_place():
     print("Time and place synchronized successfully.")
     return True
 
-def handle_time_and_place_sync_action():
+def run():
     """
     Check for internet connectivity, attempt automatic reconnection if offline,
     and trigger the main time and location synchronization routine.
