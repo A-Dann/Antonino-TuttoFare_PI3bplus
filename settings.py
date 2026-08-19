@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-from settings_modules import system_info
+
+import settings_modules.system_info as system_info
+import settings_modules.configure_wifi as configure_wifi
 import settings_modules.sync_time_and_place as sync_time_and_place
 import settings_modules.change_language as change_language
 from utils.i18n import t
@@ -10,7 +12,7 @@ def run():
     while True:
         print(f"\n--- {t('settings_title')} ---")
         print(f"1. {t('settings_sys_info')}")
-        print(f"2. {t('settings_wifi')}")
+        print(f"2. {t('settings_configure_wifi')}")
         print(f"3. {t('settings_sync')}")
         print(f"4. {t('settings_change_lang')}")
         print(f"5. {t('settings_back')}")
@@ -21,7 +23,7 @@ def run():
             system_info.run()
         elif choice == '2':
             print(t('msg_wifi_not_implemented'))
-            # Implement connect_to_wifi.run()
+            configure_wifi.run()
         elif choice == '3':
             sync_time_and_place.run()
         elif choice == '4':

@@ -15,3 +15,6 @@ TIME_PLACE_JSON_CONFIG_PATH = os.path.join(DATA_DIR_PATH, "time&place_config.jso
 LANGUAGE_CONFIG_PATH = os.path.join(DATA_DIR_PATH, "language_config.json")
 
 DEFAULT_LANGUAGE = "en"  # Default language code
+
+# Path to the temporary pending Wi-Fi file
+TEMP_WIFI_SSID_JSON_PATH = "/tmp/pending_wifi.json"
