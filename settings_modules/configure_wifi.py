@@ -50,7 +50,7 @@ def scan_and_connect():
     # 3. Display the list of detected networks with index, security and signal
     print(f"\n--- {t('configure_wifi_available_networks')} ({len(networks)}) ---")
     for idx, net in enumerate(networks, start=1):
-        print(f"{idx}. {net['ssid']} ({t('wifi_security')}: {net['security']}%, {t('wifi_signal')}: {net['signal']})")
+        print(f"{idx}. {net['ssid']} ({t('key_security')}: {net['security']}%, {t('key_signal')}: {net['signal']})")
     
     # 4. Prompt the user to choose a network by its number
     choice = input(f"\n{t('configure_wifi_select_network')} ").strip()
