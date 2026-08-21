@@ -1,11 +1,11 @@
 {
     "common": {
-        "msg_press_enter_to_continue": "Pulsa Intro para continuar...",
-        "msg_invalid_choice": "Opción no válida. Inténtalo de nuevo.",
+        "msg_press_enter_to_continue": "Pulse Intro para continuar...",
+        "msg_invalid_choice": "Opción no válida. Inténtelo de nuevo.",
         "msg_unexpected_input": "Entrada inesperada o no válida.",
-        "msg_prompt_choice": "Selecciona una opción:",
+        "msg_prompt_choice": "Seleccione una opción:",
         "msg_back_to_menu": "Volviendo al Menú Principal...",
-        "msg_press_enter_return": "Pulsa Intro para volver..."
+        "msg_press_enter_return": "Pulse Intro para volver..."
     },
     "key": {
         "key_unknown_city": "Ciudad desconocida",
@@ -15,7 +15,6 @@
         "key_city": "Ciudad",
         "key_country": "País",
         "key_outdoor_temperature": "Temperatura exterior",
-        "desktop_mode_label_stats": "--- ESTADÍSTICAS DEL SISTEMA ---",
         "key_cpu_usage": "Uso de CPU",
         "key_memory_usage": "Uso de memoria",
         "key_disk_usage": "Uso de disco",
@@ -34,118 +33,120 @@
     },
     "menu_modules": {
         "main_menu": {
-                "menu_title": "MENÚ PRINCIPAL",
-                "menu_desktop_mode": "Modo Escritorio",
-                "menu_dual_audio": "Audio Dual",
-                "menu_settings": "Configuración",
-                "menu_exit": "Salir"
+            "menu_title": "MENÚ PRINCIPAL",
+            "menu_desktop_mode": "Modo Escritorio",
+            "menu_dual_audio": "Audio Dual",
+            "menu_settings": "Ajustes",
+            "menu_exit": "Salir"
         },
         "desktop_mode": {
-                "desktop_mode_starting": "Iniciando modo Escritorio...",
-                "desktop_mode_config_not_found": "Archivo de configuración no encontrado. Iniciando sincronización inicial...",
-                "desktop_mode_init_failed": "Inicialización fallida.",
-                "desktop_mode_cannot_start": "El modo Escritorio no puede iniciarse sin configuración.",
-                "desktop_mode_connection_lost": "Conexión Wi-Fi perdida. Por favor, reconéctate.",
-                "desktop_mode_header": "=== MODO ESCRITORIO ===",
-                "desktop_mode_label_info": "--- INFORMACIÓN DEL SISTEMA ---",
-                "desktop_mode_any_key_to_exit": "Pulsa cualquier tecla para salir del modo escritorio...",
-                "desktop_mode_exiting": "Saliendo del modo escritorio..."            
+            "desktop_mode_starting": "Iniciando el modo Escritorio...",
+            "desktop_mode_config_not_found": "Archivo de configuración no encontrado. Iniciando la sincronización inicial...",
+            "desktop_mode_init_failed": "Error de inicialización.",
+            "desktop_mode_cannot_start": "El modo Escritorio no puede iniciarse sin configuración.",
+            "desktop_mode_connection_lost": "Conexión Wi-Fi perdida. Reconéctese.",
+            "desktop_mode_header": "=== MODO ESCRITORIO ===",
+            "desktop_mode_label_stats": "--- ESTADÍSTICAS DEL SISTEMA ---",
+            "desktop_mode_label_info": "--- INFORMACIÓN DEL SISTEMA ---",
+            "desktop_mode_any_key_to_exit": "Pulse cualquier tecla para salir del modo escritorio...",
+            "desktop_mode_exiting": "Saliendo del modo escritorio..."
         },
         "dual_audio": {
-                "dual_audio_starting": "Abriendo Audio Dual...",
-                "dual_audio_title": "AUDIO DUAL",
-                "dual_audio_dev": "Configuración de audio dual en desarrollo."
+            "dual_audio_starting": "Abriendo Audio Dual...",
+            "dual_audio_title": "AUDIO DUAL",
+            "dual_audio_dev": "Ajustes de audio dual en desarrollo."
         },
         "turn_off": {
-                "turn_off_system_exiting": "Saliendo...",
-                "turn_off_shutting_down": "Apagando el sistema..."
+            "turn_off_system_exiting": "Saliendo...",
+            "turn_off_shutting_down": "Apagando el sistema..."
         }
     },
     "settings_modules": {
         "settings": {
-                "settings_starting": "Abriendo Configuración...",
-                "settings_title": "CONFIGURACIÓN",
-                "settings_info": "Información del sistema",
-                "settings_configure_wifi": "Configuración de Wi-Fi",
-                "settings_sync_time_place": "Sincronizar hora y lugar",
-                "settings_change_lang": "Cambiar idioma",
-                "settings_back_to_menu": "Volver al Menú Principal"
+            "settings_starting": "Abriendo Ajustes...",
+            "settings_title": "AJUSTES",
+            "settings_sys_info": "Información del sistema",
+            "settings_configure_wifi": "Configuración Wi-Fi",
+            "settings_sync_time_place": "Sincronizar hora y lugar",
+            "settings_change_lang": "Cambiar idioma",
+            "settings_back_to_menu": "Volver al Menú Principal"
         },
         "system_info": {
-                "sys_info_fetching_info": "Obteniendo información del sistema...",
-                "sys_info_title": "=== INFORMACIÓN DEL SISTEMA ==="
+            "sys_info_fetching_info": "Obteniendo información del sistema...",
+            "sys_info_title": "=== INFORMACIÓN DEL SISTEMA ==="
         },
         "configure_wifi": {
-                "configure_wifi_title": "Configuración de Wi-Fi",
-                "configure_wifi_get_current_state": "Estado de conexión actual",
-                "configure_wifi_scan_and_connect": "Escanear y conectar",
-                "configure_wifi_get_saved_networks": "Ver redes guardadas",
-                "configure_wifi_remove_saved_networks": "Eliminar red guardada",
-                "configure_wifi_disconnect_from_network": "Desconectar de la red",
-                "configure_wifi_back_to_settings": "Volver a la configuración",
-                "configure_wifi_status_disconnected": "Estado: Desconectado.",
-                "configure_wifi_scanning": "Escaneando redes Wi-Fi disponibles...",
-                "configure_wifi_no_networks_found": "No se encontraron redes Wi-Fi.",
-                "configure_wifi_available_networks": "Redes Disponibles",
-                "configure_wifi_select_network": "Selecciona el número de una red (o presiona Intro para cancelar):",
-                "configure_wifi_connecting_to": "Conectando a",
-                "configure_wifi_connected_successfully": "¡Conectado con éxito!",
-                "configure_wifi_password_required_start_ap": "Contraseña requerida - Modo AP Activo",
-                "configure_wifi_connection_error": "Error de conexión o fallo al iniciar el modo AP.",
-                "configure_wifi_no_password_found": "No se encontró contraseña (ausente o corrupta)",
-                "configure_wifi_ask_for_retry": "¿Deseas reintentar enviar la contraseña?",
-                "configure_wifi_back_to_wifi_menu": "Volviendo al Menú de Configuración Wi-Fi",
-                "configure_wifi_saved_networks_label": "Redes Guardadas",
-                "configure_wifi_no_saved_networks_found": "No se encontraron redes guardadas.",
-                "configure_wifi_remove_saved_networks_label": "Eliminar Red Guardada",
-                "configure_wifi_select_network_to_remove": "Selecciona el número de la red a eliminar (o presiona Intro para cancelar):",
-                "configure_wifi_network_removed_successfully": "Red eliminada con éxito",
-                "configure_wifi_remove_network_error": "Error al eliminar la red",
-                "configure_wifi_disconnected_successfully": "Desconectado con éxito.",
-                "configure_wifi_disconnection_error": "Error al desconectar o ya desconectado."
+            "configure_wifi_title": "Configuración Wi-Fi",
+            "configure_wifi_get_current_state": "Estado de la conexión actual",
+            "configure_wifi_scan_and_connect": "Escanear y conectar",
+            "configure_wifi_get_saved_networks": "Ver redes guardadas",
+            "configure_wifi_remove_saved_networks": "Eliminar red guardada",
+            "configure_wifi_disconnect_from_network": "Desconectarse de la red",
+            "configure_wifi_back_to_settings": "Volver a ajustes",
+            "configure_wifi_status_disconnected": "Estado: Desconectado.",
+            "configure_wifi_scanning": "Escaneando redes Wi-Fi disponibles...",
+            "configure_wifi_no_networks_found": "No se encontraron redes Wi-Fi.",
+            "configure_wifi_available_networks": "Redes Disponibles",
+            "configure_wifi_select_network": "Seleccione el número de una red (o pulse Intro para cancelar):",
+            "configure_wifi_connecting_to": "Conectando a",
+            "configure_wifi_connected_successfully": "¡Conectado con éxito!",
+            "configure_wifi_password_required_start_ap": "Contraseña requerida - Modo AP Activo",
+            "configure_wifi_connection_error": "Error de conexión o fallo al iniciar el modo AP.",
+            "configure_wifi_no_password_found": "No se encontró contraseña (ausente o corrupta)",
+            "configure_wifi_ask_for_retry": "¿Desea volver a intentar enviar la contraseña?",
+            "configure_wifi_back_to_wifi_menu": "Volviendo al menú de configuración Wi-Fi",
+            "configure_wifi_saved_networks_label": "Redes Guardadas",
+            "configure_wifi_no_saved_networks_found": "No se encontraron redes guardadas.",
+            "configure_wifi_remove_saved_networks_label": "Eliminar Red Guardada",
+            "configure_wifi_select_network_to_remove": "Seleccione el número de la red a eliminar (o pulse Intro para cancelar):",
+            "configure_wifi_network_removed_successfully": "Red eliminada con éxito",
+            "configure_wifi_remove_network_error": "Fallo al eliminar la red",
+            "configure_wifi_disconnected_successfully": "Desconectado con éxito.",
+            "configure_wifi_disconnection_error": "Fallo al desconectar o ya desconectado."
         },
         "sync_time_and_place": {
-                "sync_time_and_place_completed_successfully": "Hora y lugar sincronizados con éxito.",
-                "sync_time_and_place_failed": "Sincronización fallida.",
-                "sync_time_and_place_critical_sync_error": "Error crítico de sincronización: {e}"
+            "sync_time_and_place_completed_successfully": "Hora y lugar sincronizados con éxito.",
+            "sync_time_and_place_failed": "Sincronización fallida.",
+            "sync_time_and_place_critical_sync_error": "Error crítico de sincronización: {e}"
         },
-        "change_language":{
-                "change_language_english": "Inglés (en)",
-                "change_language_italian": "Italiano (it)",
-                "change_language_spanish": "Español (es)",
-                "change_language_settings": "Configuración de Idioma",
-                "change_language_back_to_settings": "Volver a la Configuración",
-                "change_language_changed_succesfully": "Idioma cambiado con éxito"
+        "change_language": {
+            "change_language_title": "CAMBIAR IDIOMA",
+            "change_language_english": "Inglés (en)",
+            "change_language_italian": "Italiano (it)",
+            "change_language_spanish": "Español (es)",
+            "change_language_settings": "Ajustes de Idioma",
+            "change_language_back_to_settings": "Volver a Ajustes",
+            "change_language_changed_succesfully": "Idioma cambiado con éxito"
         }
     },
     "utils": {
         "sync_engine": {
-                "sync_engine_currently_offline": "Actualmente sin conexión. Intentando reconexión automática a redes conocidas...",
-                "sync_engine_wifi_scan_error": "Error al escanear redes Wi-Fi: {e}",
-                "sync_engine_mozilla_geo_error": "Error del Servicio de Ubicación de Mozilla: {e}",
-                "sync_engine_nominatim_error": "Error de geocodificación inversa de Nominatim: {e}",
-                "sync_engine_ip_fallback_error": "Error al obtener la ubicación alternativa por IP: {e}",
-                "sync_engine_attempting_wifi_geo": "Intentando geolocalización Wi-Fi de alta precisión...",
-                "sync_engine_wifi_geo_fallback": "Geolocalización Wi-Fi no disponible o fallida. Usando ubicación alternativa basada en IP...",
-                "sync_engine_syncing_time_and_place": "Sincronizando hora y lugar...",
-                "sync_engine_failed_retrieve_location": "Error al recuperar los datos de ubicación.",
-                "sync_engine_location_found": "Ubicación encontrada: {city}, {country}, Zona horaria: {timezone}",
-                "sync_engine_synced_successfully": "Hora y lugar sincronizados con éxito.",
-                "sync_engine_no_internet_available": "Imposible sincronizar: no hay conexión a internet disponible.\nPor favor, conéctate a una red Wi-Fi en la configuración."
+            "sync_engine_currently_offline": "Desconectado. Intentando reconexión automática a redes conocidas...",
+            "sync_engine_wifi_scan_error": "Error al escanear redes Wi-Fi: {e}",
+            "sync_engine_mozilla_geo_error": "Error del servicio de posicionamiento de Mozilla: {e}",
+            "sync_engine_nominatim_error": "Error de geocodificación inversa de Nominatim: {e}",
+            "sync_engine_ip_fallback_error": "Error al obtener la ubicación alternativamente por IP: {e}",
+            "sync_engine_attempting_wifi_geo": "Intentando geolocalización Wi-Fi de alta precisión...",
+            "sync_engine_wifi_geo_fallback": "Geolocalización Wi-Fi no disponible o fallida. Usando ubicación basada en IP...",
+            "sync_engine_syncing_time_and_place": "Sincronizando hora y lugar...",
+            "sync_engine_failed_retrieve_location": "Fallo al recuperar los datos de ubicación.",
+            "sync_engine_location_found": "Ubicación encontrada: {city}, {country}, Zona horaria: {timezone}",
+            "sync_engine_synced_successfully": "Hora y lugar sincronizados con éxito.",
+            "sync_engine_no_internet_available": "Imposible sincronizar: no hay conexión a internet disponible.\nConéctese a una red Wi-Fi en los ajustes."
         },
         "wifi": {
             "templates": {
                 "wifi_portal_password_request": {
-                        "portal_request_title": "Conexión Wi-Fi",
-                        "portal_request_password": "Contraseña",
-                        "portal_request_show_password": "Mostrar contraseña",
-                        "portal_request_connect_btn": "Conectar"
+                    "portal_request_title": "Conexión Wi-Fi",
+                    "portal_request_password": "Contraseña",
+                    "portal_request_show_password": "Mostrar contraseña",
+                    "portal_request_connect_btn": "Conectar"
                 },
                 "wifi_portal_password_received": {
-                        "portal_received_password_received": "¡Contraseña recibida!",
-                        "portal_received_disconnecting_hotspot": "Desconectando el punto de acceso y conectando a la red...",
-                        "portal_received_connection_attempt": "Intentando conexión a",
-                        "portal_received_msg_close_page": "Esta página se cerrará automáticamente en 5 segundos."
+                    "portal_received_password_received": "¡Contraseña recibida!",
+                    "portal_received_disconnecting_hotspot": "Desconectando el punto de acceso y conectando a la red...",
+                    "portal_received_connection_attempt": "Intentando conexión a",
+                    "portal_received_msg_close_page": "Esta página se cerrará automáticamente en 5 segundos."
                 }
             }
         }

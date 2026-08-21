@@ -10,12 +10,12 @@ import os
 from utils.i18n import t, load_language, set_language, current_lang
 
 def run():
-    print(t('msg_change_lang'))
+    print(t('change_language_title'))
 
     languages = {
-        "en": t('lang_english'),
-        "it": t('lang_italian'),
-        "es": t('lang_spanish'),
+        "en": t('change_language_english'),
+        "it": t('change_language_italian'),
+        "es": t('change_language_spanish'),
     }
 
     while True:

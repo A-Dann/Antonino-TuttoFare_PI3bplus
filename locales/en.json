@@ -15,7 +15,6 @@
         "key_city": "City",
         "key_country": "Country",
         "key_outdoor_temperature": "Outdoor Temperature",
-        "desktop_mode_label_stats": "--- SYSTEM STATS ---",
         "key_cpu_usage": "CPU Usage",
         "key_memory_usage": "Memory Usage",
         "key_disk_usage": "Disk Usage",
@@ -47,6 +46,7 @@
                 "desktop_mode_cannot_start": "Desktop mode cannot start without configuration.",
                 "desktop_mode_connection_lost": "Wi-Fi connection lost. Please reconnect.",
                 "desktop_mode_header": "=== DESKTOP MODE ===",
+                "desktop_mode_label_stats": "--- SYSTEM STATS ---",
                 "desktop_mode_label_info": "--- SYSTEM INFO ---",
                 "desktop_mode_any_key_to_exit": "Press any key to exit desktop mode...",
                 "desktop_mode_exiting": "Exiting desktop mode..."            
@@ -65,7 +65,7 @@
         "settings": {
                 "settings_starting": "Opening Settings...",
                 "settings_title": "SETTINGS",
-                "settings_info": "System Information",
+                "settings_sys_info": "System Information",
                 "settings_configure_wifi": "Wi-Fi Configuration",
                 "settings_sync_time_place": "Synchronize Time and Place",
                 "settings_change_lang": "Change Language",
@@ -110,6 +110,7 @@
                 "sync_time_and_place_critical_sync_error": "Critical synchronization error: {e}"
         },
         "change_language":{
+                "change_language_title": "CHANGE LANGUAGE",
                 "change_language_english": "English (en)",
                 "change_language_italian": "Italian (it)",
                 "change_language_spanish": "Spanish (es)",

@@ -44,11 +44,11 @@ def get_system_details() -> dict:
             pass
 
     return {
-        t('sys_hostname'): hostname,
-        t('sys_os'): f"{os_name} {os_release}",
-        t('sys_ip_address'): ip_address,
-        t('sys_processor'): processor,
-        t('sys_cpu_temperature'): cpu_temp
+        t('key_hostname'): hostname,
+        t('key_os'): f"{os_name} {os_release}",
+        t('key_ip_address'): ip_address,
+        t('key_processor'): processor,
+        t('key_cpu_temperature'): cpu_temp
     }
 
 def run():
