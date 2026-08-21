@@ -3,10 +3,18 @@
 Wi-Fi Engine Module
 
 Low-level management of Wi-Fi operations using NetworkManager (nmcli):
-- Current status
-- Nearby networks scan and smart connection (saved vs AP mode)
-- Saved networks listing and removal
-- Disconnection
+- Current status check.
+- Nearby networks scan and smart connection (handling saved, open, or AP mode).
+- Saved networks listing (with automatic stripping of Netplan system-connection prefixes).
+- Network removal and explicit profile resolution.
+- Disconnection management.
+
+Raspberry Pi Connectivity Architecture:
+- Uses NetworkManager as the primary backend daemon for network interfaces (wlan0).
+- Interacts with netplan-generated system profiles (e.g., netplan-wlan0-SSID) 
+  where NetworkManager relies on configuration persistence layers.
+- Supports standard wireless protocols (802.11 b/g/n/ac depending on hardware) 
+  and fallback mechanisms between Infrastructure mode (client) and Access Point (AP) mode.
 """
 
 import subprocess
@@ -92,7 +100,20 @@ def handle_network_selection(ssid, security):
     # 1. Saved network: connect directly
     if ssid in saved:
         try:
-            subprocess.run(["nmcli", "connection", "up", ssid], capture_output=True, text=True, check=True)
+            # Query NetworkManager for all existing connection profiles to resolve Netplan naming conventions
+            profiles_res = subprocess.run(
+                ["nmcli", "-t", "-f", "NAME", "connection", "show"],
+                capture_output=True, text=True, check=True
+            )
+            profile_to_up = ssid
+            for line in profiles_res.stdout.splitlines():
+                p_name = line.strip()
+                # Match either the plain SSID or the Netplan-prefixed system profile name
+                if p_name == ssid or p_name == f"netplan-wlan0-{ssid}":
+                    profile_to_up = p_name
+                    break
+            # Bring up the matched connection profile
+            subprocess.run(["nmcli", "connection", "up", profile_to_up], capture_output=True, text=True, check=True)
             return "connected"
         except subprocess.CalledProcessError:
             return "error"
@@ -154,7 +175,11 @@ def get_saved_list():
         for line in result.stdout.splitlines():
             parts = line.split(":")
             if len(parts) >= 2 and "wireless" in parts[1]:
-                networks.append(parts[0])
+                name = parts[0]
+                # Strip the Netplan system prefix to expose a clean, user-friendly SSID string
+                if name.startswith("netplan-wlan0-"):
+                    name = name.replace("netplan-wlan0-", "", 1)
+                networks.append(name)
         return networks
     except Exception:
         return []
@@ -162,7 +187,22 @@ def get_saved_list():
 def remove_network(target):
     """Removes a saved network from system-connections."""
     try:
-        subprocess.run(["nmcli", "connection", "delete", target], capture_output=True, check=True)
+        # Retrieve all connection profile names from NetworkManager to locate the correct target
+        result = subprocess.run(
+            ["nmcli", "-t", "-f", "NAME", "connection", "show"],
+            capture_output=True, text=True, check=True
+        )
+
+        profile_to_delete = target
+        for line in result.stdout.splitlines():
+            profile_name = line.strip()
+            # Match target against raw profile name or Netplan-prefixed system profile name
+            if profile_name == target or profile_name == f"netplan-wlan0-{target}":
+                profile_to_delete = profile_name
+                break
+
+        # Delete the resolved connection profile from system storage
+        subprocess.run(["nmcli", "connection", "delete", profile_to_delete], capture_output=True, check=True)
         return True
     except Exception:
         return False

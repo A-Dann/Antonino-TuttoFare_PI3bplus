@@ -28,7 +28,7 @@ def run():
             print(f"{idx}. {languages[code]}")
         print(f"{len(codes) + 1}. {t('change_language_back_to_settings')}")
 
-        choice = input(f"\n{t('_prompt_choice')} ").strip()
+        choice = input(f"\n{t('msg_prompt_choice')} ").strip()
 
         if choice.isdigit():
             choice_idx = int(choice)
