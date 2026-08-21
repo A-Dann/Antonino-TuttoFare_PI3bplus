@@ -35,7 +35,7 @@ def fetch_outdoor_temperature() -> str:
     current_time = time.time()
     
     if last_successful_fetch > 0 and (current_time - last_successful_fetch > 3600):
-        return t('reconnect_wifi')
+        return t('desktop_mode_connection_lost')
 
     if current_time - last_outdoor_temp_fetch < 3600 and cached_outdoor_temp != "N/A":
         return cached_outdoor_temp
@@ -121,19 +121,19 @@ def get_stats() -> dict:
         t('key_memory_usage'): f"{memory_percent}%",
         t('key_disk_usage'): f"{disk_percent}%",
         t('key_uptime'): uptime_string,
-        t('key_temperature'): cpu_temp
+        t('key_cpu_temperature'): cpu_temp
     }
 
 def ensure_synchronized() -> bool:
     if os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         return True
 
-    print(t('msg_config_not_found'))
+    print(t('desktop_mode_config_not_found'))
     success = sync_time_and_place.run()
 
     if not success or not os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
-        print(t('msg_init_failed'))
-        print(t('msg_desktop_cannot_start'))
+        print(t('desktop_mode_init_failed'))
+        print(t('desktop_mode_cannot_start'))
         return False
 
     return True
@@ -143,7 +143,7 @@ def is_key_pressed() -> bool:
     return bool(dr)
 
 def run():
-    print(t('msg_desktop_mode'))
+    print(t('desktop_mode_starting'))
 
     if not ensure_synchronized():
         return
@@ -153,25 +153,24 @@ def run():
     
     try:
         tty.setcbreak(fd)
-        print(t('msg_desktop_starting'))
         time.sleep(1)
         
         while True:
             os.system('clear' if os.name == 'posix' else 'cls')
             
             print(t('desktop_mode_header'))
-            print(t('label_info'))
+            print(t('desktop_mode_label_info'))
             print(json.dumps(get_info(), indent=4, ensure_ascii=False))
-            print(t('label_stats'))
+            print(t('desktop_mode_label_stats'))
             print(json.dumps(get_stats(), indent=4, ensure_ascii=False))
-            print(t('press_any_key_footer'))
+            print(t('desktop_mode_any_key_to_exit'))
 
             start_time = time.time()
             while time.time() - start_time < 5:
                 if is_key_pressed():
                     sys.stdin.read(1)
                     os.system('clear' if os.name == 'posix' else 'cls')
-                    print(t('msg_exiting_desktop'))
+                    print(t('desktop_mode_exiting'))
                     return
                 time.sleep(0.1)
 

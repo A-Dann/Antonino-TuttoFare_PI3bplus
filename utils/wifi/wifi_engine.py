@@ -9,11 +9,11 @@ Low-level management of Wi-Fi operations using NetworkManager (nmcli):
 - Disconnection
 """
 
-import json
 import subprocess
-from config import TEMP_WIFI_SSID_JSON_PATH
+from config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
+from utils.file_utils import write_json
 
-def get_current_connection():
+def get_current_connection_state():
     """Returns a dictionary with SSID, security, and signal of the currently connected network, or None."""
     try:
         result = subprocess.run(
@@ -112,8 +112,7 @@ def handle_network_selection(ssid, security):
     else:
         try:
             # Saves the chosen ssid in a temp json file
-            with open(TEMP_WIFI_SSID_JSON_PATH, "w") as f:
-                json.dump({"target_ssid": ssid}, f)
+            write_json(TEMP_SELECTED_WIFI_INFO_JSON_PATH, {"ssid": ssid})
 
             # Desconnects the Pi's Wi-Fi
             subprocess.run(["nmcli", "device", "disconnect", "wlan0"], capture_output=True)
@@ -132,6 +131,17 @@ def handle_network_selection(ssid, security):
                 return "error"
         except Exception:
             return "error"
+
+def connect_with_saved_credentials(ssid, password):
+    """Connects to a Wi-Fi network using the provided SSID and password."""
+    try:
+        result = subprocess.run(
+            ["nmcli", "device", "wifi", "connect", ssid, "password", password],
+            capture_output=True, text=True, check=True
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
 
 def get_saved_list():
     """Returns a clean list of saved Wi-Fi network names."""

@@ -1,0 +1,93 @@
+:root {
+    --bg-color: var(--theme-bg, #d3d3e0);
+    --card-bg: var(--theme-card, #ffffff);
+    --text-color: var(--theme-text, #333333);
+    --primary-color: var(--theme-primary, #007BFF);
+    --button-text: var(--theme-btn-text, #ffffff);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+h1, h2 {
+    margin-top: 0;
+    font-size: 24px;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bolder;
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input {
+    width: 100%;
+    padding: 10px;
+    padding-right: 45px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.eye-btn {
+    position: absolute;
+    right: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+}
+
+.eye-btn:hover {
+    opacity: 1;
+}
+
+.eye-btn img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+button[type="submit"] {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: var(--button-text);
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}

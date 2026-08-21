@@ -36,7 +36,7 @@ def try_connection_to_known_networks():
     Returns:
         bool: True if connection is successfully established, False otherwise.
     """
-    print(t('currently_offline'))
+    print(t('sync_engine_currently_offline'))
 
     subprocess.run(["nmcli", "networking", "on"])
     time.sleep(5)
@@ -97,7 +97,7 @@ def scan_wifi_networks():
                         continue
         return networks
     except Exception as e:
-        print(t('wifi_scan_error').format(e=e))
+        print(t('sync_engine_wifi_scan_error').format(e=e))
         return []
 
 def fetch_location_from_wifi():
@@ -126,7 +126,7 @@ def fetch_location_from_wifi():
                 return lat, lng
             
     except requests.RequestException as e:
-        print(t('mozilla_geo_error').format(e=e))
+        print(t('sync_engine_mozilla_geo_error').format(e=e))
     
     return None
 
@@ -156,7 +156,7 @@ def get_city_from_coords(lat, lng):
             return city, country
         
     except requests.RequestException as e:
-        print(t('nominatim_error').format(e=e))
+        print(t('sync_engine_nominatim_error').format(e=e))
     
     return None, None
 
@@ -179,7 +179,7 @@ def fetch_location_fallback_ip():
             }
         
     except requests.RequestException as e:
-        print(t('ip_fallback_error').format(e=e))
+        print(t('sync_engine_ip_fallback_error').format(e=e))
     return None
 
 def fetch_location_data():
@@ -191,7 +191,7 @@ def fetch_location_data():
         dict | None: Dictionary containing 'city', 'country', and 'timezone', or None.
     """
     if has_wifi_hardware():
-        print(t('attempting_wifi_geo'))
+        print(t('sync_engine_attempting_wifi_geo'))
         coords = fetch_location_from_wifi()
 
         if coords:
@@ -207,7 +207,7 @@ def fetch_location_data():
                     "timezone": timezone
                 }
 
-    print(t('wifi_geo_fallback'))
+    print(t('sync_engine_wifi_geo_fallback'))
     return fetch_location_fallback_ip()
 
 def update_system_timezone(timezone):
@@ -243,14 +243,14 @@ def execute_sync():
     Returns:
         bool: True if synchronization succeeded, False otherwise.
     """
-    print(t('syncing_time_place'))
+    print(t('sync_engine_syncing_time_and_place'))
 
     location_data = fetch_location_data()
     if not location_data:
-        print(t('failed_retrieve_location'))
+        print(t('sync_engine_failed_retrieve_location'))
         return False
 
-    print(t('location_found').format(
+    print(t('sync_engine_location_found').format(
         city=location_data['city'], 
         country=location_data['country'], 
         timezone=location_data['timezone']
@@ -259,7 +259,7 @@ def execute_sync():
     update_system_timezone(location_data["timezone"])
     save_location_config(location_data)
 
-    print(t('sync_success'))
+    print(t('sync_engine_synced_successfully'))
     return True
 
 def run_synchronization():
@@ -272,7 +272,7 @@ def run_synchronization():
     """
     if not check_internet_connection():
         if not try_connection_to_known_networks():
-            print(t('no_internet_available'))
+            print(t('sync_engine_no_internet_available'))
             return False
 
     return execute_sync()

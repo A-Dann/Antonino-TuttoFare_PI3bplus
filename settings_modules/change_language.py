@@ -20,22 +20,22 @@ def run():
 
     while True:
         os.system('clear' if os.name == 'posix' else 'cls')
-        print(f"\n--- {t('settings_change_lang')} ---")
-        print(f"Current / Corrente / Actual: {languages.get(current_lang, current_lang)}\n")
+        print(f"\n--- {t('change_language_settings')} ---")
+        print(f"{t('key_current')}: {languages.get(current_lang, current_lang)}\n")
 
         codes = list(languages.keys())
         for idx, code in enumerate(codes, 1):
             print(f"{idx}. {languages[code]}")
-        print(f"{len(codes) + 1}. {t('settings_back')}")
+        print(f"{len(codes) + 1}. {t('change_language_back_to_settings')}")
 
-        choice = input(f"\n{t('settings_prompt_choice')} ").strip()
+        choice = input(f"\n{t('_prompt_choice')} ").strip()
 
         if choice.isdigit():
             choice_idx = int(choice)
             if 1 <= choice_idx <= len(codes):
                 selected_lang = codes[choice_idx - 1]
                 set_language(selected_lang)
-                print(f"\n{t('msg_sync_success')}")
+                print(f"\n{t('change_language_changed_succesfully')}")
                 input(f"\n{t('msg_press_enter_return')}")
                 break
             elif choice_idx == len(codes) + 1:

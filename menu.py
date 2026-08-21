@@ -11,7 +11,7 @@ def main():
         print(f"3. {t('menu_settings')}")
         print(f"4. {t('menu_exit')}")
 
-        choice = input(f"{t('menu_prompt_choice')} ").strip()
+        choice = input(f"{t('msg_prompt_choice')} ").strip()
 
         if choice == '1':
             desktop_mode.run()

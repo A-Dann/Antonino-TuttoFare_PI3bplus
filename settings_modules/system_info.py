@@ -7,7 +7,6 @@ such as OS version, kernel, hostname, IP address, and hardware temperatures.
 """
 
 import platform
-import subprocess
 import psutil
 import os
 from utils.i18n import t
@@ -53,10 +52,10 @@ def get_system_details() -> dict:
     }
 
 def run():
-    print(t('msg_fetching_sys_info'))
+    print(t('sys_info_fetching_info'))
 
     os.system('clear' if os.name == 'posix' else 'cls')
-    print(t('msg_system_info_title'))
+    print(t('sys_info_title'))
     
     details = get_system_details()
     for key, value in details.items():
