@@ -45,8 +45,12 @@ def scan_networks():
     """Scans for networks and returns a list of dictionaries with SSID and signal."""
     try:
         # 1. Force a fresh Wi-Fi scan to detect nearby networks
-        subprocess.run(["nmcli", "device", "wifi", "rescan"], capture_output=True)
-        
+        subprocess.run(["sudo", "iw", "dev", "wlan0", "scan"], capture_output=True)
+
+        # Small pause to allow the wifi driver to scan
+        import time
+        time.sleep(1)
+
         # 2. Get the list of visible networks with clean output format
         result = subprocess.run(
             ["nmcli", "-t", "-f", "SSID,SECURITY,SIGNAL", "dev", "wifi", "list"],
@@ -135,16 +139,47 @@ def handle_network_selection(ssid, security):
             # Saves the chosen ssid in a temp json file
             write_json(TEMP_SELECTED_WIFI_INFO_JSON_PATH, {"ssid": ssid})
 
-            # Desconnects the Pi's Wi-Fi
-            subprocess.run(["nmcli", "device", "disconnect", "wlan0"], capture_output=True)
+            # Disconnette wlan0 and removes hotspot profiles to avoid any conflict
+            subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"], capture_output=True)
+            subprocess.run(["sudo", "nmcli", "connection", "delete", "Ras-Pi_Input_Wi-Fi_Password"], capture_output=True)
+
+            # Explicitly create a persistent Wi-Fi connection profile for the AP
+            subprocess.run([
+                "sudo", "nmcli", "connection", "add", 
+                "type", "wifi", 
+                "ifname", "wlan0", 
+                "con-name", "Ras-Pi_Input_Wi-Fi_Password", 
+                "ssid", "Ras-Pi_Input_Wi-Fi_Password"
+            ], capture_output=True, check=True)
+
+            # Configure the profile for Access Point mode and IP sharing
+            subprocess.run([
+                "sudo", "nmcli", "connection", "modify", "Ras-Pi_Input_Wi-Fi_Password", 
+                "802-11-wireless.mode", "ap", 
+                "802-11-wireless.band", "bg", 
+                "ipv4.method", "shared"
+            ], capture_output=True, check=True)
+
+            # Set the WPA security credentials
+            subprocess.run([
+                "sudo", "nmcli", "connection", "modify", "Ras-Pi_Input_Wi-Fi_Password", 
+                "wifi-sec.key-mgmt", "wpa-psk", 
+                "wifi-sec.psk", "12345678"
+            ], capture_output=True, check=True)
+
+            # Bring up the configured AP profile
+            res = subprocess.run([
+                "sudo", "nmcli", "connection", "up", "Ras-Pi_Input_Wi-Fi_Password"
+            ], capture_output=True, text=True)
+
 
             # Starts temporary AP mode
-            res = subprocess.run([
-                "nmcli", "device", "wifi", "hotspot", 
-                "ifname", "wlan0", 
-                "ssid", "Ras-Pi_Input_Wi-Fi_Password", 
-                "password", "12345678"
-            ], capture_output=True, text=True)
+            #res = subprocess.run([
+            #    "nmcli", "device", "wifi", "hotspot", 
+            #    "ifname", "wlan0", 
+            #    "ssid", "Ras-Pi_Input_Wi-Fi_Password", 
+            #    "password", "12345678"
+            #], capture_output=True, text=True)
             
             if res.returncode == 0:
                 return "ap_started"
