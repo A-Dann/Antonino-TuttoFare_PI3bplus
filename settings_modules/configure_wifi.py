@@ -90,8 +90,8 @@ def run_ap_mode_session(ssid):
 
     while True:
         # 1. Start the Flask captive portal server
-        flask_process = subprocess.Popen(["python3", CAPTIVE_PORTAL_SCRIPT_PATH])
-    
+        flask_process = subprocess.Popen(["sudo", "python3", CAPTIVE_PORTAL_SCRIPT_PATH])    
+
         try:
             #TODO WRITE THE FREEZE SCREEN WITH THE INSTRUCCIONS ON HOW TO CONNECT:
             # This text should be translated based on the system language choices
@@ -100,8 +100,20 @@ def run_ap_mode_session(ssid):
             # Password: 12345678
             # Type the password and press Submit
             # Press any key to exit ap mode
+            
+            # Set a 5-minute timeout (300 seconds)
+            timeout_seconds = 300
+            start_time = time.time()
 
             while flask_process.poll() is None:
+                # Check if 5 minutes have elapsed
+                if time.time() - start_time > timeout_seconds:
+                    if flask_process.poll() is None:
+                        flask_process.terminate()
+                        flask_process.wait()
+                    print(f"\n{t('configure_wifi_ap_timeout')}") #has no key of translation
+                    break
+
                 time.sleep(0.5)
             
         except KeyboardInterrupt:

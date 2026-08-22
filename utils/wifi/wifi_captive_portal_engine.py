@@ -62,5 +62,10 @@ def connect():
         current_lang=current_lang
     )
 
+@app.route('/<path:text>', methods=['GET', 'POST'])
+def catch_all(text):
+    """Catches all other requests and redirects them to the captive portal index."""
+    return index()
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
