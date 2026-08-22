@@ -82,6 +82,7 @@
                 "configure_wifi_get_saved_networks": "View saved networks",
                 "configure_wifi_remove_saved_networks": "Remove saved network",
                 "configure_wifi_disconnect_from_network": "Disconnect from network",
+                "configure_wifi_offline_online_mode": "Offline/Online Mode",
                 "configure_wifi_back_to_settings": "Back to settings",
                 "configure_wifi_status_disconnected": "Status: Disconnected.",
                 "configure_wifi_scanning": "Scanning for available Wi-Fi networks...",

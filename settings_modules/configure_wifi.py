@@ -206,6 +206,10 @@ def disconnect_from_network():
     # TODO: SET A PRESS ANY KEY MODE
     input(f"\n{t('msg_press_enter_to_continue')} ")
 
+def offline_online_mode():
+    ""
+    #TODO WORK IN PROGRESS
+
 def run():
     while True:
         print(f"\n--- {t('configure_wifi_title')} ---")
@@ -214,7 +218,8 @@ def run():
         print(f"3. {t('configure_wifi_get_saved_networks')}")
         print(f"4. {t('configure_wifi_remove_saved_networks')}")
         print(f"5. {t('configure_wifi_disconnect_from_network')}")
-        print(f"6. {t('configure_wifi_back_to_settings')}")
+        print(f"6. {t('configure_wifi_offline_online_mode')}")
+        print(f"7. {t('configure_wifi_back_to_settings')}")
 
         choice = input(f"{t('msg_prompt_choice')} ").strip()
 
@@ -229,6 +234,8 @@ def run():
         elif choice == '5':
             disconnect_from_network()
         elif choice == '6':
+            offline_online_mode()
+        elif choice == '7':
             print(t('msg_back_to_menu'))
             return
         else:
