@@ -19,16 +19,16 @@ DEFAULT_PALETTE = {
 
 DEFAULT_UI_STYLE = {
     "button": {
-        "height": 50,
-        "width": 700,
+        "height": 40,
+        "width": 600,
         "border_radius": 8,
         "border_width": 2,
         "shadow_offset": 4,
         "margin_y": 15
     },
     "fonts": {
-        "title_size": 40,
-        "option_size": 30
+        "title_size": 35,
+        "option_size": 25
     }
 }
 
@@ -96,6 +96,7 @@ def load_theme(palette_name: str = None, style_name: str = None, font_name: str 
     # Combine everything into the final active theme structure expected by renderers
     current_theme = {
         "name": f"{target_palette}_{target_style}_{target_font}",
+        "style": target_style,  # <--- AGGIUNGI QUESTA RIGA per esporre lo stile pulito
         "colors": final_palette,
         "button": final_style["button"],
         "fonts": {

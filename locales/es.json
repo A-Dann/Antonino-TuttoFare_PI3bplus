@@ -68,7 +68,8 @@
             "settings_sys_info": "Información del sistema",
             "settings_configure_wifi": "Configuración Wi-Fi",
             "settings_sync_time_place": "Sincronizar hora y lugar",
-            "settings_change_lang": "Cambiar idioma",
+            "settings_change_theme": "Cambiar Tema",
+            "settings_change_lang": "Cambiar Idioma",        
             "settings_back_to_menu": "Volver al Menú Principal"
         },
         "system_info": {

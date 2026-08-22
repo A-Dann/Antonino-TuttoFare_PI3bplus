@@ -7,11 +7,17 @@ using NetworkManager (nmcli).
 """
 
 import subprocess
+import sys
 import time
-from config import CAPTIVE_PORTAL_SCRIPT_PATH, TEMP_SELECTED_WIFI_INFO_JSON_PATH
-import utils.wifi.wifi_engine as wifi_engine
+import pygame
+from graphic.menu_renderer import render_menu
+from graphic.ui_components import show_message_screen
 from utils.file_utils import read_json
 from utils.i18n import t
+
+import utils.wifi.wifi_engine as wifi_engine
+from config import CAPTIVE_PORTAL_SCRIPT_PATH, TEMP_SELECTED_WIFI_INFO_JSON_PATH
+
 
 def get_current_state():
     """
@@ -222,33 +228,63 @@ def offline_online_mode():
     ""
     #TODO WORK IN PROGRESS
 
-def run():
-    while True:
-        print(f"\n--- {t('configure_wifi_title')} ---")
-        print(f"1. {t('configure_wifi_get_current_state')}")
-        print(f"2. {t('configure_wifi_scan_and_connect')}")
-        print(f"3. {t('configure_wifi_get_saved_networks')}")
-        print(f"4. {t('configure_wifi_remove_saved_networks')}")
-        print(f"5. {t('configure_wifi_disconnect_from_network')}")
-        print(f"6. {t('configure_wifi_offline_online_mode')}")
-        print(f"7. {t('configure_wifi_back_to_settings')}")
+def draw_frame(virtual_screen, selected_index=0, events=None):
+    """
+    Renders a single frame of the Wi-Fi configuration menu using passed events.
+    """
 
-        choice = input(f"{t('msg_prompt_choice')} ").strip()
+    # 1. Define translated options for the Wi-Fi configuration menu
+    configure_wifi_options = [
+        t('configure_wifi_get_current_state'),
+        t('configure_wifi_scan_and_connect'),
+        t('configure_wifi_get_saved_networks'),
+        t('configure_wifi_remove_saved_networks'),
+        t('configure_wifi_disconnect_from_network'),
+        t('configure_wifi_offline_online_mode'),
+        t('configure_wifi_back_to_settings')
+    ]
 
-        if choice == '1':
-            get_current_state()
-        elif choice == '2':
-            scan_and_connect()
-        elif choice == '3':
-            get_saved_networks()
-        elif choice == '4':
-            remove_saved_networks()
-        elif choice == '5':
-            disconnect_from_network()
-        elif choice == '6':
-            offline_online_mode()
-        elif choice == '7':
-            print(t('msg_back_to_menu'))
-            return
-        else:
-            print(t('msg_invalid_choice'))
+    # 2. Fallback event fetching if none are passed from the main loop
+    if events is None:
+        events = pygame.event.get()
+
+    # 3. Process keyboard input events
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                # Move selection down (cyclic)
+                selected_index = (selected_index + 1) % len(configure_wifi_options)
+            elif event.key == pygame.K_UP:
+                # Move selection up (cyclic)
+                selected_index = (selected_index - 1) % len(configure_wifi_options)
+            elif event.key == pygame.K_RETURN:
+                # Handle selection confirmation on options by calling the respective functions
+                if selected_index == 0:
+                    get_current_state()
+                elif selected_index == 1:
+                    scan_and_connect()
+                elif selected_index == 2:
+                    get_saved_networks()
+                elif selected_index == 3:
+                    remove_saved_networks()
+                elif selected_index == 4:
+                    disconnect_from_network()
+                elif selected_index == 5:
+                    offline_online_mode()
+                elif selected_index == 6:
+                    return "SETTINGS", selected_index
+
+            elif event.key == pygame.K_ESCAPE:
+                # Quick return to settings using ESC
+                return "SETTINGS", selected_index
+
+    # 4. Render the current frame graphics
+    render_menu(
+        screen=virtual_screen,
+        menu_title=t('configure_wifi_title'),
+        menu_options=configure_wifi_options,
+        selected_index=selected_index
+    )
+
+    # 5. Return the active state and current index back to the main loop
+    return "CONFIGURE_WIFI", selected_index

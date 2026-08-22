@@ -1,0 +1,15 @@
+{
+    "draw_style": "default",
+    "button": {
+        "height": 40,
+        "width": 600,
+        "border_radius": 8,
+        "border_width": 2,
+        "shadow_offset": 0,
+        "margin_y": 15
+    },
+    "fonts": {
+        "title_size": 35,
+        "option_size": 25
+    }
+}

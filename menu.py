@@ -1,66 +1,62 @@
 #!/usr/bin/env python3
-import sys
+"""
+Main Menu Module (Pygame UI Version)
+"""
 
 import pygame
 from graphic.menu_renderer import render_menu
 from menu_modules import desktop_mode, turn_off, dual_audio
-import settings
-from graphic.display import init_display
 from utils.i18n import t
 
-def main():
-    screen = init_display()
-    clock = pygame.time.Clock()
-
-    menu_options=[t('menu_desktop_mode'),
-                  t('menu_dual_audio'),
-                  t('menu_settings'),
-                  t('menu_exit')
+def draw_frame(virtual_screen, selected_index=0, events=None):
+    """
+    Renders a single frame of the main menu using passed events.
+    """
+    
+    # 1. Define translated options for the main menu
+    menu_options = [
+        t('menu_desktop_mode'),
+        t('menu_dual_audio'),
+        t('menu_settings'),
+        t('menu_exit')
     ]
 
-    selected_index = 0
-    running = True
+    # 2. Fallback event fetching if none are passed from the main loop
+    if events is None:
+        events = pygame.event.get()
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                turn_off.run()
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DOWN:
-                    selected_index = (selected_index + 1) % len(menu_options)
-                elif event.key == pygame.K_UP:
-                    selected_index = (selected_index - 1) % len(menu_options)
-                elif event.key == pygame.K_RETURN:  # Tasto INVIO
-                    if selected_index == 0:
-                        desktop_mode.run()
-                    elif selected_index == 1:
-                        dual_audio.run()
-                    elif selected_index == 2:
-                        settings.run()
-                    elif selected_index == 3:
-                        turn_off.run()
-                        running = False
-                elif event.key == pygame.K_ESCAPE:
+    # 3. Process keyboard input events
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                # Move selection down (cyclic)
+                selected_index = (selected_index + 1) % len(menu_options)
+            elif event.key == pygame.K_UP:
+                # Move selection up (cyclic)
+                selected_index = (selected_index - 1) % len(menu_options)
+            elif event.key == pygame.K_RETURN:
+                # Handle selection confirmation on options
+                if selected_index == 0:
+                    desktop_mode.run()
+                elif selected_index == 1:
+                    dual_audio.run()
+                elif selected_index == 2:
+                    return "SETTINGS", selected_index
+                elif selected_index == 3:
                     turn_off.run()
-                    running = False
+                    return "EXIT", selected_index
+            elif event.key == pygame.K_ESCAPE:
+                # Quick exit using ESC
+                turn_off.run()
+                return "EXIT", selected_index
 
-        # 2. Disegno del menu grafico tramite il renderer
-        render_menu(
-            screen=screen,
-            menu_title=t('menu_title'),
-            menu_options=menu_options,
-            selected_index=selected_index
-        )
+    # 4. Render the current frame graphics
+    render_menu(
+        screen=virtual_screen,
+        menu_title=t('menu_title'),
+        menu_options=menu_options,
+        selected_index=selected_index
+    )
 
-        # 3. Aggiornamento dello schermo
-        pygame.display.flip()
-
-        # 4. Limitazione a 60 FPS
-        clock.tick(60)
-
-    pygame.quit()
-    sys.exit()
-
-if __name__ == "__main__":
-    main()
+    # 5. Return the active state and current index back to the main loop
+    return "MAIN_MENU", selected_index
