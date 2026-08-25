@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "style_name": "default",
-    "description": "Configurazione di stile e layout predefinita."
+    "style_name": "hive",
+    "description": "Configurazione di stile e layout per il tema Hive."
   },
-  "draw_style": "default",
+  "draw_style": "hive",
   "button": {
     "height": 40,
     "width": 600,

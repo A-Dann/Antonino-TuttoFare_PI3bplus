@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "palette_name": "hive",
+    "description": "Palette convertita dalla vecchia struttura piatta."
+  },
+  "core": {
+    "background_primary": [60, 35, 15],
+    "background_secondary": [60, 35, 15],
+    "background_tertiary": [15, 15, 15],
+    "border_color": [15, 15, 15]
+  },
+  "text": {
+    "text_primary": [255, 255, 255],
+    "text_secondary": [255, 255, 255],
+    "text_disabled": [120, 120, 120],
+    "text_inverted": [60, 35, 15]
+  },
+  "interactive": {
+    "default": {
+      "fill": [245, 200, 40],
+      "text": [255, 255, 255],
+      "border": [15, 15, 15]
+    },
+    "hover": {
+      "fill": [220, 110, 20],
+      "text": [255, 255, 255],
+      "border": [15, 15, 15]
+    },
+    "selected": {
+      "fill": [220, 110, 20],
+      "text": [255, 255, 255],
+      "border": [255, 255, 255]
+    }
+  },
+  "effects": {
+    "highlight_primary": [245, 200, 40],
+    "highlight_secondary": [220, 110, 20],
+    "glitch_primary": [255, 0, 0],
+    "glitch_secondary": [0, 0, 255],
+    "overlay_effect": [15, 15, 15, 150]
+  }
+}

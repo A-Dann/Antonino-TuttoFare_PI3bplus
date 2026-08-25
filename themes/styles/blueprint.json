@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "style_name": "default",
-    "description": "Configurazione di stile e layout predefinita."
+    "style_name": "Blueprint",
+    "description": "Configurazione di stile e layout per il tema Blueprint."
   },
-  "draw_style": "default",
+  "draw_style": "blueprint",
   "button": {
     "height": 40,
     "width": 600,

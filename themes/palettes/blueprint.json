@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "palette_name": "blueprint",
+    "description": "Palette convertita dalla vecchia struttura piatta."
+  },
+  "core": {
+    "background_primary": [26, 26, 75],
+    "background_secondary": [26, 26, 75],
+    "background_tertiary": [15, 15, 40],
+    "border_color": [15, 15, 40]
+  },
+  "text": {
+    "text_primary": [255, 255, 255],
+    "text_secondary": [255, 255, 255],
+    "text_disabled": [110, 110, 110],
+    "text_inverted": [26, 26, 75]
+  },
+  "interactive": {
+    "default": {
+      "fill": [255, 107, 91],
+      "text": [255, 255, 255],
+      "border": [15, 15, 40]
+    },
+    "hover": {
+      "fill": [230, 85, 70],
+      "text": [255, 255, 255],
+      "border": [15, 15, 40]
+    },
+    "selected": {
+      "fill": [230, 85, 70],
+      "text": [255, 255, 255],
+      "border": [255, 255, 255]
+    }
+  },
+  "effects": {
+    "highlight_primary": [255, 107, 91],
+    "highlight_secondary": [50, 50, 110],
+    "glitch_primary": [255, 0, 0],
+    "glitch_secondary": [0, 0, 255],
+    "overlay_effect": [15, 15, 40, 150]
+  }
+}

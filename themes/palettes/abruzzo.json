@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "palette_name": "abruzzo",
+    "description": "Palette ispirata ai sapori e ai colori tradizionali d'Abruzzo (legno, vino rosso e terra)."
+  },
+  "core": {
+    "background_primary": [110, 65, 35],
+    "background_secondary": [85, 48, 24],
+    "background_tertiary": [40, 20, 10],
+    "border_color": [230, 190, 80]
+  },
+  "text": {
+    "text_primary": [255, 245, 220],
+    "text_secondary": [230, 190, 80],
+    "text_disabled": [130, 110, 90],
+    "text_inverted": [110, 65, 35]
+  },
+  "interactive": {
+    "default": {
+      "fill": [70, 35, 18],
+      "text": [255, 245, 220],
+      "border": [40, 20, 10]
+    },
+    "hover": {
+      "fill": [130, 45, 20],
+      "text": [255, 255, 255],
+      "border": [230, 190, 80]
+    },
+    "selected": {
+      "fill": [130, 45, 20],
+      "text": [255, 255, 255],
+      "border": [230, 190, 80]
+    }
+  },
+  "effects": {
+    "highlight_primary": [230, 190, 80],
+    "highlight_secondary": [120, 15, 25],
+    "glitch_primary": [180, 40, 40],
+    "glitch_secondary": [240, 230, 210],
+    "overlay_effect": [40, 20, 10, 200]
+  }
+}

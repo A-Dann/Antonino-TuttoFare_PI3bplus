@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "style_name": "abruzzo",
+    "description": "Configurazione di stile e layout ispirata alla tradizione rustica abruzzese."
+  },
+  "draw_style": "abruzzo",
+  "button": {
+    "height": 45,
+    "width": 550,
+    "border_radius": 6,
+    "border_width": 2,
+    "shadow_offset": 4,
+    "margin_y": 15
+  },
+  "fonts": {
+    "title_size": 36,
+    "option_size": 24
+  }
+}

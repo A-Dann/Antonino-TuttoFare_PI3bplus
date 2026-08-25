@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "style_name": "glitch",
+    "description": "Configurazione di layout ed effetti visivi per menu in stile terminale corrotto."
+  },
+  "button": {
+    "height": 50,
+    "width": 600,
+    "border_radius": 0,
+    "border_width": 2,
+    "shadow_offset": 0,
+    "margin_y": 20
+  },
+  "fonts": {
+    "title_size": 35,
+    "option_size": 25
+  },
+  "screen_effects": {
+    "enable_scanlines": true,
+    "scanline_frequency_px": 3,
+    "scanline_alpha": 80,
+    "enable_vignette": true,
+    "enable_static_noise": true,
+    "noise_intensity_percent": 30,
+    "noise_alpha_max": 20
+  },
+  "interaction": {
+    "selection": {
+      "glitch_effect": {
+        "enabled": true,
+        "violent_glitch_chance_percent": 15,
+        "max_tremble_x_px": 10,
+        "max_tremble_y_px": 4,
+        "color_invert_chance_percent": 30
+      },
+      "text_format_unselected": "[ {option_text} ]",
+      "text_format_selected": "<< {option_text} >>"
+    }
+  }
+}

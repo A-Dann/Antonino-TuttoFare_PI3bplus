@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "palette_name": "pixel_art",
+    "description": "Palette convertita dalla vecchia struttura piatta."
+  },
+  "core": {
+    "background_primary": [40, 30, 50],
+    "background_secondary": [40, 30, 50],
+    "background_tertiary": [10, 10, 10],
+    "border_color": [15, 15, 15]
+  },
+  "text": {
+    "text_primary": [240, 240, 240],
+    "text_secondary": [240, 240, 240],
+    "text_disabled": [120, 120, 120],
+    "text_inverted": [40, 30, 50]
+  },
+  "interactive": {
+    "default": {
+      "fill": [53, 143, 60],
+      "text": [240, 240, 240],
+      "border": [15, 15, 15]
+    },
+    "hover": {
+      "fill": [75, 195, 84],
+      "text": [240, 240, 240],
+      "border": [15, 15, 15]
+    },
+    "selected": {
+      "fill": [75, 195, 84],
+      "text": [240, 240, 240],
+      "border": [240, 240, 240]
+    }
+  },
+  "effects": {
+    "highlight_primary": [53, 143, 60],
+    "highlight_secondary": [50, 40, 60],
+    "glitch_primary": [255, 0, 0],
+    "glitch_secondary": [0, 0, 255],
+    "overlay_effect": [10, 10, 10, 150]
+  }
+}

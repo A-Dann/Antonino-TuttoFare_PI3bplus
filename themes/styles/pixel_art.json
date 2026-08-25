@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "style_name": "pixel_art",
+    "description": "Configurazione di stile e layout per il tema Pixel Art."
+  },
+  "draw_style": "pixel_art",
+  "button": {
+    "height": 45,
+    "width": 500,
+    "border_radius": 0,
+    "border_width": 2,
+    "shadow_offset": 4,
+    "margin_y": 15
+  },
+  "fonts": {
+    "title_size": 32,
+    "option_size": 22
+  }
+}

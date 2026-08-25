@@ -17,9 +17,9 @@ def draw_frame(virtual_screen, selected_index=0, events=None):
     """
     Renders a single frame of the multi-component theme configuration menu.
     """
-    # 1. Definiamo le opzioni disponibili per ciascuna categoria
-    palettes = ["default", "neon_cyberpunk"]
-    styles = ["default", "neon_cyberpunk"]
+    # 1. Definiamo le opzioni disponibili per ciascuna categoria allineate ai file JSON creati
+    palettes = ["default", "abruzzo", "pixel_art", "hive", "blueprint", "glitch"]
+    styles = ["default", "abruzzo", "pixel_art", "hive", "blueprint", "glitch"]
     fonts = ["default"]
 
     # Leggiamo direttamente le preferenze salvate dal file di configurazione dei temi

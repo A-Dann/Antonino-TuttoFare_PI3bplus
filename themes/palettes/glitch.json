@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "palette_name": "Glitch Analogico (Fosforo Verde)",
+    "description": "Tavolozza di colori basata su terminali CRT a fosfori verdi con accenti di errore RGB."
+  },
+  "core": {
+    "background_primary": [10, 10, 10],
+    "background_secondary": [10, 10, 10],
+    "background_tertiary": [0, 0, 0],
+    "border_color": [50, 205, 50]
+  },
+  "text": {
+    "text_primary": [50, 205, 50],
+    "text_secondary": [50, 205, 50],
+    "text_disabled": [26, 102, 26],
+    "text_inverted": [10, 10, 10]
+  },
+  "interactive": {
+    "default": {
+      "fill": [0, 0, 0],
+      "text": [50, 205, 50],
+      "border": [50, 205, 50]
+    },
+    "hover": {
+      "fill": [50, 205, 50],
+      "text": [10, 10, 10],
+      "border": [50, 205, 50]
+    },
+    "selected": {
+      "fill": [0, 0, 0],
+      "text": [50, 205, 50],
+      "border": [50, 205, 50]
+    }
+  },
+  "effects": {
+    "highlight_primary": [50, 255, 50],
+    "highlight_secondary": [0, 100, 0],
+    "glitch_primary": [255, 50, 50],
+    "glitch_secondary": [50, 50, 255],
+    "overlay_effect": [0, 0, 0, 80]
+  }
+}

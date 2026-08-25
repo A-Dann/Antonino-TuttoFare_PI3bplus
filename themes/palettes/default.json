@@ -1,8 +1,42 @@
 {
-    "background": [30, 30, 30],
-    "surface": [60, 60, 60],
-    "surface_hover": [80, 80, 80],
-    "border": [100, 100, 100],
-    "text": [255, 255, 255],
-    "shadow": [10, 10, 10, 150]
+  "metadata": {
+    "palette_name": "default",
+    "description": "Palette di default convertita dalla vecchia struttura piatta."
+  },
+  "core": {
+    "background_primary": [30, 30, 30],
+    "background_secondary": [30, 30, 30],
+    "background_tertiary": [10, 10, 10],
+    "border_color": [100, 100, 100]
+  },
+  "text": {
+    "text_primary": [255, 255, 255],
+    "text_secondary": [255, 255, 255],
+    "text_disabled": [100, 100, 100],
+    "text_inverted": [30, 30, 30]
+  },
+  "interactive": {
+    "default": {
+      "fill": [60, 60, 60],
+      "text": [255, 255, 255],
+      "border": [100, 100, 100]
+    },
+    "hover": {
+      "fill": [80, 80, 80],
+      "text": [255, 255, 255],
+      "border": [100, 100, 100]
+    },
+    "selected": {
+      "fill": [200, 200, 50],
+      "text": [30, 30, 30],
+      "border": [220, 220, 100]
+    }
+  },
+  "effects": {
+    "highlight_primary": [200, 200, 50],
+    "highlight_secondary": [45, 45, 45],
+    "glitch_primary": [255, 0, 0],
+    "glitch_secondary": [0, 0, 255],
+    "overlay_effect": [10, 10, 10, 150]
+  }
 }

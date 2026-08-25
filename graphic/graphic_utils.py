@@ -64,3 +64,34 @@ def handle_menu_viewport(screen: pygame.Surface, menu_options: list, selected_in
     screen.blit(arrow_down_surf, arrow_down_rect)
 
     return start_index, end_index, visible_options
+
+def flatten_palette(palette: dict) -> dict:
+    """Converte una palette annidata (core, text, interactive) in un dizionario piatto."""
+    flat = {}
+    if not isinstance(palette, dict):
+        return flat
+
+    for section_name, section_value in palette.items():
+        if isinstance(section_value, dict):
+            for k, v in section_value.items():
+                if isinstance(v, dict):
+                    for sub_k, sub_v in v.items():
+                        if isinstance(sub_v, (tuple, list)):
+                            flat[f"{k}_{sub_k}"] = sub_v
+                elif isinstance(v, (tuple, list)):
+                    flat[k] = v
+        elif isinstance(section_value, (tuple, list)):
+            flat[section_name] = section_value
+
+    if "interactive" in palette and isinstance(palette["interactive"], dict):
+        inter = palette["interactive"]
+        if "default" in inter and isinstance(inter["default"], dict):
+            if "fill" in inter["default"]:
+                flat["fill"] = inter["default"]["fill"]
+                flat["default_fill"] = inter["default"]["fill"]
+        if "selected" in inter and isinstance(inter["selected"], dict):
+            if "fill" in inter["selected"]:
+                flat["hover_fill"] = inter["selected"]["fill"]
+                flat["selected_fill"] = inter["selected"]["fill"]
+
+    return flat
