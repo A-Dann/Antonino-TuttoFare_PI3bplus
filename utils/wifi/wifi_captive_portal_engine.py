@@ -62,6 +62,23 @@ def connect():
         current_lang=current_lang
     )
 
+@app.route('/generate_204')
+@app.route('/gen_204')
+def android_captive():
+    """Redirect per Android captive portal check"""
+    return index()
+
+@app.route('/hotspot-detect.html')
+def apple_captive():
+    """Redirect per Apple/iOS captive portal check"""
+    return index()
+
+@app.route('/connecttest.txt')
+@app.route('/ncsi.txt')
+def windows_captive():
+    """Redirect per Windows captive portal check"""
+    return index()
+
 @app.route('/<path:text>', methods=['GET', 'POST'])
 def catch_all(text):
     """Catches all other requests and redirects them to the captive portal index."""

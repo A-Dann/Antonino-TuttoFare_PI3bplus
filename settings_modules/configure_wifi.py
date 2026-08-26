@@ -71,7 +71,7 @@ def scan_and_connect():
         # 6. Check the status returned by the engine and show the appropriate message
         if status == "connected":
             print(f"\n{t('configure_wifi_connected_successfully')}")
-        elif status == "ap_started":
+        elif status == "ap_required":
             print(f"\n{t('configure_wifi_password_required_start_ap')}")
             run_ap_mode_session(ssid)
         else:
@@ -89,6 +89,11 @@ def run_ap_mode_session(ssid):
     """
 
     while True:
+        if wifi_engine.start_ap_mode() != "ap_started":
+            print(f"\n{t('configure_wifi_errore_while_starting_ap')}")
+            break
+
+
         # 1. Start the Flask captive portal server
         flask_process = subprocess.Popen(["sudo", "python3", CAPTIVE_PORTAL_SCRIPT_PATH])    
 
@@ -102,58 +107,62 @@ def run_ap_mode_session(ssid):
             # Press any key to exit ap mode
             
             # Set a 5-minute timeout (300 seconds)
-            timeout_seconds = 300
-            start_time = time.time()
+            deadline = time.monotonic() + 300
 
             while flask_process.poll() is None:
                 # Check if 5 minutes have elapsed
-                if time.time() - start_time > timeout_seconds:
-                    if flask_process.poll() is None:
+                if time.monotonic() > deadline:
                         flask_process.terminate()
                         flask_process.wait()
-                    print(f"\n{t('configure_wifi_ap_timeout')}") #has no key of translation
-                    break
-
-                time.sleep(0.5)
+                        print(f"\n{t('configure_wifi_ap_timeout')}") #has no key of translation
+                        break
+                
+                time.sleep(1)
             
         except KeyboardInterrupt:
             if flask_process.poll() is None:
                 flask_process.terminate()
                 flask_process.wait()
-            wifi_engine.disconnect_wifi()
             return
 
         # 2. Flask has closed (5 seconds passed)
+
+        wifi_engine.disconnect_wifi()
+
         # Now check if the password was correctly stored in the JSON file.
         data = read_json(TEMP_SELECTED_WIFI_INFO_JSON_PATH)
-        saved_password = data.get("password") if data else None
+        saved_password = data.get("password")
 
-        # 3. Control check: did the user actually submit a password?
+        # 3. If there's a password try to connect with the credentials
         if saved_password:
             print(f"\n{t('configure_wifi_connecting_to')} '{ssid}'...")
-            wifi_engine.disconnect_wifi()
 
             # TODO: Mostra schermata "Connessione in corso..."
             success = wifi_engine.connect_with_saved_credentials(ssid, saved_password)
 
             if success:
                 print(f"\n{t('configure_wifi_connected_successfully')}")
+                break
             else:
                 print(f"\n{t('configure_wifi_connection_error')}")
-            break
+                choice = input(f"\n{t('configure_wifi_ask_for_retry')}").strip().lower()
+                if choice == 'y':
+                    continue
+                else:
+                    print(f"\n{t('configure_wifi_back_to_wifi_menu')}")
+                    break
+            
         else:
             # No password found or json file corrupted
             print(f"\n{t('configure_wifi_no_password_found')}")
 
             # Ask the user if they want to retry or exit
             choice = input(f"\n{t('configure_wifi_ask_for_retry')}").strip().lower()
-            if choice != 'y':
-                wifi_engine.disconnect_wifi()
+            if choice == 'y':
+                continue
+            else:
                 print(f"\n{t('configure_wifi_back_to_wifi_menu')}")
                 break
-
-            # If 'y', the loop restarts and launches Flask again.
-
 
 def get_saved_networks():
     """

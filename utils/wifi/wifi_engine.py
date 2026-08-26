@@ -96,7 +96,7 @@ def handle_network_selection(ssid, security):
     Handles network selection.
     Returns:
         - "connected": Successfully connected to a saved or open network.
-        - "ap_started": Successfully started the setup hotspot for a secured network.
+        - "ap_required": To notify that the network is secured and need ap to obtain the password.
         - "error": Something went wrong.
     """
     saved = get_saved_list()
@@ -133,60 +133,31 @@ def handle_network_selection(ssid, security):
         except subprocess.CalledProcessError:
             return "error"
             
-    # 3. Secured network: start AP mode for password configuration
+    # 3. Secured network: 
     else:
-        try:
             # Saves the chosen ssid in a temp json file
             write_json(TEMP_SELECTED_WIFI_INFO_JSON_PATH, {"ssid": ssid})
 
-            # Disconnette wlan0 and removes hotspot profiles to avoid any conflict
-            subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"], capture_output=True)
-            subprocess.run(["sudo", "nmcli", "connection", "delete", "Ras-Pi_Input_Wi-Fi_Password"], capture_output=True)
+            return "ap_required"
 
-            # Explicitly create a persistent Wi-Fi connection profile for the AP
-            subprocess.run([
-                "sudo", "nmcli", "connection", "add", 
-                "type", "wifi", 
-                "ifname", "wlan0", 
-                "con-name", "Ras-Pi_Input_Wi-Fi_Password", 
-                "ssid", "Ras-Pi_Input_Wi-Fi_Password"
-            ], capture_output=True, check=True)
+def start_ap_mode():
+    """
+        Start AP mode for password configuration
+    """
+    try:
+        # Disconnette wlan0 to prevent any error
+        subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"], capture_output=True)
 
-            # Configure the profile for Access Point mode and IP sharing
-            subprocess.run([
-                "sudo", "nmcli", "connection", "modify", "Ras-Pi_Input_Wi-Fi_Password", 
-                "802-11-wireless.mode", "ap", 
-                "802-11-wireless.band", "bg", 
-                "ipv4.method", "shared"
-            ], capture_output=True, check=True)
+        # Commands NetworkManager to init HotspotMode
+        result = subprocess.run(["sudo", "nmcli", "device", "wifi", "hotspot", "ifname", "wlan0", "ssid", "Ras-Pi_Input_Wi-Fi_Password", "password", "12345678"
+        ], capture_output=True, text=True)
 
-            # Set the WPA security credentials
-            subprocess.run([
-                "sudo", "nmcli", "connection", "modify", "Ras-Pi_Input_Wi-Fi_Password", 
-                "wifi-sec.key-mgmt", "wpa-psk", 
-                "wifi-sec.psk", "12345678"
-            ], capture_output=True, check=True)
-
-            # Bring up the configured AP profile
-            res = subprocess.run([
-                "sudo", "nmcli", "connection", "up", "Ras-Pi_Input_Wi-Fi_Password"
-            ], capture_output=True, text=True)
-
-
-            # Starts temporary AP mode
-            #res = subprocess.run([
-            #    "nmcli", "device", "wifi", "hotspot", 
-            #    "ifname", "wlan0", 
-            #    "ssid", "Ras-Pi_Input_Wi-Fi_Password", 
-            #    "password", "12345678"
-            #], capture_output=True, text=True)
-            
-            if res.returncode == 0:
-                return "ap_started"
-            else:
-                return "error"
-        except Exception:
+        if result.returncode == 0:
+            return "ap_started"
+        else:
             return "error"
+    except Exception:
+        return "error"
 
 def connect_with_saved_credentials(ssid, password):
     """Connects to a Wi-Fi network using the provided SSID and password."""
