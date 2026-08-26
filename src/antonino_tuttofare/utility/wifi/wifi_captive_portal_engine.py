@@ -10,9 +10,9 @@ import os
 import time
 import threading
 from flask import Flask, render_template, request
-from config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
-from utils.file_utils import read_json, write_json
-from utils.i18n import t, current_lang
+from src.antonino_tuttofare.config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
+from antonino_tuttofare.utility.files_utils import read_json, write_json
+from src.antonino_tuttofare.utility.i18n import t, current_lang
 
 
 app = Flask(__name__)

@@ -10,19 +10,23 @@ if missing, fetches outdoor temperature hourly while updating and clearing the s
 completely every 5 seconds, and runs in a continuous loop until a key is pressed.
 """
 
-import time
-import psutil
 import datetime
 import json
+import logging
 import os
-import sys
 import select
+import sys
 import termios
+import time
 import tty
+import psutil
 import requests
-import config
-import settings_modules.sync_time_and_place as sync_time_and_place
-from utils.i18n import t
+
+from antonino_tuttofare import config
+from antonino_tuttofare.settings_modules import sync_time_and_place
+from antonino_tuttofare.utility.i18n import t
+
+logger = logging.getLogger(__name__)
 
 # Global variables to cache outdoor temperature, track last fetch time, and track last success
 cached_outdoor_temp = "N/A"
@@ -60,13 +64,13 @@ def fetch_outdoor_temperature() -> str:
                     cached_outdoor_temp = f"{temp:.1f}°C"
                     last_successful_fetch = current_time
                     return cached_outdoor_temp
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to fetch outdoor temperature: %s", e)
 
     if last_successful_fetch > 0 and (current_time - last_successful_fetch <= 3600):
         return cached_outdoor_temp
 
-    return t('reconnect_wifi')
+    return t('desktop_mode_connection_lost')
 
 def get_info() -> dict:
     now = datetime.datetime.now()
@@ -74,16 +78,16 @@ def get_info() -> dict:
     current_time_zone = time.tzname[time.daylight]
     current_time = now.strftime("%H:%M:%S")
 
-    city = t('unknown_city')
+    city = t('key_unknown_city')
     country = ""
     if os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         try:
             with open(config.TIME_PLACE_JSON_CONFIG_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                city = data.get("city", t('unknown_city'))
+                city = data.get("city", t('key_unknown_city'))
                 country = data.get("country", "")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read time/place config: %s", e)
 
     outdoor_temp = fetch_outdoor_temperature()
 
@@ -113,8 +117,8 @@ def get_stats() -> dict:
             with open(temp_path, "r") as f:
                 raw_temp = int(f.read().strip())
                 cpu_temp = f"{raw_temp / 1000.0:.1f}°C"
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read CPU temperature: %s", e)
 
     return {
         t('key_cpu_usage'): f"{cpu_percent}%",
@@ -129,11 +133,13 @@ def ensure_synchronized() -> bool:
         return True
 
     print(t('desktop_mode_config_not_found'))
+    logger.info("Configuration file not found. Starting initial synchronization...")
     success = sync_time_and_place.run()
 
     if not success or not os.path.exists(config.TIME_PLACE_JSON_CONFIG_PATH):
         print(t('desktop_mode_init_failed'))
         print(t('desktop_mode_cannot_start'))
+        logger.error("Initialization failed. Desktop mode cannot start without configuration.")
         return False
 
     return True
@@ -144,6 +150,7 @@ def is_key_pressed() -> bool:
 
 def run():
     print(t('desktop_mode_starting'))
+    logger.info("Starting Desktop Mode...")
 
     if not ensure_synchronized():
         return
@@ -171,6 +178,7 @@ def run():
                     sys.stdin.read(1)
                     os.system('clear' if os.name == 'posix' else 'cls')
                     print(t('desktop_mode_exiting'))
+                    logger.info("Exiting desktop mode...")
                     return
                 time.sleep(0.1)
 

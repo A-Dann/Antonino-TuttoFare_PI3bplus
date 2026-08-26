@@ -92,6 +92,7 @@
                 "configure_wifi_connected_successfully": "Successfully connected!",
                 "configure_wifi_password_required_start_ap": "Password required - AP Mode Active",
                 "configure_wifi_connection_error": "Connection error or failed to start AP mode.",
+                "configure_wifi_ap_timeout": "Access Point session timed out after 5 minutes.",
                 "configure_wifi_no_password_found": "No password was found (absent or corrupted)",
                 "configure_wifi_ask_for_retry": "Do you want to retry submitting the password?",
                 "configure_wifi_back_to_wifi_menu": "Returning to Wi-Fi Configuration Menu",

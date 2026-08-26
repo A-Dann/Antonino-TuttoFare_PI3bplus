@@ -92,6 +92,7 @@
             "configure_wifi_connected_successfully": "¡Conectado con éxito!",
             "configure_wifi_password_required_start_ap": "Contraseña requerida - Modo AP Activo",
             "configure_wifi_connection_error": "Error de conexión o fallo al iniciar el modo AP.",
+            "configure_wifi_ap_timeout": "La sesión del punto de acceso expiró después de 5 minutos.",
             "configure_wifi_no_password_found": "No se encontró contraseña (ausente o corrupta)",
             "configure_wifi_ask_for_retry": "¿Desea volver a intentar enviar la contraseña?",
             "configure_wifi_back_to_wifi_menu": "Volviendo al menú de configuración Wi-Fi",

@@ -6,16 +6,20 @@ This module retrieves and displays detailed system information about the Raspber
 such as OS version, kernel, hostname, IP address, and hardware temperatures.
 """
 
+import logging
+import os
 import platform
 import psutil
-import os
-from utils.i18n import t
+
+from antonino_tuttofare.utility.i18n import t
+
+logger = logging.getLogger(__name__)
 
 def get_system_details() -> dict:
     hostname = platform.node()
     os_name = platform.system()
     os_release = platform.release()
-    processor = platform.processor() or t('unknown_processor')
+    processor = platform.processor() or t('key_unknown')
 
     # Tries to retrieve the IP address of the Raspberry Pi
     ip_address = "N/A"
@@ -29,8 +33,8 @@ def get_system_details() -> dict:
                         break
                 if ip_address != "N/A":
                     break
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Could not retrieve IP address: %s", e)
 
     # Tries to retrieve the CPU temperature
     cpu_temp = "N/A"
@@ -40,8 +44,8 @@ def get_system_details() -> dict:
             with open(temp_path, "r") as f:
                 raw_temp = int(f.read().strip())
                 cpu_temp = f"{raw_temp / 1000.0:.1f}°C"
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Could not read CPU temperature: %s", e)
 
     return {
         t('key_hostname'): hostname,
@@ -53,6 +57,7 @@ def get_system_details() -> dict:
 
 def run():
     print(t('sys_info_fetching_info'))
+    logger.info("Fetching system information...")
 
     os.system('clear' if os.name == 'posix' else 'cls')
     print(t('sys_info_title'))
@@ -62,7 +67,7 @@ def run():
         print(f"{key}: {value}")
         
     print("\n-------------------------")
-    input(t('msg_press_enter_return'))
+    input(f"{t('msg_press_enter_return')} ")
 
 if __name__ == "__main__":
     run()

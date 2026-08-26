@@ -6,8 +6,11 @@ This module acts as an intermediary layer between the settings interface
 and the synchronization logic (sync_engine).
 """
 
-from utils.sync import sync_engine
-from utils.i18n import t
+import logging
+from antonino_tuttofare.services import sync_engine
+from antonino_tuttofare.utility.i18n import t
+
+logger = logging.getLogger(__name__)
 
 def run():
     """
@@ -20,14 +23,18 @@ def run():
         
         if success:
             print(t('sync_time_and_place_completed_successfully'))
+            logger.info("Time and place synchronized successfully.")
         else:
             print(t('sync_time_and_place_failed'))
+            logger.warning("Time and place synchronization failed.")
             
     except Exception as e:
-        print(t('sync_time_and_place_critical_sync_error').format(e=e))
+        error_msg = t('sync_time_and_place_critical_sync_error').format(e=e)
+        print(error_msg)
+        logger.exception("Critical synchronization error occurred: %s", e)
+        success = False
     
-    # Wait for any key press before returning to the menu
-    # TODO: SET A PRESS ANY KEY MODE
+    # Wait for user input before returning to the menu
     input(f"\n{t('msg_press_enter_to_continue')} ")
     return success
 

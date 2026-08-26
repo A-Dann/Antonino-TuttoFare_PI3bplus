@@ -1,7 +1,18 @@
-import subprocess
-import time
+#!/usr/bin/env python3
+"""
+Turn Off / Shutdown Module
+
+This module handles the graceful exit/shutdown process of the application, displaying
+an ASCII art animation spelling out 'GOODBYE' letter by letter.
+"""
+
+import logging
 import os
-from utils.i18n import t
+import time
+
+from antonino_tuttofare.utility.i18n import t
+
+logger = logging.getLogger(__name__)
 
 ascii_font = {
     'G': [
@@ -59,7 +70,7 @@ def print_letter_by_letter(word, font):
             for i in range(height):
                 composite_lines[i] += letter_design[i] + "  "
             
-            os.system('clear')
+            os.system('clear' if os.name == 'posix' else 'cls')
             print("\n" * 2)
             for line in composite_lines:
                 print(line)
@@ -68,11 +79,14 @@ def print_letter_by_letter(word, font):
 
 def run():
     print(t('turn_off_system_exiting'))
+    logger.info("Initiating application exit sequence...")
 
     print_letter_by_letter("GOODBYE", ascii_font)
 
     print("\n" * 2)
     print(t('turn_off_shutting_down'), flush=True)
+    logger.info("Shutdown sequence completed.")
     time.sleep(2)
 
-    subprocess.run(["sudo", "shutdown", "now"])
+if __name__ == "__main__":
+    run()

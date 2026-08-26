@@ -3,8 +3,11 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "antonino_tuttofare_pi3bplus"
+name = "antonino_tuttofare"
 version = "0.1.0"
+description = "Raspberry Pi 3B+ System Manager"
+readme = "README.md"
+requires-python = ">=3.9"
 dependencies = [
     "psutil",
     "requests",
@@ -12,4 +15,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["../../assets/**/*"]

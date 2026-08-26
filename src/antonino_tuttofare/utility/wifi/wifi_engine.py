@@ -18,8 +18,8 @@ Raspberry Pi Connectivity Architecture:
 """
 
 import subprocess
-from config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
-from utils.file_utils import write_json
+from src.antonino_tuttofare.config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
+from antonino_tuttofare.utility.files_utils import write_json
 
 def get_current_connection_state():
     """

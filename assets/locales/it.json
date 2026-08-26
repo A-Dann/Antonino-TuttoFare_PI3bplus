@@ -92,6 +92,7 @@
             "configure_wifi_connected_successfully": "Connessione riuscita!",
             "configure_wifi_password_required_start_ap": "Password richiesta - Modalità AP Attiva",
             "configure_wifi_connection_error": "Errore di connessione o fallimento nell'avvio della modalità AP.",
+            "configure_wifi_ap_timeout": "La sessione dell'Access Point è scaduta dopo 5 minuti.",
             "configure_wifi_no_password_found": "Nessuna password trovata (assente o corrotta)",
             "configure_wifi_ask_for_retry": "Vuoi riprovare a inviare la password?",
             "configure_wifi_back_to_wifi_menu": "Ritorno al menu di configurazione Wi-Fi",

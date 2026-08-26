@@ -3,33 +3,31 @@
 Internationalization (i18n) module for managing multi-language support.
 """
 
-import os
-import config
-from utils.file_utils import read_json, write_json
+from pathlib import Path
+from antonino_tuttofare import config
+from antonino_tuttofare.utility.files_utils import read_json, write_json
 
 current_lang = config.DEFAULT_LANGUAGE
 translations = {}
 fallback_translations = {}
 
 
-def _get_locale_file_path(lang_code: str) -> str:
+def _get_locale_file_path(lang_code: str) -> Path:
     """Build the absolute path for a given language code."""
-    return os.path.join(config.LOCALES_DIR_PATH, f"{lang_code}.json")
+    return Path(config.LOCALES_DIR_PATH) / f"{lang_code}.json"
 
 
-def load_language(lang_code=None) -> None:
+def load_language(lang_code: str = None) -> None:
     """Load translation strings with a chronological fallback chain:
     Requested -> Previous/Saved -> Default.
     """
     global current_lang, translations, fallback_translations
     
-    # 1. Determine the target language we want to load
     target_lang = lang_code
-    previous_lang = current_lang  # Save the current language as "previous"
+    previous_lang = current_lang
 
-    # If no target language is provided, attempt to load the user's saved preference
     if not target_lang:
-        if os.path.exists(config.LANGUAGE_CONFIG_PATH):
+        if config.LANGUAGE_CONFIG_PATH.exists():
             user_data = read_json(config.LANGUAGE_CONFIG_PATH)
             target_lang = user_data.get("language", current_lang)
         else:
@@ -93,7 +91,6 @@ def set_language(lang_code: str) -> None:
     """Set a new language and save preference to disk if it differs from current."""
     global current_lang
     
-    # If the requested language is already the active one, do nothing
     if lang_code == current_lang:
         return
 
@@ -108,4 +105,5 @@ def set_language(lang_code: str) -> None:
     load_language(lang_code)
 
 
+# Initialize on import
 load_language()

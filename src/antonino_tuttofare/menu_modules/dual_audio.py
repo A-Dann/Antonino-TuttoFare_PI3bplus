@@ -3,7 +3,7 @@
 Dual Audio Module
 """
 
-from utils.i18n import t
+from src.antonino_tuttofare.utility.i18n import t
 
 def run():
     print(t('dual_audio_starting'))
