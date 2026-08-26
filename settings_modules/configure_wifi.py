@@ -7,6 +7,7 @@ using NetworkManager (nmcli).
 """
 
 import subprocess
+import sys
 import time
 from config import PROJECT_ROOT, CAPTIVE_PORTAL_SCRIPT_PATH, TEMP_SELECTED_WIFI_INFO_JSON_PATH
 import utils.wifi.wifi_engine as wifi_engine
@@ -95,7 +96,7 @@ def run_ap_mode_session(ssid):
 
 
         # 1. Start the Flask captive portal server
-        flask_process = subprocess.Popen(["python3", CAPTIVE_PORTAL_SCRIPT_PATH],
+        flask_process = subprocess.Popen([sys.executable, "-m", "utils.wifi.wifi_captive_portal_engine"],
                                          cwd=PROJECT_ROOT)
 
         try:

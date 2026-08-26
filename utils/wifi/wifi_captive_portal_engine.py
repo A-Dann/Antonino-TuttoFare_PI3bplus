@@ -14,6 +14,7 @@ from config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
 from utils.file_utils import read_json, write_json
 from utils.i18n import t, current_lang
 
+
 app = Flask(__name__)
 
 def shutdown_server():

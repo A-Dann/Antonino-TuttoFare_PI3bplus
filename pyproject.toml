@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "progetto_raspberry"
+name = "antonino_tuttofare_pi3bplus"
 version = "0.1.0"
 dependencies = [
     "psutil",
-    "requests"
+    "requests",
+    "flask"
 ]
 
-# Aggiungi questo blocco per indicare che il pacchetto vive dentro 'src'
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
