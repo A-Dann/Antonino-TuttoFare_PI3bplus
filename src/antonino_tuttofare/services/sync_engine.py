@@ -3,7 +3,7 @@
 Sync Engine Module
 
 This module handles network connectivity checks, automatic reconnection via NetworkManager,
-high-precision Wi-Fi geolocation using the BeaconDB Location Service, reverse geocoding via OpenStreetMap,
+high-precision Wi-Fi geolocation using the Google Geolocation API, reverse geocoding via OpenStreetMap,
 IP-based location as fallback, system timezone updates, and local configuration persistence.
 """
 
@@ -129,8 +129,8 @@ def scan_wifi_networks() -> list:
 
 def fetch_location_from_wifi() -> tuple:
     """
-    Use BeaconDB via nearby Wi-Fi networks to get precise coordinates.
-    
+    Use Google Geolocation API via nearby Wi-Fi networks to get precise coordinates.
+
     Returns:
         tuple[float, float] | None: A tuple containing (latitude, longitude), or None if it fails.
     """
@@ -138,10 +138,17 @@ def fetch_location_from_wifi() -> tuple:
     if not wifi_list:
         return None
 
-    url = "https://beacondb.net/v1/geolocate"
-    payload = {"wifiAccessPoints": wifi_list}
+    api_key = getattr(config, "GOOGLE_API_KEY", "")
+    if not api_key:
+        logger.error("Google API Key is missing in configuration. Cannot query Google Geolocation API.")
+        return None
+
+    url = f"https://www.googleapis.com/geolocation/v1/geolocate?key={api_key}"
+    payload = {
+        "wifiAccessPoints": wifi_list
+    }
     
-    logger.debug("Sending Wi-Fi fingerprint to BeaconDB Location Service...") 
+    logger.debug("Sending Wi-Fi fingerprint to Google Geolocation API...")
     try:
         response = requests.post(url, json=payload, timeout=5)
         if response.status_code == 200:
@@ -150,13 +157,13 @@ def fetch_location_from_wifi() -> tuple:
             lng = data.get("location", {}).get("lng")
 
             if lat and lng:
-                logger.debug(f"BeaconDB resolved coordinates: Lat {lat}, Lng {lng}")  
+                logger.debug(f"Google resolved coordinates: Lat {lat}, Lng {lng}")
                 return lat, lng
         else:
-            logger.warning(f"BeaconDB returned status code: {response.status_code}")
+            logger.warning(f"Google Geolocation API returned status code: {response.status_code} - {response.text}")
     except requests.RequestException as e:
-        logger.error(f"BeaconDB geolocation error: {e}")
-
+        logger.error(f"Google Geolocation error: {e}")
+    
     return None
 
 
