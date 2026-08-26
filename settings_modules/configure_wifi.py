@@ -8,7 +8,7 @@ using NetworkManager (nmcli).
 
 import subprocess
 import time
-from config import CAPTIVE_PORTAL_SCRIPT_PATH, TEMP_SELECTED_WIFI_INFO_JSON_PATH
+from config import PROJECT_ROOT, CAPTIVE_PORTAL_SCRIPT_PATH, TEMP_SELECTED_WIFI_INFO_JSON_PATH
 import utils.wifi.wifi_engine as wifi_engine
 from utils.file_utils import read_json
 from utils.i18n import t
@@ -95,7 +95,8 @@ def run_ap_mode_session(ssid):
 
 
         # 1. Start the Flask captive portal server
-        flask_process = subprocess.Popen(["sudo", "python3", CAPTIVE_PORTAL_SCRIPT_PATH])    
+        flask_process = subprocess.Popen(["python3", CAPTIVE_PORTAL_SCRIPT_PATH],
+                                         cwd=PROJECT_ROOT)
 
         try:
             #TODO WRITE THE FREEZE SCREEN WITH THE INSTRUCCIONS ON HOW TO CONNECT:

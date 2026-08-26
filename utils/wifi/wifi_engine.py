@@ -22,12 +22,19 @@ from config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
 from utils.file_utils import write_json
 
 def get_current_connection_state():
-    """Returns a dictionary with SSID, security, and signal of the currently connected network, or None."""
+    """
+    Checks if the Raspberry Pi is currently connected to a Wi-Fi network.
+    Returns a dictionary with SSID, security, and signal strength, or None if not connected.
+    """
+
     try:
+        # Query NetworkManager for Wi-Fi device status in tabular format
         result = subprocess.run(
             ["nmcli", "-t", "-f", "ACTIVE,SSID,SECURITY,SIGNAL", "dev", "wifi"],
             capture_output=True, text=True, check=True
         )
+
+        # Parse output line by line searching for the active connection (indicated by "yes:")
         for line in result.stdout.splitlines():
             if line.startswith("yes:"):
                 parts = line.split(":")
@@ -42,66 +49,63 @@ def get_current_connection_state():
         return None
 
 def scan_networks():
-    """Scans for networks and returns a list of dictionaries with SSID and signal."""
+    """
+    Forces a fresh Wi-Fi scan via NetworkManager and returns a sorted list 
+    of dictionaries containing SSID, security, and signal strength (without duplicates).
+    """ 
     try:
-        # 1. Force a fresh Wi-Fi scan to detect nearby networks
-        subprocess.run(["sudo", "iw", "dev", "wlan0", "scan"], capture_output=True)
-
-        # Small pause to allow the wifi driver to scan
-        import time
-        time.sleep(1)
-
-        # 2. Get the list of visible networks with clean output format
+        # Trigger a rescan and get the list of visible networks
         result = subprocess.run(
-            ["nmcli", "-t", "-f", "SSID,SECURITY,SIGNAL", "dev", "wifi", "list"],
+            ["nmcli", "-t", "-f", "SSID,SECURITY,SIGNAL", "dev", "wifi", "list", "--rescan", "yes"],
             capture_output=True, text=True, check=True
         )
-        
+
         raw_networks = []
         
-        # 3. Read the output and parse each line
+        # Parse each line returned by nmcli
         for line in result.stdout.splitlines():
             parts = line.split(":")
             if len(parts) >= 3:
                 ssid = parts[0].strip()
                 security = parts[1].strip()
-                signal_strenght = parts[2].strip()
+                signal_strength = parts[2].strip()
 
-                if ssid and signal_strenght.isdigit():
+                # Filter only valid networks with a non-empty SSID and numeric signal
+                if ssid and signal_strength.isdigit():
                     raw_networks.append({
                         "ssid": ssid,
-                        "security": security,
-                        "signal": int(signal_strenght)})
+                        "security": security if security else "Open",
+                        "signal": int(signal_strength)
+                    })
         
-        # 4. Sort by signal strength in descending order (highest signal first)
+        # Sort networks from strongest to weakest signal
         raw_networks.sort(key=lambda x: x["signal"], reverse=True)
         
         networks = []
-        seen = set()  # Used to filter out duplicate SSIDs (keeping the strongest one)
+        seen = set()  # Used to filter out duplicates (keeping the strongest signal occurrence)
         
-        # 5. Filter duplicates, keeping only the first occurrence (which now has the best signal)
         for net in raw_networks:
             if net["ssid"] not in seen:
                 seen.add(net["ssid"])
-                # Convert signal back to string if your frontend expects it
-                net["signal"] = str(net["signal"])
+                net["signal"] = str(net["signal"])  # Convert signal back to string for frontend compatibility
                 networks.append(net)
-                    
+                
         return networks
     except Exception:
         return []
 
 def handle_network_selection(ssid, security):
     """
-    Handles network selection.
+    Handles user network selection.
     Returns:
         - "connected": Successfully connected to a saved or open network.
-        - "ap_required": To notify that the network is secured and need ap to obtain the password.
+        - "ap_required": The network is secured and requires AP mode to gather the password.
         - "error": Something went wrong.
     """
+
     saved = get_saved_list()
     
-    # 1. Saved network: connect directly
+    # CASE 1: The network is already saved in the system -> Connect directly
     if ssid in saved:
         try:
             # Query NetworkManager for all existing connection profiles to resolve Netplan naming conventions
@@ -112,17 +116,20 @@ def handle_network_selection(ssid, security):
             profile_to_up = ssid
             for line in profiles_res.stdout.splitlines():
                 p_name = line.strip()
-                # Match either the plain SSID or the Netplan-prefixed system profile name
+                # Handle both plain SSIDs and Netplan-prefixed system profiles
                 if p_name == ssid or p_name == f"netplan-wlan0-{ssid}":
                     profile_to_up = p_name
                     break
+                
             # Bring up the matched connection profile
-            subprocess.run(["nmcli", "connection", "up", profile_to_up], capture_output=True, text=True, check=True)
+            subprocess.run(
+                ["nmcli", "connection", "up", profile_to_up],
+                capture_output=True, text=True, check=True)
             return "connected"
         except subprocess.CalledProcessError:
             return "error"
             
-    # 2. Open network: connect directly without password
+    # CASE 2: The network is open (no password) -> Connect directly without credentials
     elif not security or security == "--" or security.lower() == "open":
         try:
             subprocess.run(
@@ -132,30 +139,28 @@ def handle_network_selection(ssid, security):
             return "connected"
         except subprocess.CalledProcessError:
             return "error"
-            
-    # 3. Secured network: 
+        
+    # CASE 3: The network is secured and not saved -> Save SSID to temporary file and trigger AP mode
     else:
-            # Saves the chosen ssid in a temp json file
             write_json(TEMP_SELECTED_WIFI_INFO_JSON_PATH, {"ssid": ssid})
-
             return "ap_required"
 
 def start_ap_mode():
     """
-        Start AP mode for password configuration
+    Starts Access Point (Hotspot) mode on the Raspberry Pi so the user's smartphone 
+    can connect and provide the Wi-Fi password for the target network.
     """
     try:
-        # Disconnette wlan0 to prevent any error
-        subprocess.run(["sudo", "nmcli", "device", "disconnect", "wlan0"], capture_output=True)
+        # Disconnect wlan0 to free up the interface and prevent conflicts
+        subprocess.run(["nmcli", "device", "disconnect", "wlan0"],
+            capture_output=True)
 
-        # Commands NetworkManager to init HotspotMode
-        result = subprocess.run(["sudo", "nmcli", "device", "wifi", "hotspot", "ifname", "wlan0", "ssid", "Ras-Pi_Input_Wi-Fi_Password", "password", "12345678"
-        ], capture_output=True, text=True)
+        # Configure and start NetworkManager's native hotspot mode
+        result = subprocess.run(
+            ["nmcli", "device", "wifi", "hotspot", "ifname", "wlan0", "ssid", "Ras-Pi_Input_Wi-Fi_Password", "password", "12345678"],
+            capture_output=True, text=True)
 
-        if result.returncode == 0:
-            return "ap_started"
-        else:
-            return "error"
+        return "ap_started" if result.returncode == 0 else "error"
     except Exception:
         return "error"
 
