@@ -10,7 +10,7 @@ import subprocess
 import sys
 import time
 
-from antonino_tuttofare.config import PROJECT_ROOT, TEMP_SELECTED_WIFI_INFO_JSON_PATH
+from antonino_tuttofare.config import PROJECT_ROOT, TEMP_SELECTED_WIFI_INFO_JSON_PATH, CAPTIVE_PORTAL_SCRIPT_PATH
 import antonino_tuttofare.hardware.wifi_engine as wifi_engine
 from antonino_tuttofare.utility.files_utils import read_json
 from antonino_tuttofare.utility.logger import get_logger
@@ -64,7 +64,7 @@ def run_ap_mode_session(ssid: str) -> str:
 
             logger.info("Launching Flask captive portal server process...")
             flask_process = subprocess.Popen(
-                [sys.executable, "-m", "utils.wifi.wifi_captive_portal_engine"],
+                [sys.executable, str(CAPTIVE_PORTAL_SCRIPT_PATH)],
                 cwd=PROJECT_ROOT
             )
 
