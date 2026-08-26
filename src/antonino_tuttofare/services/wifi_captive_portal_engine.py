@@ -12,14 +12,14 @@ import socket
 import threading
 from flask import Flask, render_template, request
 
-from antonino_tuttofare.config import TEMP_SELECTED_WIFI_INFO_JSON_PATH, TEMPLATES_DIR_PATH
+from antonino_tuttofare.config import TEMP_SELECTED_WIFI_INFO_JSON_PATH, TEMPLATES_DIR_PATH, STATIC_DIR_PATH
 from antonino_tuttofare.utility.files_utils import read_json, write_json
 from antonino_tuttofare.utility.i18n import t, current_lang
 from antonino_tuttofare.utility.logger import get_logger
 
 logger = get_logger(__name__)
 
-app = Flask(__name__, template_folder=str(TEMPLATES_DIR_PATH))
+app = Flask(__name__, template_folder=str(TEMPLATES_DIR_PATH), static_folder=str(STATIC_DIR_PATH))
 
 
 def run_captive_dns() -> None:
