@@ -5,6 +5,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CODE_ROOT_PATH = PROJECT_ROOT / "src" / "antonino_tuttofare"
 ASSETS_DIR_PATH = PROJECT_ROOT / "assets"
+TEMPLATES_DIR_PATH = ASSETS_DIR_PATH / "templates"
 LOCALES_DIR_PATH = ASSETS_DIR_PATH / "locales"
 
 # Application name used for system directories

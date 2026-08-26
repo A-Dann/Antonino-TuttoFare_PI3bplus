@@ -180,13 +180,44 @@ def start_ap_mode():
     logger.info("Starting Access Point (AP) mode...")
     try:
         # Disconnect wlan0 to free up the interface and prevent conflicts
-        subprocess.run(["nmcli", "device", "disconnect", "wlan0"],
-            capture_output=True)
+        subprocess.run(["nmcli", "device", "disconnect", "wlan0"], capture_output=True)
 
-        # Configure and start NetworkManager's native hotspot mode
-        result = subprocess.run(
-            ["nmcli", "device", "wifi", "hotspot", "ifname", "wlan0", "ssid", "Ras-Pi_Input_Wi-Fi_Password", "password", "12345678"],
-            capture_output=True, text=True)
+        # Remove any previous Hotspot profile to avoid conflicts
+        subprocess.run(["nmcli", "connection", "delete", "RasPi-Hotspot"], capture_output=True)
+
+        # Create a new Wi-Fi connection profile
+        subprocess.run([
+            "nmcli", "connection", "add", "type", "wifi",
+            "ifname", "wlan0",
+            "con-name", "RasPi-Hotspot",
+            "ssid", "Ras-Pi_Input_Wi-Fi_Password"
+        ], capture_output=True, check=True)
+
+        # Configure Access Point (AP) mode and WPA2 security
+        subprocess.run([
+            "nmcli", "connection", "modify", "RasPi-Hotspot",
+            "802-11-wireless.mode", "ap",
+            "802-11-wireless.band", "bg",
+            "wifi-sec.key-mgmt", "wpa-psk",
+            "wifi-sec.psk", "12345678"
+        ], capture_output=True, check=True)
+
+        # Configure IPv4 method as shared
+        subprocess.run([
+            "nmcli", "connection", "modify", "RasPi-Hotspot",
+            "ipv4.method", "shared"
+        ], capture_output=True, check=True)
+
+        # Configure static gateway IP and DNS
+        subprocess.run([
+            "nmcli", "connection", "modify", "RasPi-Hotspot",
+            "ipv4.addresses", "10.42.0.1/24"
+        ], capture_output=True, check=True)
+
+        # Start the AP connection
+        result = subprocess.run([
+            "nmcli", "connection", "up", "RasPi-Hotspot"
+        ], capture_output=True, text=True)
 
         if result.returncode == 0:
             logger.info("Access Point mode started successfully ('Ras-Pi_Input_Wi-Fi_Password').")
