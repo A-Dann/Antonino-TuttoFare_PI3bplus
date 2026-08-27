@@ -10,6 +10,7 @@ import logging
 import os
 import time
 
+from antonino_tuttofare.menu_modules import ai_agent
 from antonino_tuttofare.utility.i18n import t
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,10 @@ def print_letter_by_letter(word, font):
 def run():
     print(t('turn_off_system_exiting'))
     logger.info("Initiating application exit sequence...")
+
+    if ai_agent.is_running():
+            logger.info("Stopping AI Agent before shutting down...")
+            ai_agent.stop()
 
     print_letter_by_letter("GOODBYE", ascii_font)
 

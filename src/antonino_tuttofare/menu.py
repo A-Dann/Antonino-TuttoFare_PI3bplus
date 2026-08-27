@@ -7,6 +7,7 @@ allowing users to navigate between desktop mode, dual audio, settings, and exit.
 """
 
 import logging
+import threading
 
 from antonino_tuttofare.menu_modules import desktop_mode, dual_audio, ai_agent, turn_off
 from antonino_tuttofare import settings
@@ -20,9 +21,13 @@ def main():
         print(f"\n--- {t('menu_title')} ---")
         print(f"1. {t('menu_desktop_mode')}")
         print(f"2. {t('menu_dual_audio')}")
-        print(f"3. {t('ai_agent')}")
-        print(f"4. {t('menu_settings')}")
-        print(f"5. {t('menu_exit')}")
+        if not ai_agent.is_running():
+            print(f"3. {t('Start_ai_agent')}")
+        else:
+            print(f"3. {t('Close_ai_agent')}")
+        print(f"4. AI Agent Test Scrittura (Debug)")
+        print(f"5. {t('menu_settings')}")
+        print(f"6. {t('menu_exit')}")
 
         choice = input(f"{t('msg_prompt_choice')} ").strip()
 
@@ -33,12 +38,19 @@ def main():
             logger.info("Navigating to Dual Audio.")
             dual_audio.run()
         elif choice == '3':
-            logger.info("Navigating to Dual Audio.")
-            ai_agent.run()
+            if not ai_agent.is_running():
+                logger.info("Starting AI Agent in background.")
+                ai_agent.start()
+            else:
+                logger.info("Closing AI Agent.")
+                ai_agent.stop()
         elif choice == '4':
+            logger.info("Opening AI Agent testing console.")
+            ai_agent.run_testing_console()
+        elif choice == '5':
             logger.info("Navigating to Settings.")
             settings.run()
-        elif choice == '5':
+        elif choice == '6':
             logger.info("Exiting application from main menu.")
             turn_off.run()
             break
