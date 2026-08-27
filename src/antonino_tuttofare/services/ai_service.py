@@ -1,41 +1,48 @@
-import os
+import logging
 from google import genai
 from google.genai import types
-from antonino_tuttofare.config import CONFIG_DIR
-from antonino_tuttofare.utility.logger import get_logger
+from google.genai.errors import APIError
+from antonino_tuttofare.utility.i18n import t
 
-logger = get_logger(__name__)
-
-KEY_PATH = CONFIG_DIR / "gemini.key"
+logger = logging.getLogger(__name__)
 
 def ask_gemini(prompt: str) -> str:
-    logger.debug("Verifica presenza chiave API...")
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key and KEY_PATH.exists():
-        api_key = KEY_PATH.read_text().strip()
-
-    if not api_key:
-        logger.error("API key mancante in %s", KEY_PATH)
-        raise ValueError(f"API key missing. Save it in: {KEY_PATH}")
-
     try:
-        logger.info("Inizializzazione client GenAI...")        
-        client = genai.Client(api_key=api_key)
+        logger.debug("Checking API key...")
+        client = genai.Client()
         
-        # Aumentato il limite a 4096 token per evitare risposte tagliate
-        config = types.GenerateContentConfig(
-            max_output_tokens=4096,
+        # System instructions defining the agent's identity and behavior
+        system_instruction = (
+            "You are Antonino Tuttofare, the voice assistant integrated into a Raspberry Pi 3B+ "
+            "system design as a multi-tool device with plenty of functions. "
+            "Always reply concisely, directly, and naturally, keeping in mind that your responses "
+            "will be read aloud by a Text-to-Speech (TTS) engine. "
+            "Maintain a friendly tone, keep it extremely brief, and avoid long bulleted lists."
         )
         
-        logger.debug("Invio richiesta HTTP rapida a Gemini...")
+        config = types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            temperature=0.7,
+        )
+        
+        logger.info("Sending request to Gemini with system context...")
         response = client.models.generate_content(
             model="gemini-3.6-flash",
             contents=prompt,
             config=config,
         )
         
-        logger.info("Risposta ricevuta con successo da Gemini.")
-        return response.text if response.text else ""
+        logger.info("Response received successfully from Gemini.")
+        return response.text
+
+    except APIError as e:
+        if e.code == 429:
+            logger.warning("Gemini daily quota exceeded.")
+            return "Free daily quota exceeded for the Gemini API key. Please try again tomorrow."
+        else:
+            logger.error("Gemini API error: %s", e)
+            return f"Gemini service error: {e.message}"
+            
     except Exception as e:
-        logger.error("Gemini API communication error: %s", e, exc_info=True)
-        raise e
+        logger.error("Unexpected error communicating with Gemini: %s", e, exc_info=True)
+        return f"Unexpected error: {e}"

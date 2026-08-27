@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Wi-Fi Configuration Menu Module
+Wi-Fi Configuration Module (CLI State Version)
 
-Provides the interactive CLI user interface for Wi-Fi management,
-delegating operations to wifi_service.
+Provides the interactive CLI user interface for Wi-Fi management adapted
+for the state machine architecture, delegating operations to wifi_service.
 """
 
 from antonino_tuttofare.utility.i18n import t
@@ -62,7 +62,7 @@ def handle_scan_and_connect() -> None:
             print(f"\n{t('configure_wifi_connected_successfully')}")
         elif status == "ap_required":
             print(f"\n{t('configure_wifi_password_required_start_ap')}")
-            
+
             # Run AP mode session loop with retry options
             while True:
                 ap_result = wifi_service.run_ap_mode_session(ssid)
@@ -95,6 +95,7 @@ def show_saved_networks() -> None:
     if not saved:
         print(f"\n{t('configure_wifi_no_saved_networks_found')}")
     else:
+        print(f"\n{t('configure_wifi_no_saved_networks_found')}") if not saved else None
         for idx, net in enumerate(saved, start=1):
             print(f"{idx}. {net}")
             
@@ -144,41 +145,41 @@ def handle_disconnection() -> None:
     input(f"\n{t('msg_press_enter_to_continue')} ")
 
 
-def run() -> None:
-    """Execute the main Wi-Fi configuration menu loop."""
-    logger.debug("Starting Wi-Fi configuration menu loop...")
-    while True:
-        try:
-            print(f"\n--- {t('configure_wifi_title')} ---")
-            print(f"1. {t('configure_wifi_get_current_state')}")
-            print(f"2. {t('configure_wifi_scan_and_connect')}")
-            print(f"3. {t('configure_wifi_get_saved_networks')}")
-            print(f"4. {t('configure_wifi_remove_saved_networks')}")
-            print(f"5. {t('configure_wifi_disconnect_from_network')}")
-            print(f"6. {t('configure_wifi_back_to_settings')}")
+def run_cli_state(selected_index=0):
+    """
+    Renders the Wi-Fi configuration menu once in the terminal, processes a single choice input,
+    and returns the next application state and selected index.
+    """
+    print(f"\n--- {t('configure_wifi_title')} ---")
+    print(f"1. {t('configure_wifi_get_current_state')}")
+    print(f"2. {t('configure_wifi_scan_and_connect')}")
+    print(f"3. {t('configure_wifi_get_saved_networks')}")
+    print(f"4. {t('configure_wifi_remove_saved_networks')}")
+    print(f"5. {t('configure_wifi_disconnect_from_network')}")
+    print(f"6. {t('configure_wifi_back_to_settings')}")
 
-            choice = input(f"{t('msg_prompt_choice')} ").strip()
+    choice = input(f"{t('msg_prompt_choice')} ").strip()
 
-            if choice == '1':
-                show_current_state()
-            elif choice == '2':
-                handle_scan_and_connect()
-            elif choice == '3':
-                show_saved_networks()
-            elif choice == '4':
-                handle_remove_saved_network()
-            elif choice == '5':
-                handle_disconnection()
-            elif choice == '6':
-                print(t('msg_back_to_menu'))
-                return
-            else:
-                print(t('msg_invalid_choice'))
-                
-        except (KeyboardInterrupt, EOFError):
-            logger.info("Wi-Fi configuration menu interrupted by user.")
-            print(t('msg_back_to_menu'))
-            break
-        except Exception as e:
-            logger.error(f"Unexpected error in Wi-Fi configuration menu: {e}")
-            break
+    if choice == '1':
+        show_current_state()
+        return "WIFI_MENU", selected_index
+    elif choice == '2':
+        handle_scan_and_connect()
+        return "WIFI_MENU", selected_index
+    elif choice == '3':
+        show_saved_networks()
+        return "WIFI_MENU", selected_index
+    elif choice == '4':
+        handle_remove_saved_network()
+        return "WIFI_MENU", selected_index
+    elif choice == '5':
+        handle_disconnection()
+        return "WIFI_MENU", selected_index
+    elif choice == '6':
+        print(t('msg_back_to_menu'))
+        logger.info("Returning to Settings.")
+        return "SETTINGS", selected_index
+    else:
+        print(t('msg_invalid_choice'))
+        logger.warning("Invalid Wi-Fi menu choice entered: %s", choice)
+        return "WIFI_MENU", selected_index

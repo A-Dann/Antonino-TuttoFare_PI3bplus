@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-System Info Module
+System Info Module (CLI State Version)
 
 This module retrieves and displays detailed system information about the Raspberry Pi,
 such as OS version, kernel, hostname, IP address, and hardware temperatures.
+Adapted for the state machine architecture.
 """
 
 import logging
@@ -55,10 +56,12 @@ def get_system_details() -> dict:
         t('key_cpu_temperature'): cpu_temp
     }
 
-def run():
-    print(t('sys_info_fetching_info'))
-    logger.info("Fetching system information...")
-
+def run_cli_state(selected_index=0):
+    """
+    Displays system information once, waits for user input, and returns the SETTINGS state.
+    """
+    logger.info("Running System Info state...")
+    
     os.system('clear' if os.name == 'posix' else 'cls')
     print(t('sys_info_title'))
     
@@ -68,6 +71,6 @@ def run():
         
     print("\n-------------------------")
     input(f"{t('msg_press_enter_return')} ")
-
-if __name__ == "__main__":
-    run()
+    
+    logger.info("Exiting system info screen.")
+    return "SETTINGS", selected_index

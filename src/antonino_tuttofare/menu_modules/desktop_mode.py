@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 """
-Desktop Mode Engine
+Desktop Mode Engine (CLI State Version)
 
 This module provides utility functions to retrieve system statistics (CPU, memory,
 disk, uptime, temperature) as well as current date, time, timezone, location data, 
-and outdoor temperature loaded from a local configuration file and weather API. 
-It checks for the presence of the configuration file at startup, attempts synchronization 
-if missing, fetches outdoor temperature hourly while updating and clearing the screen 
-completely every 5 seconds, and runs in a continuous loop until a key is pressed.
+and outdoor temperature loaded from a local configuration file and weather API.
+Adapted for the state machine architecture.
 """
 
 import datetime
 import json
 import logging
 import os
-import select
-import sys
-import termios
 import time
-import tty
 import psutil
 import requests
 
@@ -144,46 +138,26 @@ def ensure_synchronized() -> bool:
 
     return True
 
-def is_key_pressed() -> bool:
-    dr, _, _ = select.select([sys.stdin], [], [], 0)
-    return bool(dr)
-
-def run():
-    print(t('desktop_mode_starting'))
-    logger.info("Starting Desktop Mode...")
+def run_cli_state(selected_index=0):
+    """
+    Renders the desktop mode monitoring screen once, and returns back to MAIN_MENU.
+    """
+    logger.info("Running Desktop Mode state...")
 
     if not ensure_synchronized():
-        return
+        input(f"\n{t('msg_press_enter_return')} ")
+        return "MAIN_MENU", selected_index
 
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
+    os.system('clear' if os.name == 'posix' else 'cls')
     
-    try:
-        tty.setcbreak(fd)
-        time.sleep(1)
-        
-        while True:
-            os.system('clear' if os.name == 'posix' else 'cls')
-            
-            print(t('desktop_mode_header'))
-            print(t('desktop_mode_label_info'))
-            print(json.dumps(get_info(), indent=4, ensure_ascii=False))
-            print(t('desktop_mode_label_stats'))
-            print(json.dumps(get_stats(), indent=4, ensure_ascii=False))
-            print(t('desktop_mode_any_key_to_exit'))
-
-            start_time = time.time()
-            while time.time() - start_time < 5:
-                if is_key_pressed():
-                    sys.stdin.read(1)
-                    os.system('clear' if os.name == 'posix' else 'cls')
-                    print(t('desktop_mode_exiting'))
-                    logger.info("Exiting desktop mode...")
-                    return
-                time.sleep(0.1)
-
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-
-if __name__ == "__main__":
-    run()
+    print(t('desktop_mode_header'))
+    print(t('desktop_mode_label_info'))
+    print(json.dumps(get_info(), indent=4, ensure_ascii=False))
+    print(t('desktop_mode_label_stats'))
+    print(json.dumps(get_stats(), indent=4, ensure_ascii=False))
+    
+    print("\n-------------------------")
+    input(f"{t('msg_press_enter_return')} ")
+    
+    logger.info("Exiting desktop mode...")
+    return "MAIN_MENU", selected_index

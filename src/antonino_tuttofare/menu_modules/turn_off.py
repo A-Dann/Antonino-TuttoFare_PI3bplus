@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Turn Off / Shutdown Module
+Turn Off / Shutdown Module (CLI State Version)
 
 This module handles the graceful exit/shutdown process of the application, displaying
-an ASCII art animation spelling out 'GOODBYE' letter by letter.
+an ASCII art animation spelling out 'GOODBYE' letter by letter. Adapted for the state machine architecture.
 """
 
 import logging
@@ -78,13 +78,16 @@ def print_letter_by_letter(word, font):
             
             time.sleep(0.3)
 
-def run():
+def run_cli_state(selected_index=0):
+    """
+    Executes the shutdown sequence and returns the 'EXIT' state to stop the state machine.
+    """
     print(t('turn_off_system_exiting'))
     logger.info("Initiating application exit sequence...")
 
     if ai_agent.is_running():
-            logger.info("Stopping AI Agent before shutting down...")
-            ai_agent.stop()
+        logger.info("Stopping AI Agent before shutting down...")
+        ai_agent.stop()
 
     print_letter_by_letter("GOODBYE", ascii_font)
 
@@ -93,5 +96,4 @@ def run():
     logger.info("Shutdown sequence completed.")
     time.sleep(2)
 
-if __name__ == "__main__":
-    run()
+    return "EXIT", selected_index
