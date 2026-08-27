@@ -18,7 +18,7 @@ Raspberry Pi Connectivity Architecture:
 """
 
 import subprocess
-from src.antonino_tuttofare.config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
+from antonino_tuttofare.config import TEMP_SELECTED_WIFI_INFO_JSON_PATH
 from antonino_tuttofare.utility.files_utils import write_json
 from antonino_tuttofare.utility.logger import get_logger
 

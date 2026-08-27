@@ -1,4 +1,4 @@
-import src.antonino_tuttofare.menu as menu
+import antonino_tuttofare.menu as menu
 
 if __name__ == "__main__":
     menu.main()

@@ -8,7 +8,7 @@ allowing users to navigate between desktop mode, dual audio, settings, and exit.
 
 import logging
 
-from antonino_tuttofare.menu_modules import desktop_mode, dual_audio, turn_off
+from antonino_tuttofare.menu_modules import desktop_mode, dual_audio, ai_agent, turn_off
 from antonino_tuttofare import settings
 from antonino_tuttofare.utility.i18n import t
 
@@ -20,8 +20,9 @@ def main():
         print(f"\n--- {t('menu_title')} ---")
         print(f"1. {t('menu_desktop_mode')}")
         print(f"2. {t('menu_dual_audio')}")
-        print(f"3. {t('menu_settings')}")
-        print(f"4. {t('menu_exit')}")
+        print(f"3. {t('ai_agent')}")
+        print(f"4. {t('menu_settings')}")
+        print(f"5. {t('menu_exit')}")
 
         choice = input(f"{t('msg_prompt_choice')} ").strip()
 
@@ -32,9 +33,12 @@ def main():
             logger.info("Navigating to Dual Audio.")
             dual_audio.run()
         elif choice == '3':
+            logger.info("Navigating to Dual Audio.")
+            ai_agent.run()
+        elif choice == '4':
             logger.info("Navigating to Settings.")
             settings.run()
-        elif choice == '4':
+        elif choice == '5':
             logger.info("Exiting application from main menu.")
             turn_off.run()
             break
