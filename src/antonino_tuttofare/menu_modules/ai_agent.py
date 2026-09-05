@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 wakeword_antonino = str(WAKEWORD_DIR_PATH / "antonino.onnx")
 _running = False
 _thread = None
+_stop_event = threading.Event()
 
 # Initialize the Gemini service instance for the background worker
 _ai_service = GeminiService()
@@ -22,11 +23,12 @@ def start() -> None:
         # TODO: Add graphic warning sign
         return
 
-    global _running, _thread
+    global _running, _thread, _stop_event
     if _running:
         return
     
     _running = True
+    _stop_event.clear()
     _thread = threading.Thread(target=_ai_worker, daemon=True)
     _thread.start()
     logger.info("AI Agent started in background.")
@@ -34,8 +36,9 @@ def start() -> None:
 
 def stop() -> None:
     """Signals the background worker loop to stop running."""
-    global _running
+    global _running, _stop_event
     _running = False
+    _stop_event.set()
     logger.info("AI Agent stop requested.")
 
 
@@ -59,7 +62,7 @@ def _ai_worker() -> None:
         try:
             # Start passive listening for the wake word
             stream = audio_utils.listen_for_key_word(
-                wakeword_antonino, sample_rate=16000, channels=1
+                wakeword_antonino, sample_rate=16000, channels=1, stop_event=_stop_event
             )
             
             # If the stream fails to initialize, wait briefly before retrying
@@ -71,17 +74,14 @@ def _ai_worker() -> None:
             while _running and stream.active:
                 threading.Event().wait(0.1)
 
-            # If stopped externally, break out of the loop
+            # If the user requested to stop, break out of the loop
             if not _running:
-                if stream.active:
-                    stream.stop()
-                    stream.close()
                 break
 
             # Wake word detected, now record the active user command
             logger.info("Wake word triggered. Recording user speech...")
             speech_data = audio_utils.record_speech(
-                sample_rate=16000, channels=1, silence_limit=1.5
+                sample_rate=16000, channels=1, silence_limit=1.5, stop_event=_stop_event
             )
 
             if speech_data is not None:

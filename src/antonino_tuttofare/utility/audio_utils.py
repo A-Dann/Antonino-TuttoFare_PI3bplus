@@ -1,4 +1,5 @@
 from pathlib import Path
+import threading
 import time
 import io
 import wave
@@ -38,7 +39,7 @@ def check_microphone() -> bool:
 
 
 def listen_for_key_word(
-    keyword: str, sample_rate: int = 16000, channels: int = 1
+    keyword: str, sample_rate: int = 16000, channels: int = 1, stop_event: threading.Event | None = None
 ):
     """Starts an audio input stream to listen for a specific wake word using openWakeWord.
 
@@ -82,7 +83,7 @@ def listen_for_key_word(
                     logger.info(f"Score rilevato: {score:.4f}")
                     
                 # Check if the confidence score exceeds the detection threshold
-                if score > 0.5:
+                if score > 0.3:
                     logger.info(
                         f"Wake word '{model_name}' detected! Score: {score:.2f}"
                     )
@@ -107,9 +108,7 @@ def listen_for_key_word(
 
         # External control loop to safely stop and close
         while stream.active:
-            if detected:
-                stream.stop()
-                stream.close()
+            if detected or (stop_event is not None and stop_event.is_set()):
                 break
             time.sleep(0.05)
 
@@ -119,9 +118,12 @@ def listen_for_key_word(
         logger.error(f"Error starting passive listening stream: {e}")
         return None
 
+    finally:
+        close_audio_stream(stream)
+
 
 def record_speech(
-    sample_rate: int = 16000, channels: int = 1, silence_limit: float = 1.5
+    sample_rate: int = 16000, channels: int = 1, silence_limit: float = 1.5, stop_event: threading.Event = None
     ) -> np.ndarray | None:
     """Records active speech dynamically, stopping automatically when silence is detected.
 
@@ -133,6 +135,8 @@ def record_speech(
     Returns:
         np.ndarray or None: The recorded audio data array, or None if an error occurs.
     """
+
+    stream = None
     try:
         logger.info("Listening for command...")
         
@@ -173,26 +177,28 @@ def record_speech(
                 logger.error(f"Error during speech recording callback: {cb_err}")
 
         # Open the active input stream with a fixed block size for chunking
-        with sd.InputStream(
+        stream = sd.InputStream(
             samplerate=sample_rate,
             channels=channels,
             callback=callback,
             dtype=np.int16,
             blocksize=chunk_size,
-        ):
-            start_time = time.time()
-            while True:
-                time.sleep(0.05)
-                
-                # Stop if no speech is detected at all within the initial 5 seconds
-                if not is_speaking and (time.time() - start_time > 5.0):
-                    logger.info("No speech detected, stopping recording.")
-                    break
-                
-                # Stop if speech started and continuous silence limit has been reached
-                if is_speaking and silent_chunks >= max_silent_chunks:
-                    logger.info("Silence detected, stopping recording.")
-                    break
+        )
+
+        stream.start()
+        start_time = time.time()        
+        while stream.active and (stop_event is None or not stop_event.is_set()):
+            time.sleep(0.05)
+            
+            # Stop if no speech is detected at all within the initial 5 seconds
+            if not is_speaking and (time.time() - start_time > 5.0):
+                logger.info("No speech detected, stopping recording.")
+                break
+            
+            # Stop if speech started and continuous silence limit has been reached
+            if is_speaking and silent_chunks >= max_silent_chunks:
+                logger.info("Silence detected, stopping recording.")
+                break
 
         if not audio_chunks:
             return None
@@ -205,6 +211,28 @@ def record_speech(
     except Exception as e:
         logger.error(f"Error recording speech dynamically: {e}")
         return None
+
+    finally:
+        close_audio_stream(stream)
+
+def close_audio_stream(stream: sd.InputStream | None) -> None:
+    """Safely stops and closes an active sounddevice input stream, 
+    releasing underlying PortAudio resources.
+    
+    Args:
+        stream (sd.InputStream or None): The audio stream instance to close.
+    """
+    if stream is not None:
+        try:
+            if stream.active:
+                stream.stop()
+            stream.close()
+            logger.info("Audio stream closed successfully.")
+        except Exception as close_err:
+            logger.error(f"Error closing audio stream: {close_err}")
+        finally:
+            # Short pause to let PortAudio release hardware drivers on Raspberry Pi
+            time.sleep(0.2)
 
 def audio_to_wav_bytes(audio_array: np.ndarray, sample_rate: int = 16000) -> bytes:
     """Converts a NumPy audio array into WAV-formatted bytes in memory."""

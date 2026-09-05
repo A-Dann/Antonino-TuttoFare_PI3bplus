@@ -10,12 +10,25 @@ from antonino_tuttofare.settings_modules import wifi_menu, change_language, sync
 from antonino_tuttofare.utility.i18n import t
 
 logger = logging.getLogger(__name__)
+current_state = "MAIN_MENU"
+
+VALID_STATES = [
+    "MAIN_MENU",
+    "DESKTOP_MODE",
+    "DUAL_AUDIO",
+    "SETTINGS",
+    "SYSTEM_INFO",
+    "WIFI_MENU",
+    "SYNC_TIME_AND_PLACE",
+    "CHANGE_LANGUAGE",
+    "TURN_OFF",
+    "EXIT"
+]
 
 def main():
     logger.info("Application started in CLI state-machine mode.")
-    current_state = "MAIN_MENU"
+    global current_state
     selected_index = 0
-    
     running = True
     while running:
         previous_state = current_state
@@ -53,6 +66,23 @@ def main():
 
         if current_state != previous_state:
             selected_index = 0
+
+def get_current_state():
+    return current_state
+
+def change_state(target_state: str) -> str:
+    """Changes the application navigation state.
+    
+    Args:
+        target_state: The exact string identifier of the target state (e.g., MAIN_MENU, SETTINGS, WIFI_MENU, DESKTOP_MODE).
+    """
+    if target_state not in VALID_STATES:
+        logger.warning(f"AI tried to switch to an invalid state: {target_state}")
+        return f"Error: State '{target_state}' does not exist. Choose from: {', '.join(VALID_STATES)}"
+
+    logger.info(f"Tool executed: changing state to {target_state}")
+    main.current_state = target_state
+    return f"State successfully changed to {target_state}"
 
 if __name__ == "__main__":
     main()
