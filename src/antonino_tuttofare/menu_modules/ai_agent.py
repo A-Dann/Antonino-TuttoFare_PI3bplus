@@ -3,7 +3,7 @@ import threading
 
 from antonino_tuttofare.config import WAKEWORD_DIR_PATH
 from antonino_tuttofare.utility import audio_utils
-from antonino_tuttofare.services.ai_service import GeminiService
+from antonino_tuttofare.services.ai_service import AIService
 from antonino_tuttofare.utility.i18n import t
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ _thread = None
 _stop_event = threading.Event()
 
 # Initialize the Gemini service instance for the background worker
-_ai_service = GeminiService()
+_ai_service = AIService()
 
 def start() -> None:
     """Checks for microphone availability and starts the AI Agent in a background thread."""
@@ -109,27 +109,32 @@ def _ai_worker() -> None:
 
     logger.info("AI Agent background worker stopped.")
 
+
 def run_testing_console() -> None:
-    """Isolated testing console to send text prompts directly to the Gemini service
-    without blocking other application workflows.
+    """Isolated interactive testing console to send text prompts directly to the Gemini service
+    without stopping the background worker loop.
     """
     print(f"\n--- {t('ai_agent')} [TEXT TESTING MODE] ---")
-    print("Type a message to simulate a voice command (or 'exit' to return to the menu).")
+    print("Type a message to simulate a voice command, or type 'exit' to return to the menu.")
+    print("Note: The background audio agent keeps running while you test here.\n")
 
-    # Instantiate a local service instance specifically for the testing console
-    test_service = GeminiService()
+    # Istanziamo un servizio dedicato per il debug testuale
+    test_service = AIService()
 
     while True:
         try:
             user_input = input("\n[VOICE SIMULATION TEST] > ").strip()
+            
             if user_input.lower() == "exit":
+                print("Exiting testing console. Returning to menu...")
                 break
+                
             if not user_input:
                 continue
 
-            # Send the test text prompt through the Gemini service
+            # Invia il prompt di testo di debug sfruttando il metodo dedicato
             response = test_service.ask_text_test(user_input)
-            print(f"\nGemini (Voice Simulation): {response}")
+            print(f"\nAntonino (Debug Simulation): {response}")
 
         except Exception as e:
             logger.error("Error in AI Agent test: %s", e, exc_info=True)

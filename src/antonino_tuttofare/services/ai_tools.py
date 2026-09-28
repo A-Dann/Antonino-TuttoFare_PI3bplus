@@ -18,9 +18,7 @@ def change_state(target_state: str) -> str:
         target_state: The exact string identifier of the target state. 
                       Allowed values: MAIN_MENU, SETTINGS, WIFI_MENU, DESKTOP_MODE, SYSTEM_INFO, SYNC_TIME_AND_PLACE, CHANGE_LANGUAGE, TURN_OFF.
     """
-    logger.info(f"Tool executed: changing state to {target_state}")
-    # Call your application logic to update the state here
-    return f"State successfully changed to {target_state}"
+    return main.change_state(target_state)
 
 def execute_action(action_name: str) -> str:
     """MANDATORY SYSTEM COMMAND. You MUST call this function immediately when the user 
@@ -31,11 +29,46 @@ def execute_action(action_name: str) -> str:
                      Allowed values: CloseAiAgent.
     """
     logger.info(f"Tool executed: running action {action_name}")
-    # Call your application logic to run the action here
+    if action_name == "CloseAiAgent":
+        main.change_state("MAIN_MENU")
     return f"Action {action_name} executed successfully."
 
-# Collective list exportable to pass to the Gemini configuration
-ai_tools = [
-    change_state,
-    execute_action,
+gemini_tools = [change_state, execute_action]
+openai_tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "change_state",
+            "description": "MANDATORY SYSTEM COMMAND. You MUST call this function immediately when the user asks to change menu, open a section, go back, or navigate anywhere.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "target_state": {
+                        "type": "string",
+                        "description": "The exact string identifier of the target state.",
+                        "enum": ["MAIN_MENU", "SETTINGS", "WIFI_MENU", "DESKTOP_MODE", "SYSTEM_INFO", "SYNC_TIME_AND_PLACE", "CHANGE_LANGUAGE", "TURN_OFF"]
+                    }
+                },
+                "required": ["target_state"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_action",
+            "description": "MANDATORY SYSTEM COMMAND. You MUST call this function immediately when the user requests a background action or system command in the current menu.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action_name": {
+                        "type": "string",
+                        "description": "The exact name of the action to execute.",
+                        "enum": ["CloseAiAgent"]
+                    }
+                },
+                "required": ["action_name"]
+            }
+        }
+    }
 ]

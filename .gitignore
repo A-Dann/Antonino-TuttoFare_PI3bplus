@@ -13,6 +13,7 @@ __pycache__/
 dist/
 build/
 
-# Sensitive data or local folders
+# Sensitive data & Environment files
+.env
 data/
 _Progetto Audio/

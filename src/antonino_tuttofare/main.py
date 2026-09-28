@@ -9,6 +9,10 @@ from antonino_tuttofare.menu_modules import desktop_mode, dual_audio, turn_off
 from antonino_tuttofare.settings_modules import wifi_menu, change_language, sync_time_and_place, system_info
 from antonino_tuttofare.utility.i18n import t
 
+from dotenv import load_dotenv
+# Upload environment variables from .env file
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 current_state = "MAIN_MENU"
 
@@ -76,12 +80,13 @@ def change_state(target_state: str) -> str:
     Args:
         target_state: The exact string identifier of the target state (e.g., MAIN_MENU, SETTINGS, WIFI_MENU, DESKTOP_MODE).
     """
+    global current_state
     if target_state not in VALID_STATES:
         logger.warning(f"AI tried to switch to an invalid state: {target_state}")
         return f"Error: State '{target_state}' does not exist. Choose from: {', '.join(VALID_STATES)}"
 
     logger.info(f"Tool executed: changing state to {target_state}")
-    main.current_state = target_state
+    current_state = target_state
     return f"State successfully changed to {target_state}"
 
 if __name__ == "__main__":
