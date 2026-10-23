@@ -2,9 +2,11 @@ import logging
 import threading
 
 from antonino_tuttofare.config import WAKEWORD_DIR_PATH
+from antonino_tuttofare.state import get_current_state
 from antonino_tuttofare.utility import audio_utils
 from antonino_tuttofare.services.ai_service import AIService
 from antonino_tuttofare.utility.i18n import t
+from antonino_tuttofare.utility.speech_utils import SpeechConverter
 
 logger = logging.getLogger(__name__)
 
@@ -13,14 +15,24 @@ _running = False
 _thread = None
 _stop_event = threading.Event()
 
-# Initialize the Gemini service instance for the background worker
-_ai_service = AIService()
-
-def start() -> None:
-    """Checks for microphone availability and starts the AI Agent in a background thread."""
+def check_hardware_availability() -> bool:
+    """Verifies if both microphone and speakers are available on the system."""
     if not audio_utils.check_microphone():
         logger.warning("No microphone found. AI Agent will not start.")
-        # TODO: Add graphic warning sign
+        # TODO Add graphic error message
+        return False
+
+    if not audio_utils.check_speakers():
+        logger.warning("No speakers/output devices found. AI Agent will not start.")
+        # TODO Add graphic error message
+        return False
+
+    return True
+
+
+def start() -> None:
+    """Validates hardware requirements and starts the AI Agent worker thread."""
+    if not check_hardware_availability():
         return
 
     global _running, _thread, _stop_event
@@ -43,11 +55,7 @@ def stop() -> None:
 
 
 def is_running() -> bool:
-    """Returns the current running status of the AI Agent.
-
-    Returns:
-        bool: True if the agent is running, False otherwise.
-    """
+    """Returns the current running status of the AI Agent."""
     return _running
 
 
@@ -55,8 +63,17 @@ def _ai_worker() -> None:
     """Main background worker loop that handles wake word detection,
     speech recording, and communication with the Gemini service.
     """
-    global _running
     logger.info("AI Agent background worker started.")
+
+    try:
+        ai_service = AIService()
+        speech_converter = SpeechConverter()
+        logger.info("AIService and SpeechConverter initialized successfully.")
+    except Exception as e:
+        logger.error(f"Failed to initialize AI Agent services: {e}", exc_info=True)
+        global _running
+        _running = False
+        return
 
     while _running:
         try:
@@ -84,21 +101,21 @@ def _ai_worker() -> None:
                 sample_rate=16000, channels=1, silence_limit=1.5, stop_event=_stop_event
             )
 
-            if speech_data is not None:
-                # Convert NumPy audio array into WAV-formatted bytes in memory
-                wav_bytes = audio_utils.audio_to_wav_bytes(
-                    speech_data, sample_rate=16000
-                )
+            # Transcribe recorded audio into text using the dedicated helper
+            wav_bytes = audio_utils.audio_to_wav_bytes(speech_data, sample_rate=16000)
+            user_text = speech_converter.audio_to_text(wav_bytes)
 
-                # Send the audio payload to Gemini using the new service method
-                logger.info("Sending recorded audio to Gemini service...")
-                response_text = _ai_service.ask_audio(wav_bytes)
-                logger.info(f"Gemini response received: {response_text}")
+            if user_text:
+                print(f"\nUser: {user_text}")
+
+                # Send the transcribed text to the AI service
+                logger.info("Sending transcribed text to AI service...")
+                response_text = ai_service._send_request(user_text)
+                logger.info(f"AI response received: {response_text}")
                 
-                # Output the assistant's reply directly to the console interface
+                # Output the assistant's reply and speak it directly
                 print(f"\nAntonino: {response_text}\n")
-                
-                # TODO: Pass the response text to the Text-to-Speech (TTS) engine
+                speech_converter.speak(response_text)
 
         except Exception as worker_err:
             logger.error(
@@ -109,9 +126,8 @@ def _ai_worker() -> None:
 
     logger.info("AI Agent background worker stopped.")
 
-
 def run_testing_console() -> None:
-    """Isolated interactive testing console to send text prompts directly to the Gemini service
+    """Isolated interactive testing console to send text prompts directly to the AI service
     without stopping the background worker loop.
     """
     print(f"\n--- {t('ai_agent')} [TEXT TESTING MODE] ---")
@@ -123,7 +139,9 @@ def run_testing_console() -> None:
 
     while True:
         try:
-            user_input = input("\n[VOICE SIMULATION TEST] > ").strip()
+            # Recupera dinamicamente lo stato corrente per mostrarlo nel prompt
+            current_state = get_current_state()
+            user_input = input(f"\n[{current_state}] [VOICE SIMULATION TEST] > ").strip()
             
             if user_input.lower() == "exit":
                 print("Exiting testing console. Returning to menu...")

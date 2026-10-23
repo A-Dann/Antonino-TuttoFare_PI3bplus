@@ -3,91 +3,92 @@
 Main entry point for the logic/CLI branch using a state machine structure.
 """
 
+import builtins
 import logging
-from antonino_tuttofare import menu, settings
-from antonino_tuttofare.menu_modules import desktop_mode, dual_audio, turn_off
-from antonino_tuttofare.settings_modules import wifi_menu, change_language, sync_time_and_place, system_info
-from antonino_tuttofare.utility.i18n import t
 
 from dotenv import load_dotenv
 # Upload environment variables from .env file
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-current_state = "MAIN_MENU"
+from antonino_tuttofare import menu, settings, state
+from antonino_tuttofare.menu_modules import desktop_mode, dual_audio, turn_off
+from antonino_tuttofare.settings_modules import wifi_menu, change_language, sync_time_and_place, system_info
+from antonino_tuttofare.utility.i18n import t
+from antonino_tuttofare.utility.input_utils import universal_input, StateChangedInterrupt
 
-VALID_STATES = [
-    "MAIN_MENU",
-    "DESKTOP_MODE",
-    "DUAL_AUDIO",
-    "SETTINGS",
-    "SYSTEM_INFO",
-    "WIFI_MENU",
-    "SYNC_TIME_AND_PLACE",
-    "CHANGE_LANGUAGE",
-    "TURN_OFF",
-    "EXIT"
-]
+logger = logging.getLogger(__name__)
+
+# State handler registry mapping states to their respective runner modules
+STATE_HANDLERS = {
+    # Main Menu & core modes
+    "MAIN_MENU": menu.run_cli_state,
+    "DESKTOP_MODE": desktop_mode.run_cli_state,
+    "DUAL_AUDIO": dual_audio.run_cli_state,
+    "SETTINGS": settings.run_cli_state,
+    "SYSTEM_INFO": system_info.run_cli_state,
+
+    # Settings & sub-states
+
+    # Wi-Fi Menu & Sub-states
+    "WIFI_MENU": wifi_menu.run_cli_state,
+    "WIFI_STATUS": wifi_menu.run_cli_state,
+    "WIFI_SCAN": wifi_menu.run_cli_state,
+    "WIFI_SAVED": wifi_menu.run_cli_state,
+    "WIFI_REMOVE": wifi_menu.run_cli_state,
+    
+    "SYNC_TIME_AND_PLACE": sync_time_and_place.run_cli_state,
+    "CHANGE_LANGUAGE": change_language.run_cli_state,
+    "TURN_OFF": turn_off.run_cli_state,
+}
+
+# Override builtins.input globally to make all menu inputs instantly reactive to voice commands
+builtins.input = universal_input
+
 
 def main():
+    """Main application loop managing state machine transitions reactively."""
     logger.info("Application started in CLI state-machine mode.")
-    global current_state
     selected_index = 0
     running = True
+    
     while running:
-        previous_state = current_state
+        active_state = state.get_current_state()
+        previous_state = active_state
+        state.state_changed_event.clear()
 
-        if current_state == "MAIN_MENU":
-            current_state, selected_index = menu.run_cli_state(selected_index)
-
-        elif current_state == "DESKTOP_MODE":
-            current_state, selected_index = desktop_mode.run_cli_state(selected_index)
-
-        elif current_state == "DUAL_AUDIO":
-            current_state, selected_index = dual_audio.run_cli_state(selected_index)
-
-        elif current_state == "SETTINGS":
-            current_state, selected_index = settings.run_cli_state(selected_index)
-        
-        elif current_state == "SYSTEM_INFO":
-            current_state, selected_index = system_info.run_cli_state(selected_index)
-
-        elif current_state == "WIFI_MENU":
-            current_state, selected_index = wifi_menu.run_cli_state(selected_index)
-            
-        elif current_state == "SYNC_TIME_AND_PLACE":
-            current_state, selected_index = sync_time_and_place.run_cli_state(selected_index)            
-
-        elif current_state == "CHANGE_LANGUAGE":
-            current_state, selected_index = change_language.run_cli_state(selected_index)
-
-        elif current_state == "TURN_OFF":
-            current_state, selected_index = turn_off.run_cli_state(selected_index)
-
-        elif current_state == "EXIT":
+        if active_state == "EXIT":
             logger.info("Exiting application.")
             running = False
+            break
 
-        if current_state != previous_state:
+        handler = STATE_HANDLERS.get(active_state)
+        if handler:
+            try:
+                # Execute the current state handler; any internal input() call is now interruptible
+                next_state, selected_index = handler(selected_index)
+                state.set_current_state(next_state)
+            except StateChangedInterrupt:
+                # Instantly abort the current menu handler when an asynchronous voice command changes the state
+                logger.info("Menu interrupted by asynchronous voice state change.")
+                selected_index = 0
+                continue
+        else:
+            logger.error(f"No handler found for state: {active_state}")
+            state.set_current_state("MAIN_MENU")
+
+        if state.get_current_state() != previous_state:
             selected_index = 0
 
-def get_current_state():
-    return current_state
 
 def change_state(target_state: str) -> str:
-    """Changes the application navigation state.
-    
-    Args:
-        target_state: The exact string identifier of the target state (e.g., MAIN_MENU, SETTINGS, WIFI_MENU, DESKTOP_MODE).
-    """
-    global current_state
-    if target_state not in VALID_STATES:
-        logger.warning(f"AI tried to switch to an invalid state: {target_state}")
-        return f"Error: State '{target_state}' does not exist. Choose from: {', '.join(VALID_STATES)}"
+    """Wrapper function to change state for external tool compatibility."""
+    return state.set_current_state(target_state)
 
-    logger.info(f"Tool executed: changing state to {target_state}")
-    current_state = target_state
-    return f"State successfully changed to {target_state}"
+
+def get_current_state() -> str:
+    """Wrapper function to get current state."""
+    return state.get_current_state()
+
 
 if __name__ == "__main__":
     main()

@@ -20,17 +20,37 @@ def check_microphone() -> bool:
         bool: True if at least one microphone is found, False otherwise.
     """
     try:
-        # Query all audio devices registered in the operating system
         devices = sd.query_devices()
+        has_mic = any(d.get("max_input_channels", 0) > 0 for d in devices)
 
-        # Filter devices keeping only those with at least one input channel
-        input_devices = [d for d in devices if d["max_input_channels"] > 0]
-
-        if len(input_devices) > 0:
-            logger.info(f"Detected {len(input_devices)} available microphones.")
+        if has_mic:
+            logger.info("Microphone detected.")
             return True
         else:
             logger.warning("No microphone detected on the system.")
+            return False
+
+    except Exception as e:
+        logger.error(f"Error occurred while checking audio devices: {e}")
+        return False
+
+
+def check_speakers() -> bool:
+    """Checks for the presence of at least one available audio output device (speaker)
+    on the system.
+
+    Returns:
+        bool: True if at least one speaker is found, False otherwise.
+    """
+    try:
+        devices = sd.query_devices()
+        has_speaker = any(d.get("max_output_channels", 0) > 0 for d in devices)
+
+        if has_speaker:
+            logger.info("Speakers detected.")
+            return True
+        else:
+            logger.warning("No speakers detected on the system.")
             return False
 
     except Exception as e:
@@ -83,7 +103,7 @@ def listen_for_key_word(
                     logger.info(f"Score rilevato: {score:.4f}")
                     
                 # Check if the confidence score exceeds the detection threshold
-                if score > 0.3:
+                if score > 0.2:
                     logger.info(
                         f"Wake word '{model_name}' detected! Score: {score:.2f}"
                     )
