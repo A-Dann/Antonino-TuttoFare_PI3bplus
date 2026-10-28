@@ -1,3 +1,7 @@
+import logging
+
+log = logging.getLogger(__name__)
+
 class EventBus():
     def __init__(self):
         self._subscribers = {}
@@ -13,10 +17,8 @@ class EventBus():
         if event_type not in self._subscribers:
             return
 
-        for callback in self._subscribers[event_type]:
+        for callback in list(self._subscribers[event_type]):
             try:
                 callback(data)
             except Exception as e:
-                print(f"Error in subscriber for {event_type}: {e}")
-
-event_bus = EventBus()
+                log.error(f"Error in subscriber for {event_type}: {e}")

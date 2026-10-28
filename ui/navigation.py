@@ -1,5 +1,6 @@
-from ui.screens import MenuScreen
+import logging
 
+log = logging.getLogger(__name__)
 
 _SCREEN_REGISTRY = {}
 _ACTIONS_REGISTRY = {}
@@ -16,7 +17,7 @@ def get_active_screen(state_manager):
 def execute_action(event_bus, state_manager, action_id: str):
     current_key = state_manager.get("active_screen")
     actions = _ACTIONS_REGISTRY.get(current_key, {})
-    
+
     action = actions.get(action_id)
     if action:
         action(event_bus, state_manager)

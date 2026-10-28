@@ -1,36 +1,38 @@
 import importlib
-import os
+import logging
+import pkgutil
+import plugins as plugins_pkg
+
+log = logging.getLogger(__name__)
 
 class PluginManager():
-    def __init__(self, event_bus, state_manager):
-        self._event_bus = event_bus
-        self._state_manager = state_manager
-        self._plugins_dir = "plugins"
+    def __init__(self, ctx):
+        self._ctx = ctx
         self._plugins = {}
 
-        self.load_plugins()
-        self.setup_plugins()
+        self.discover()
+        self.start_all()
 
-    def load_plugins(self):
-        # Scan the plugins directory and load python files
-        for filename in os.listdir(self._plugins_dir):
-            if filename.endswith(".py") and not filename.startswith("__init__"):
-                plugin_name = filename[:-3]
-                self.add_plugin(plugin_name)
+    def discover(self):
+        """Discover all available plugins in the plugins/ package."""
+        for info in pkgutil.iter_modules(plugins_pkg.__path__):
+            module_name = f"{plugins_pkg.__name__}.{info.name}"
+            try:
+                module = importlib.import_module(module_name)
                 
-    def add_plugin(self, key: str):
-        # Dynamically import the plugin module
-        module_path = f"plugins.{key}"
-        plugin_module = importlib.import_module(module_path)
+                if not hasattr(module, "init") or not callable(module.init):
+                    raise TypeError(f"Plugin '{info.name}' does not define a valid init(ctx) function.")
+                
+                self._plugins[info.name] = module
+                log.info(f"Discovered plugin: {info.name}")
+            except Exception as e:
+                log.error(f"Error discovering plugin {info.name}: {e}")
 
-        # Checks if the plugin implements plugins_interface
-        if not hasattr(plugin_module, "init") or not callable(plugin_module.init):
-            raise TypeError(f"{key} plugin does not respect the plugin_interface contract.")
-        
-        self._plugins[key] = plugin_module
-
-    def setup_plugins(self):
-        # Initialize loaded plugins by passing core dependencies
-        for plugin_module in self._plugins.values():
-            if hasattr(plugin_module, "init"):
-                plugin_module.init(self._event_bus, self._state_manager)
+    def start_all(self):
+        """Initialize and start all discovered plugins."""
+        for name, module in self._plugins.items():
+            try:
+                log.info(f"Starting plugin: {name}")
+                module.init(self._ctx)
+            except Exception as e:
+                log.error(f"Error starting plugin {name}: {e}")

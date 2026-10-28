@@ -1,16 +1,15 @@
 from dataclasses import dataclass
 from typing import Optional
 
-
 @dataclass
 class MenuItem:
-    id : str
-    label : str
-    icon : Optional[str] = None
+    id: str
+    label: str
+    icon: Optional[str] = None
 
 @dataclass
 class MenuScreen:
     key: str
     title: str
     options: list[MenuItem]
-    selected_option: Optional[int] = 0
+    selected_option: int = 0

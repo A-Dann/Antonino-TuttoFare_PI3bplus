@@ -1,26 +1,22 @@
 import time
-from core.event_bus import event_bus
-from core.state_manager import state_manager
+from core.event_bus import EventBus
+from core.state_manager import StateManager
 from core.plugin_manager import PluginManager
 
+class AppContext:
+    def __init__(self, event_bus, state_manager):
+        self.event_bus = event_bus
+        self.state_manager = state_manager
+        self.plugin_manager = PluginManager(self)
+
 def main():
-    print("Starting system...")
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
     
-    # Inizializzazione del plugin manager
-    plugin_manager = PluginManager(event_bus, state_manager)
+    ctx = AppContext(event_bus, state_manager)
     
-    # Imposta lo stato iniziale dello schermo attivo
-    state_manager.set("active_screen", "Main")
-    
-    print("System started successfully.\n")
-    
-    try:
-        # Avvia il renderer CLI dello schermo
-        render_screen(event_bus, state_manager)
-            
-    except KeyboardInterrupt:
-        print("\nShutting down system...")
-        print("System stopped cleanly.")
+    # 3. Avvio dei plugin e loop principale (lo completiamo al prossimo step)
+    print("Sistema avviato.")
 
 if __name__ == "__main__":
     main()
