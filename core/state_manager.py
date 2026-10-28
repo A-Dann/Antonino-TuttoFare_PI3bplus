@@ -4,7 +4,8 @@ class StateManager():
     def __init__(self, event_bus):
         self._event_bus = event_bus
         self._state = {
-            "active_menu": "Main Menu",
+            "renderer_engine": None,
+            "active_screen": None,
             "ai_agent_running": False,
             "wifi_connected" : False,
             "microphone_connected": False,
