@@ -1,7 +1,13 @@
-from typing import Protocol, Any
+# core/interfaces/plugin_interface.py
+from abc import ABC, abstractmethod
 
-class PluginInterface(Protocol):
-    """Standard contract for each plugin."""
-    
-    def init(self, event_bus: Any, state_manager: Any) -> None:
-        """Initializes the plugin with the dipendencies."""
+
+class Plugin(ABC):
+    """Base class every plugin must extend."""
+
+    @abstractmethod
+    def start(self, ctx) -> None:
+        """Called once at startup."""
+
+    def stop(self) -> None:
+        """Optional: called at shutdown."""

@@ -1,23 +1,26 @@
 import logging
+import threading
 
 log = logging.getLogger(__name__)
 
-class EventBus():
+class EventBus:
     def __init__(self):
         self._subscribers = {}
+        self._lock = threading.Lock()
 
     def subscribe(self, event_type: str, callback):
-        if event_type not in self._subscribers:
-            self._subscribers[event_type] = []
+        with self._lock:
+            if event_type not in self._subscribers:
+                self._subscribers[event_type] = []
 
-        if callback not in self._subscribers[event_type]:
-            self._subscribers[event_type].append(callback)
+            if callback not in self._subscribers[event_type]:
+                self._subscribers[event_type].append(callback)
 
     def publish(self, event_type: str, data=None):
-        if event_type not in self._subscribers:
-            return
+        with self._lock:
+            subscribers = list(self._subscribers.get(event_type, []))
 
-        for callback in list(self._subscribers[event_type]):
+        for callback in subscribers:
             try:
                 callback(data)
             except Exception as e:
