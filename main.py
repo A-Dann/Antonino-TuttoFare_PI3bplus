@@ -1,11 +1,12 @@
 import logging
-import time
 
-from core.events import Events
-from core.state_keys import StateKeys
 from core.event_bus import EventBus
-from core.state_manager import StateManager
+from core.events import Events
+from core.input_actions import InputActions
+from core.input_event import InputEvent
 from core.plugin_manager import PluginManager
+from core.state_keys import StateKeys
+from core.state_manager import StateManager
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,6 +18,22 @@ class AppContext:
         self.plugin_manager = None
 
 
+def post_test_inputs(event_bus: EventBus) -> None:
+    """Temporary: simulates user input until hal/inputs.py exists."""
+    sequence = [
+        InputActions.DOWN,
+        InputActions.SELECT,   # Dual Audio
+        InputActions.DOWN,
+        InputActions.DOWN,
+        InputActions.SELECT,   # Exit
+    ]
+    for action in sequence:
+        event_bus.post(
+            Events.INPUT_ACTION,
+            InputEvent(input_action=action, source="test"),
+        )
+
+
 def main():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
@@ -26,15 +43,15 @@ def main():
     ctx.plugin_manager.discover()
     ctx.plugin_manager.start_all()
 
-    # prova provvisoria, da togliere quando esisterà hal/inputs.py
-    event_bus.publish(Events.INPUT_ACTION, {"action": "down"})
-    event_bus.publish(Events.INPUT_ACTION, {"action": "select"})
-    
+    post_test_inputs(event_bus)
+
     try:
         while state_manager.get(StateKeys.ACTIVE_SCREEN) is not None:
-            time.sleep(0.1)  # provvisorio: qui andrà il main loop vero
+            event_bus.dispatch_next_event()
     except KeyboardInterrupt:
         pass
+    except Exception:
+        logging.exception("Unexpected error in main loop")
     finally:
         ctx.plugin_manager.stop_all()
 

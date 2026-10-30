@@ -2,6 +2,7 @@
 import logging
 
 from core.events import Events
+from core.input_actions import InputActions
 from core.interfaces.plugin_interface import Plugin
 from core.state_keys import StateKeys
 from ui.navigation import execute_action, get_active_screen, register_screen
@@ -26,15 +27,15 @@ class MenuPlugin(Plugin):
         if not isinstance(screen, MenuScreen):
             return  # Not a menu screen, ignore
 
-        action = event.get("action")
-        if action == "up":
+        action = event.input_action
+        if action == InputActions.UP:
             self._move(screen, -1)
-        elif action == "down":
+        elif action == InputActions.DOWN:
             self._move(screen, 1)
-        elif action == "select":
+        elif action == InputActions.SELECT:
             selected_option = screen.options[screen.selected_option]
             execute_action(self._ctx.event_bus, self._ctx.state_manager, selected_option.id)
 
     def _move(self, screen: MenuScreen, step: int) -> None:
         screen.selected_option = (screen.selected_option + step) % len(screen.options)
-        self._ctx.event_bus.publish(Events.UI_UPDATE, {"screen": screen.key})
+        self._ctx.event_bus.post(Events.UI_UPDATE, {"screen": screen.key})
