@@ -1,5 +1,6 @@
 import logging
 
+from core.context import AppContext
 from core.event_bus import EventBus
 from core.events import Events
 from core.input_actions import InputActions
@@ -7,16 +8,9 @@ from core.input_event import InputEvent
 from core.plugin_manager import PluginManager
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
+from ui.navigation import Navigator
 
 logging.basicConfig(level=logging.INFO)
-
-
-class AppContext:
-    def __init__(self, event_bus, state_manager):
-        self.event_bus = event_bus
-        self.state_manager = state_manager
-        self.plugin_manager = None
-
 
 def post_test_inputs(event_bus: EventBus) -> None:
     """Temporary: simulates user input until hal/inputs.py exists."""
@@ -37,8 +31,9 @@ def post_test_inputs(event_bus: EventBus) -> None:
 def main():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
-    ctx = AppContext(event_bus, state_manager)
-
+    navigator = Navigator(state_manager)
+    ctx = AppContext(event_bus, state_manager, navigator)
+    
     ctx.plugin_manager = PluginManager(ctx)
     ctx.plugin_manager.discover()
     ctx.plugin_manager.start_all()

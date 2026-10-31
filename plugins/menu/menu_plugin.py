@@ -1,29 +1,33 @@
 # plugins/menu/menu_plugin.py
+from __future__ import annotations
 import logging
+from typing import TYPE_CHECKING
 
 from core.events import Events
 from core.input_actions import InputActions
 from core.interfaces.plugin_interface import Plugin
 from core.state_keys import StateKeys
-from ui.navigation import execute_action, get_active_screen, register_screen
 from ui.screens import MenuScreen
 
 from .main_menu import main_screen, main_actions
 
+if TYPE_CHECKING:
+    from core.context import AppContext
+
 log = logging.getLogger(__name__)
 
 class MenuPlugin(Plugin):
-    def start(self, ctx) -> None:
+    def start(self, ctx: AppContext) -> None:
         log.info("Starting MenuPlugin")
         self._ctx = ctx
 
         # Register the main menu screen and actions
-        register_screen(main_screen, main_actions)
+        self._ctx.navigator.register_screen(main_screen, main_actions)
         ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
         ctx.state_manager.set(StateKeys.ACTIVE_SCREEN, main_screen.key)
 
     def _handle_input_action(self, event) -> None:
-        screen = get_active_screen(self._ctx.state_manager)
+        screen = self._ctx.navigator.get_active_screen()
         if not isinstance(screen, MenuScreen):
             return  # Not a menu screen, ignore
 
@@ -34,7 +38,7 @@ class MenuPlugin(Plugin):
             self._move(screen, 1)
         elif action == InputActions.SELECT:
             selected_option = screen.options[screen.selected_option]
-            execute_action(self._ctx.event_bus, self._ctx.state_manager, selected_option.id)
+            self._ctx.navigator.execute_action(self._ctx, selected_option.id)
 
     def _move(self, screen: MenuScreen, step: int) -> None:
         screen.selected_option = (screen.selected_option + step) % len(screen.options)

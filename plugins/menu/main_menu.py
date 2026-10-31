@@ -1,21 +1,22 @@
 import logging
 
+from core.state_keys import StateKeys
 from ui.screens import MenuItem, MenuScreen
 
 log = logging.getLogger(__name__)
 
-def _action_desktop_mode(event_bus, state_manager):
+def _action_desktop_mode(ctx):
     log.info("Desktop Mode selected")
 
-def _action_dual_audio(event_bus, state_manager):
+def _action_dual_audio(ctx):
     log.info("Dual Audio selected")
 
-def _action_settings(event_bus, state_manager):
+def _action_settings(ctx):
     log.info("Settings selected")
 
-def _action_exit(event_bus, state_manager):
+def _action_exit(ctx):
     log.info("Turning off application")
-    state_manager.set("active_screen", None)
+    ctx.state_manager.set(StateKeys.ACTIVE_SCREEN, None)
 
 main_screen = MenuScreen(
     key="Main",

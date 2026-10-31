@@ -1,4 +1,6 @@
 # core/plugin_manager.py
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import importlib
 import inspect
 import logging
@@ -7,13 +9,16 @@ from pathlib import Path
 import plugins as plugins_pkg
 from core.interfaces.plugin_interface import Plugin
 
+if TYPE_CHECKING:
+    from core.context import AppContext
+
 log = logging.getLogger(__name__)
 
 PLUGIN_FILE_PATTERN = "*_plugin.py"
 
 
 class PluginManager:
-    def __init__(self, ctx):
+    def __init__(self, ctx: AppContext):
         self._ctx = ctx
         self._plugins: dict[str, Plugin] = {}
         self._started: list[str] = []
@@ -70,10 +75,11 @@ class PluginManager:
         """Initialize and start all discovered plugins."""
         for name, module in self._plugins.items():
             try:
-                log.info(f"Starting plugin: {name}")
+                log.info("Starting plugin: %s", name)
                 module.start(self._ctx)
-            except Exception as e:
-                log.error(f"Error starting plugin {name}: {e}")
+                self._started.append(name)
+            except Exception:
+                log.exception("Error starting plugin %s", name)
 
     def stop_all(self) -> None:
         for plugin_id in reversed(self._started):
