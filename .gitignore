@@ -15,5 +15,17 @@ build/
 
 # Sensitive data & Environment files
 .env
-data/
+/data/
 _Progetto Audio/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store

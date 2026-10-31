@@ -1,3 +1,7 @@
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["core*", "hal*", "ui*", "plugins*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
