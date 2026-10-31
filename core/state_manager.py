@@ -25,4 +25,4 @@ class StateManager():
             return
         
         self._state[key] = value
-        self._event_bus.publish(Events.STATE_CHANGES, {"key": key, "value": value})
+        self._event_bus.publish(Events.STATE_CHANGED, {"key": key, "value": value})
