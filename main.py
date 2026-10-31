@@ -28,16 +28,16 @@ def post_test_inputs(event_bus: EventBus) -> None:
         )
 
 
-def main():
+def main()-> None:
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
     navigator = Navigator(state_manager)
     ctx = AppContext(event_bus, state_manager, navigator)
-    
+
     ctx.plugin_manager = PluginManager(ctx)
     ctx.plugin_manager.discover()
     ctx.plugin_manager.start_all()
-
+    
     post_test_inputs(event_bus)
 
     try:
