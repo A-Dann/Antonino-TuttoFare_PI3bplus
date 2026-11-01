@@ -30,6 +30,17 @@ class Navigator:
         current_key = self._state_manager.get(StateKeys.ACTIVE_SCREEN)
         return self._screens.get(current_key)
 
+    def navigate_to(self, screen_key: str) -> None:
+        if screen_key not in self._screens:
+            log.warning("Attempted to navigate to unregistered screen: %s", screen_key)
+            return
+        if self._state_manager.get(StateKeys.ACTIVE_SCREEN) == screen_key:
+            log.debug("Already on screen: %s", screen_key)
+            return
+        
+        self._state_manager.set(StateKeys.ACTIVE_SCREEN, screen_key)
+        self._state_manager.set(StateKeys.SELECTED_INDEX, 0)  # Reset selected index when navigating to a new screen
+
     def execute_action(self, ctx: AppContext, action_id: str) -> None:
         current_key = self._state_manager.get(StateKeys.ACTIVE_SCREEN)
         actions = self._actions.get(current_key, {})

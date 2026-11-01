@@ -27,7 +27,6 @@ main_screen = MenuScreen(
         MenuItem(id="settings", label="Settings"),
         MenuItem(id="exit", label="Exit")
     ],
-    selected_option=0
 )
 
 main_actions = {

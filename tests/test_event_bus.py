@@ -46,7 +46,7 @@ def test_subscriber_does_not_receive_other_event_types():
     received = []
     bus.subscribe(Events.INPUT_ACTION, received.append)
 
-    bus.publish(Events.UI_UPDATE, "other")
+    bus.publish(Events.STATE_CHANGED, "other")
 
     assert received == []
 

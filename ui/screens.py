@@ -12,4 +12,3 @@ class MenuScreen:
     key: str
     title: str
     options: list[MenuItem]
-    selected_option: int = 0

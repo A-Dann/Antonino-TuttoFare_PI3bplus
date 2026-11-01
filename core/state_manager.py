@@ -10,6 +10,7 @@ class StateManager():
         self._event_bus = event_bus
         self._state = {
             StateKeys.ACTIVE_SCREEN: None,
+            StateKeys.SELECTED_INDEX: 0,
             StateKeys.AI_AGENT_RUNNING: False,
             StateKeys.WIFI_CONNECTED: False,
             StateKeys.MICROPHONE_CONNECTED: False,

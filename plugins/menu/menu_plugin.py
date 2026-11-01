@@ -24,12 +24,14 @@ class MenuPlugin(Plugin):
         # Register the main menu screen and actions
         self._ctx.navigator.register_screen(main_screen, main_actions)
         ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
-        ctx.state_manager.set(StateKeys.ACTIVE_SCREEN, main_screen.key)
+        ctx.navigator.navigate_to(main_screen.key)
 
     def _handle_input_action(self, event) -> None:
         screen = self._ctx.navigator.get_active_screen()
         if not isinstance(screen, MenuScreen):
             return  # Not a menu screen, ignore
+        if len(screen.options) == 0:
+            return  # No options to move through
 
         action = event.input_action
         if action == InputActions.UP:
@@ -37,9 +39,9 @@ class MenuPlugin(Plugin):
         elif action == InputActions.DOWN:
             self._move(screen, 1)
         elif action == InputActions.SELECT:
-            selected_option = screen.options[screen.selected_option]
+            selected_option = screen.options[self._ctx.state_manager.get(StateKeys.SELECTED_INDEX)]
             self._ctx.navigator.execute_action(self._ctx, selected_option.id)
 
     def _move(self, screen: MenuScreen, step: int) -> None:
-        screen.selected_option = (screen.selected_option + step) % len(screen.options)
-        self._ctx.event_bus.post(Events.UI_UPDATE, {"screen": screen.key})
+        selected_index = (self._ctx.state_manager.get(StateKeys.SELECTED_INDEX) + step) % len(screen.options)
+        self._ctx.state_manager.set(StateKeys.SELECTED_INDEX, selected_index)
