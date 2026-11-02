@@ -1,7 +1,9 @@
 # System Architecture - Standalone Raspberry Pi Project
 
-> Status: core, plugin system, navigator and tests are implemented.
-> Input devices, the renderer and the display backend are planned.
+> Status: core, plugin system, navigator, renderer, console display and the
+> scripted (dummy) input device are implemented and tested.
+> Planned: keyboard input device, DSI display backend, touch strip input,
+> BACK / navigation history, explicit quit mechanism.
 
 ## 1. Component Diagram
 
@@ -15,7 +17,7 @@ graph TD
 
     subgraph HAL [hal - Hardware Abstraction Layer]
         InputDevice[Input devices - own thread]
-        HalDisplay[Display backend]
+        HalDisplay[Display backends - ConsoleDisplay, DSI planned]
     end
 
     subgraph Core [core]
@@ -27,7 +29,7 @@ graph TD
 
     subgraph UI [ui]
         Navigator[Navigator - screens and actions]
-        Renderer[Renderer]
+        Renderer[Renderer - redraw flag + draw functions]
     end
 
     subgraph Plugins [plugins]
@@ -46,15 +48,22 @@ graph TD
     Context --- StateMgr
     Context --- Navigator
     PluginMgr -->|start ctx| Plugins
-    Plugins -->|post / set| EventBus
-    Plugins --> StateMgr
+    Plugins -->|set state| StateMgr
     Plugins --> Navigator
+    StateMgr -->|publish STATE_CHANGED| EventBus
     EventBus -->|notify| Renderer
-    Renderer --> HalDisplay
+    Renderer -->|reads| StateMgr
+    Renderer -->|reads| Navigator
+    Main -->|render_if_needed each loop turn| Renderer
+    Renderer -->|show_menu| HalDisplay
     HalDisplay --> Display
 ```
 
 ## 2. Input Sequence
+
+The UI is a function of the state: plugins only change the state, the
+renderer decides what to draw. Several changes in one loop turn produce a
+single redraw.
 
 ```mermaid
 sequenceDiagram
@@ -64,7 +73,7 @@ sequenceDiagram
     participant Bus as EventBus
     participant Main as main loop
     participant Menu as MenuPlugin
-    participant Nav as Navigator
+    participant State as StateManager
     participant Render as Renderer
     participant Disp as Display
 
@@ -73,12 +82,13 @@ sequenceDiagram
     Note over Bus: queued, thread-safe
     Main->>Bus: dispatch_next_event()
     Bus->>Menu: publish(INPUT_ACTION)
-    Menu->>Nav: get_active_screen()
-    Menu->>Menu: move selection
-    Menu->>Bus: post(UI_UPDATE)
-    Main->>Bus: dispatch_next_event()
-    Bus->>Render: publish(UI_UPDATE)
-    Render->>Disp: draw screen
+    Menu->>State: set(SELECTED_INDEX, new index)
+    State->>Bus: publish(STATE_CHANGED)
+    Bus->>Render: STATE_CHANGED
+    Note over Render: only raises the "needs redraw" flag
+    Main->>Render: render_if_needed()
+    Render->>State: read active screen and index
+    Render->>Disp: show_menu(title, labels, index)
     Disp->>User: refreshed display
 ```
 
@@ -90,11 +100,26 @@ sequenceDiagram
 - **post vs publish**: `post` queues an event (any thread). `publish`
   delivers immediately and is called by the main thread only
   (inside `dispatch_next_event`, or by `StateManager`).
+- **State is the single source of truth**: the active screen and the
+  selected index live in `StateManager`. Screens are plain data and hold
+  no selection. The state is changed from the main thread only.
+- **Navigation**: screens are changed only through `Navigator.navigate_to()`
+  (it resets the selection and ignores the screen that is already active).
+- **Rendering**: the `Renderer` never draws from an event handler. It only
+  raises a flag; the main loop calls `render_if_needed()` once per turn.
+  The display is used from the main thread only.
+- **Displays are passive**: a `DisplayInterface` implementation draws what
+  it is told. `show_menu` replaces whatever was on screen, so the caller
+  never has to clear first. It knows nothing about screens or plugins.
 - **Dependencies point one way**: `plugins` -> `ui`, `core`;
   `ui` and `hal` -> `core`; `core` imports nothing from the others
   at runtime (type-only imports go under `TYPE_CHECKING`).
+  `hal` never imports `ui`.
 - **Plugins** live in `plugins/<name>/<name>_plugin.py`, extend `Plugin`
   and talk to the rest only through `ctx` (events and state), never by
   importing each other.
 - **Wiring**: `main.py` is the only place that creates the services and
-  passes them down.
+  passes them down. The renderer must be started (subscribed) before the
+  plugins, because `StateManager.set` publishes synchronously.
+- **Logging**: with the console display, logs go to a file, otherwise they
+  would be mixed with the menu on the terminal.
