@@ -41,15 +41,19 @@ class Renderer:
         
         if active_screen is None:
             return
-        screen_type = type(active_screen)
 
-        if screen_type not in self._draw_functions:
-            log.warning("No render function registered for screen type: %s", screen_type)
+        draw_function = None
+        for (type_function, render_function) in self._draw_functions.items():
+            if isinstance(active_screen, type_function):
+                draw_function = render_function
+                break
+
+        if draw_function is None:
+            log.warning("No render function registered for screen type: %s", type(active_screen))
             return
 
         selected_index = self._state_manager.get(StateKeys.SELECTED_INDEX)
-        render_function = self._draw_functions[screen_type]
-        render_function(active_screen, selected_index)
+        draw_function(active_screen, selected_index)
 
     def _draw_menu(self, screen, selected_index: int) -> None:
         options = [option.label for option in screen.options]

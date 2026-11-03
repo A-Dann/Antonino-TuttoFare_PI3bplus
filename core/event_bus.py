@@ -39,4 +39,4 @@ class EventBus:
             try:
                 callback(data)
             except Exception as e:
-                log.error(f"Error in subscriber for {event_type}: {e}")
+                log.exception(f"Error in subscriber for {event_type}: {e}")

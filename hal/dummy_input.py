@@ -1,4 +1,3 @@
-# hal/scripted_input.py
 from __future__ import annotations
 
 import threading
@@ -12,14 +11,16 @@ if TYPE_CHECKING:
 
 
 class DummyInput(InputInterface):
-    name = "Dummy"
-
     def __init__(self, actions: list[InputActions], delay: float = 0.1) -> None:
         self._actions = actions
         self._delay = delay
         self._thread = None
         self._stop_signal = threading.Event()
 
+    @property
+    def name(self):
+        return "Dummy"
+    
     def start(self, emit: Callable[[InputEvent], None]) -> None:
         self._thread = threading.Thread(target=self._emit_actions, args=(emit,), daemon=True)
         self._thread.start()

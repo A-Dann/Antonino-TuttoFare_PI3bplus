@@ -21,7 +21,7 @@ class InputInterface(ABC):
         """Name of the device, used as the source of its events."""
     
     @abstractmethod
-    def start(self, emit: Callable[[InputEvent, None]]) -> None:
+    def start(self, emit: Callable[[InputEvent], None]) -> None:
         """Start the device; call emit(event) for every input."""
 
     @abstractmethod
