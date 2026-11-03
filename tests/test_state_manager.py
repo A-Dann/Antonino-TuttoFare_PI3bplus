@@ -20,7 +20,7 @@ def test_initial_selected_index_is_zero():
     assert state_manager.get(StateKeys.SELECTED_INDEX) == 0
 
 
-def test_initial_flags_are_false():
+def test_initial_flags_are_correct():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
 
@@ -29,6 +29,7 @@ def test_initial_flags_are_false():
     assert state_manager.get(StateKeys.MICROPHONE_CONNECTED) is False
     assert state_manager.get(StateKeys.SPEAKER_CONNECTED) is False
     assert state_manager.get(StateKeys.WIFI_CONNECTED) is False
+    assert state_manager.get(StateKeys.RUNNING) is True
 
 
 def test_get_returns_none_for_unknown_key():

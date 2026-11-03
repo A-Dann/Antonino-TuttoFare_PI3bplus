@@ -16,6 +16,7 @@ class StateManager():
             StateKeys.MICROPHONE_CONNECTED: False,
             StateKeys.SPEAKER_CONNECTED: False,
             StateKeys.ANTENNA_CONNECTED: False,
+            StateKeys.RUNNING: True,
         }
 
     def get(self, key):

@@ -16,7 +16,7 @@ def _action_settings(ctx):
 
 def _action_exit(ctx):
     log.info("Turning off application")
-    ctx.state_manager.set(StateKeys.ACTIVE_SCREEN, None)
+    ctx.state_manager.set(StateKeys.RUNNING, False)
 
 main_screen = MenuScreen(
     key="Main",

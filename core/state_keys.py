@@ -8,3 +8,4 @@ class StateKeys(str, Enum):
     MICROPHONE_CONNECTED = "microphone_connected"
     SPEAKER_CONNECTED = "speaker_connected"
     ANTENNA_CONNECTED = "antenna_connected"
+    RUNNING = "running"
