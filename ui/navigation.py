@@ -37,9 +37,9 @@ class Navigator:
         if self._state_manager.get(StateKeys.ACTIVE_SCREEN) == screen_key:
             log.debug("Already on screen: %s", screen_key)
             return
-        
-        self._state_manager.set(StateKeys.ACTIVE_SCREEN, screen_key)
+
         self._state_manager.set(StateKeys.SELECTED_INDEX, 0)  # Reset selected index when navigating to a new screen
+        self._state_manager.set(StateKeys.ACTIVE_SCREEN, screen_key)
 
     def execute_action(self, ctx: AppContext, action_id: str) -> None:
         current_key = self._state_manager.get(StateKeys.ACTIVE_SCREEN)

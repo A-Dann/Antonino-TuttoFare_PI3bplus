@@ -150,6 +150,26 @@ def test_navigate_to_logs_debug_for_same_screen(caplog):
     assert received_events == []  # No state change events should be published
 
 
+def test_navigate_subscriber_does_not_see_incoherent_state():
+    navigator, state_manager, event_bus = make_navigator()
+    navigator.register_screen(make_screen("A"))
+    navigator.navigate_to("A")
+    state_manager.set(StateKeys.SELECTED_INDEX, 2)
+
+    snapshots = []
+    def _screen_state_snapshot(event):
+        active_screen_key = state_manager.get(StateKeys.ACTIVE_SCREEN)
+        active_screen_index = state_manager.get(StateKeys.SELECTED_INDEX)
+        snapshots.append((active_screen_key, active_screen_index))
+
+    event_bus.subscribe(Events.STATE_CHANGED, _screen_state_snapshot)
+    navigator.register_screen(make_screen("B"))
+    navigator.navigate_to("B")
+
+    assert snapshots
+    assert ("B", 2) not in snapshots
+
+
 # --- execute_action --------------------------------------------------------
 
 def test_execute_action_runs_the_registered_action():
