@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import evdev
+from collections.abc import Callable
 
+from core.input_event import InputEvent
 from core.input_actions import InputActions
 from hal.input_interface import InputInterface
 
@@ -33,24 +35,33 @@ class KeyboardInput(InputInterface):
     def start(self, emit):
         pass
 
-    def translate_event_to_action(self, input_event: evdev.InputEvent) -> InputActions | None:
-        if input_event.type != evdev.ecodes.EV_KEY:
+    def translate_event_to_action(self, raw_event: evdev.InputEvent) -> InputActions | None:
+        if raw_event.type != evdev.ecodes.EV_KEY:
             return None
 
-        event_key = input_event.code
+        event_key = raw_event.code
         if event_key not in self.keys_mapping:
             return  None
 
         input_action = self.keys_mapping.get(event_key)
 
-        if input_event.value == KEY_RELEASED:
+        if raw_event.value == KEY_RELEASED:
             return None
 
-        if input_event.value == KEY_REPEATED and input_action not in self.can_be_repeated:
+        if raw_event.value == KEY_REPEATED and input_action not in self.can_be_repeated:
             return None
 
         return input_action
 
+    def emit_action(self, raw_event: evdev.InputEvent, emit: Callable[[InputEvent], None]) -> None:
+        input_action = self.translate_event_to_action(raw_event)
+
+        if not input_action:
+            return
+
+        input_event = InputEvent(input_action, self.name)
+        emit(input_event)
+        
 
     def stop(self):
         pass
