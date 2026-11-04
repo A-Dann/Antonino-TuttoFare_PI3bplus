@@ -30,7 +30,7 @@ class DummyInput(InputInterface):
         for action in self._actions:
             if self._stop_signal.is_set():
                 return
-            event = InputEvent(input_action=action, source=self.name)
+            event = InputEvent(action=action, source=self.name)
             emit(event)
             self._stop_signal.wait(self._delay)
 

@@ -34,7 +34,7 @@ class MenuPlugin(Plugin):
         if len(screen.options) == 0:
             return  # No options to move through
 
-        action = event.input_action
+        action = event.action
         if action == InputActions.UP:
             self._move(screen, -1)
         elif action == InputActions.DOWN:

@@ -30,7 +30,7 @@ def test_start_emits_every_action_in_order():
     assert done.wait(timeout=2)
     device.stop()
 
-    assert [event.input_action for event in events] == actions
+    assert [event.action for event in events] == actions
 
 
 def test_start_emits_input_events_with_the_device_name_as_source():
