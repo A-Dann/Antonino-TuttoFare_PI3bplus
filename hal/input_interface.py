@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from core.input_event import InputEvent
@@ -19,7 +20,7 @@ class InputInterface(ABC):
     @abstractmethod
     def name(self) -> str:
         """Name of the device, used as the source of its events."""
-    
+
     @abstractmethod
     def start(self, emit: Callable[[InputEvent], None]) -> None:
         """Start the device; call emit(event) for every input."""

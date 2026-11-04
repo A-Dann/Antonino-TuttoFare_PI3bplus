@@ -1,9 +1,9 @@
 import logging
 
 from core.event_bus import EventBus
+from core.events import Events
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
-from core.events import Events
 from ui.navigation import Navigator
 from ui.screens import MenuScreen
 
@@ -59,7 +59,7 @@ def test_register_screen_twice_ignores_the_new_actions():
     assert len(first_calls) == 1
     assert second_calls == []
 
-    
+
 def test_register_screen_twice_logs_warning(caplog):
     navigator, _, _ = make_navigator()
 
@@ -120,7 +120,7 @@ def test_navigate_to_sets_active_screen_and_resets_selected_index():
 
     assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "A"
     assert state_manager.get(StateKeys.SELECTED_INDEX) == 0  # Should be reset to 0
-    
+
 
 def test_navigate_to_logs_warning_for_unregistered_screen(caplog):
     navigator, state_manager, _ = make_navigator()

@@ -3,7 +3,6 @@ from core.events import Events
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
 
-
 # --- get -------------------------------------------------------------------
 
 def test_initial_active_screen_is_none():

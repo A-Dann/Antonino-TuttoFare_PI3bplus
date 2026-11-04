@@ -8,7 +8,6 @@ from core.state_keys import StateKeys
 from core.state_manager import StateManager
 from ui.navigation import Navigator
 
-
 # --- helpers ---------------------------------------------------------------
 
 class RecordingPlugin(Plugin):

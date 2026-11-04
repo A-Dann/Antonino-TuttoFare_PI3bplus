@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from core.input_event import InputEvent
 from hal.input_interface import InputInterface
@@ -20,7 +21,7 @@ class DummyInput(InputInterface):
     @property
     def name(self):
         return "Dummy"
-    
+
     def start(self, emit: Callable[[InputEvent], None]) -> None:
         self._thread = threading.Thread(target=self._emit_actions, args=(emit,), daemon=True)
         self._thread.start()

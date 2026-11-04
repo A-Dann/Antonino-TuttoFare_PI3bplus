@@ -1,10 +1,11 @@
 # core/plugin_manager.py
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 import importlib
 import inspect
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import plugins as plugins_pkg
 from core.interfaces.plugin_interface import Plugin

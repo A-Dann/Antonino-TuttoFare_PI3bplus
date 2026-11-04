@@ -1,9 +1,9 @@
 from __future__ import annotations
+
 import evdev
 
-from hal.input_interface import InputInterface
-
 from core.input_actions import InputActions
+from hal.input_interface import InputInterface
 
 KEY_RELEASED = 0
 KEY_PRESSED = 1
@@ -36,7 +36,7 @@ class KeyboardInput(InputInterface):
     def translate_event_to_action(self, input_event: evdev.InputEvent) -> InputActions | None:
         if input_event.type != evdev.ecodes.EV_KEY:
             return None
-        
+
         event_key = input_event.code
         if event_key not in self.keys_mapping:
             return  None
@@ -45,7 +45,7 @@ class KeyboardInput(InputInterface):
 
         if input_event.value == KEY_RELEASED:
             return None
-        
+
         if input_event.value == KEY_REPEATED and input_action not in self.can_be_repeated:
             return None
 

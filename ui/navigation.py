@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 import logging
+from typing import TYPE_CHECKING
 
 from core.state_keys import StateKeys
 
@@ -21,7 +22,7 @@ class Navigator:
         if screen.key in self._screens:
             log.warning("Screen with key %s is already registered.", screen.key)
             return
-        
+
         self._screens[screen.key] = screen
         if actions:
             self._actions[screen.key] = actions

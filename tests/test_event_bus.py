@@ -5,7 +5,6 @@ import time
 from core.event_bus import EventBus
 from core.events import Events
 
-
 # --- subscribe -------------------------------------------------------------
 
 def test_subscribe_to_new_event_type_registers_the_callback():

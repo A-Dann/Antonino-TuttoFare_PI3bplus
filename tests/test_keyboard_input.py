@@ -3,7 +3,7 @@ from __future__ import annotations
 import evdev
 
 from core.input_actions import InputActions
-from hal.keyboard_input import KeyboardInput, KEY_PRESSED, KEY_RELEASED, KEY_REPEATED
+from hal.keyboard_input import KEY_PRESSED, KEY_RELEASED, KEY_REPEATED, KeyboardInput
 
 # --- translate_event_to_action ---------------------------------------------
 

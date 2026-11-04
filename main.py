@@ -2,18 +2,24 @@ import logging
 
 from core.context import AppContext
 from core.event_bus import EventBus
-from core.input_event import InputEvent
+from core.events import Events
 from core.input_actions import InputActions
+from core.input_event import InputEvent
 from core.plugin_manager import PluginManager
 from core.state_keys import StateKeys
-from core.events import Events
 from core.state_manager import StateManager
 from hal.console_display import ConsoleDisplay
 from hal.dummy_input import DummyInput
 from ui.navigation import Navigator
 from ui.renderer import Renderer
 
-logging.basicConfig(level=logging.INFO, filename="app.log", filemode="w", format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", encoding="utf-8")
+logging.basicConfig(
+    level=logging.INFO,
+    filename="app.log",
+    filemode="w",
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    encoding="utf-8"
+)
 
 
 def main() -> None:

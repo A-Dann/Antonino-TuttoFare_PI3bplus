@@ -5,7 +5,7 @@ from core.state_keys import StateKeys
 
 log = logging.getLogger(__name__)
 
-class StateManager():
+class StateManager:
     def __init__(self, event_bus):
         self._event_bus = event_bus
         self._state = {
@@ -25,6 +25,6 @@ class StateManager():
     def set(self, key, value):
         if self._state.get(key) == value:
             return
-        
+
         self._state[key] = value
         self._event_bus.publish(Events.STATE_CHANGED, {"key": key, "value": value})

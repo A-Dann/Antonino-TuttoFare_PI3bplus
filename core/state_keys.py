@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class StateKeys(str, Enum):
     ACTIVE_SCREEN = "active_screen"
     SELECTED_INDEX = "selected_index"

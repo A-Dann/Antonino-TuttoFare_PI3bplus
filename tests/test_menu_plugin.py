@@ -19,10 +19,18 @@ def create_context():
     menu_plugin = MenuPlugin()
     menu_plugin.start(ctx)
 
-    test_menu = MenuScreen(key="Test", title="Test Menu", options=[MenuItem("a", "Option A"), MenuItem("b", "Option B"), MenuItem("c", "Option C")])
+    test_menu = MenuScreen(
+        key="Test",
+        title="Test Menu",
+        options=[
+            MenuItem("a", "Option A"),
+            MenuItem("b", "Option B"),
+            MenuItem("c", "Option C")
+        ]
+    )
 
     calls = []
-    
+
     navigator.register_screen(test_menu, {
         "a": lambda ctx: calls.append("a"),
         "b": lambda ctx: calls.append("b"),
@@ -36,7 +44,7 @@ def press_input_action(ctx, action):
     input_event = InputEvent(action, "test")
     ctx.event_bus.publish(Events.INPUT_ACTION, input_event)
 
-# --- 
+# ---
 
 def test_down_then_select_runs_the_second_option_action():
     ctx, calls = create_context()
@@ -59,7 +67,7 @@ def test_select_without_moving_runs_the_first_option_action():
     assert ctx.navigator.get_active_screen().key == "Test"
     assert calls == ["a"]
 
-    
+
 def test_up_from_first_option_wraps_to_the_last():
     ctx, calls = create_context()
 

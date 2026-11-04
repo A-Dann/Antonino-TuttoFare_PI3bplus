@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
+
 
 @dataclass
 class MenuItem:
     id: str
     label: str
-    icon: Optional[str] = None
+    icon: str | None = None
 
 @dataclass
 class MenuScreen:

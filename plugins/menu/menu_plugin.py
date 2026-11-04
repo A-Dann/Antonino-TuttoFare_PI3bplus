@@ -1,5 +1,6 @@
 # plugins/menu/menu_plugin.py
 from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -9,7 +10,7 @@ from core.interfaces.plugin_interface import Plugin
 from core.state_keys import StateKeys
 from ui.screens import MenuScreen
 
-from .main_menu import main_screen, main_actions
+from .main_menu import main_actions, main_screen
 
 if TYPE_CHECKING:
     from core.context import AppContext
