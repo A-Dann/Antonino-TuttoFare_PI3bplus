@@ -1,11 +1,17 @@
 from __future__ import annotations
 
-import evdev
+import logging
+import select
+import threading
 from collections.abc import Callable
 
-from core.input_event import InputEvent
+import evdev
+
 from core.input_actions import InputActions
+from core.input_event import InputEvent
 from hal.input_interface import InputInterface
+
+log = logging.getLogger(__name__)
 
 KEY_RELEASED = 0
 KEY_PRESSED = 1
@@ -28,12 +34,41 @@ class KeyboardInput(InputInterface):
         InputActions.RIGHT,
     })
 
-    @property
-    def name(self):
-        return "Keyboard"
+    def __init__(self, device: evdev.InputDevice) -> None:
+        self._device = device
+        self._thread = None
+        self._stop_signal = threading.Event()
 
-    def start(self, emit):
-        pass
+    @property
+    def name(self) -> str:
+        return self._device.name
+
+    def start(self, emit) -> None:
+        self._thread = threading.Thread(target=self.read_loop, args=(emit,), daemon=True)
+        self._thread.start()
+
+    def read_loop(self, emit) -> None:
+        while not self._stop_signal.is_set():
+            try:
+                selected_fd, _, _ = select.select([self._device.fd],[],[], 0.5)
+                if self._device.fd in selected_fd:
+                    for keyboard_event in self._device.read():
+                        self.emit_action(keyboard_event, emit)
+
+            except BlockingIOError:
+                log.debug("No events available: %s", self._device.name)
+            except OSError:
+                log.exception("Something went wrong with: %s", self._device.name)
+                break
+
+    def emit_action(self, raw_event: evdev.InputEvent, emit: Callable[[InputEvent], None]) -> None:
+        input_action = self.translate_event_to_action(raw_event)
+
+        if input_action is None:
+            return
+
+        input_event = InputEvent(input_action, self.name)
+        emit(input_event)
 
     def translate_event_to_action(self, raw_event: evdev.InputEvent) -> InputActions | None:
         if raw_event.type != evdev.ecodes.EV_KEY:
@@ -41,7 +76,7 @@ class KeyboardInput(InputInterface):
 
         event_key = raw_event.code
         if event_key not in self.keys_mapping:
-            return  None
+            return None
 
         input_action = self.keys_mapping.get(event_key)
 
@@ -53,15 +88,8 @@ class KeyboardInput(InputInterface):
 
         return input_action
 
-    def emit_action(self, raw_event: evdev.InputEvent, emit: Callable[[InputEvent], None]) -> None:
-        input_action = self.translate_event_to_action(raw_event)
-
-        if not input_action:
-            return
-
-        input_event = InputEvent(input_action, self.name)
-        emit(input_event)
-        
-
-    def stop(self):
-        pass
+    def stop(self) -> None:
+        self._stop_signal.set()
+        if self._thread is not None:
+            self._thread.join(timeout=1)
+        self._device.close()
