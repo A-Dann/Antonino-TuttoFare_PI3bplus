@@ -15,6 +15,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-timeout",
     "ruff",
     "mypy",
 ]
@@ -26,6 +27,7 @@ include = ["core*", "hal*", "ui*", "plugins*"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+timeout = 10
 
 [tool.ruff]
 line-length = 120
