@@ -43,6 +43,12 @@ class KeyboardInput(InputInterface):
     def name(self) -> str:
         return self._device.name
 
+    @classmethod
+    def supports(cls, device: evdev.InputDevice) -> bool:
+        keys = device.capabilities().get(evdev.ecodes.EV_KEY, [])
+
+        return set(cls.keys_mapping) <= set(keys)
+
     def start(self, emit) -> None:
         self._thread = threading.Thread(target=self.read_loop, args=(emit,), daemon=True)
         self._thread.start()

@@ -48,6 +48,12 @@ class DummyKeyboard:
             os.close(self._write_fd)
         self.is_closed = True
 
+class FakeCapabilityDevice:
+    def __init__(self, capabilities):
+        self._capabilities = capabilities
+
+    def capabilities(self):
+        return self._capabilities
 
 def key_event(code, value):
     return evdev.InputEvent(0, 0, evdev.ecodes.EV_KEY, code, value)
@@ -123,6 +129,48 @@ def test_stop_before_start_closes_the_device_without_error():
     keyboard.stop()
 
     assert device.is_closed
+
+# --- supports --------------------------------------------------------------
+
+def test_supports_returns_true_for_a_keyboard():
+    keyboard_capabilities = {
+        evdev.ecodes.EV_KEY: list(KeyboardInput.keys_mapping) + [evdev.ecodes.KEY_A, evdev.ecodes.KEY_B]
+    }
+    keyboard = FakeCapabilityDevice(keyboard_capabilities)
+
+    assert KeyboardInput.supports(keyboard) is True
+
+
+def test_supports_returns_false_for_a_mouse():
+    mouse_capabilities = {
+        evdev.ecodes.EV_KEY: [
+            evdev.ecodes.BTN_LEFT,
+            evdev.ecodes.BTN_RIGHT,
+        ],
+        evdev.ecodes.EV_REL: [
+            evdev.ecodes.REL_X,
+            evdev.ecodes.REL_Y,
+        ]
+    }
+    mouse = FakeCapabilityDevice(mouse_capabilities)
+
+    assert KeyboardInput.supports(mouse) is False
+
+
+def test_supports_returns_false_without_ev_key():
+    no_capabilities = {}
+    device_with_no_capabilities = FakeCapabilityDevice(no_capabilities)
+
+    assert KeyboardInput.supports(device_with_no_capabilities) is False
+
+
+def test_supports_returns_false_when_a_required_key_is_missing():
+    keyboard_missing_capabilities = {
+        evdev.ecodes.EV_KEY: list(KeyboardInput.keys_mapping)[1:] + [evdev.ecodes.KEY_A, evdev.ecodes.KEY_B]
+    }
+    almost_a_keyboard = FakeCapabilityDevice(keyboard_missing_capabilities)
+
+    assert KeyboardInput.supports(almost_a_keyboard) is False
 
 
 # --- read_loop -------------------------------------------------------------
