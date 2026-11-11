@@ -5,7 +5,7 @@ import pytest
 
 from core.input_actions import InputActions
 from hal.keyboard_input import KEY_PRESSED, KEY_RELEASED, KEY_REPEATED, KeyboardInput
-from tests.fakes import DummyKeyboard, collect_expected
+from tests.fakes import FakeEvdevDevice, collect_expected
 
 
 class FakeCapabilityDevice:
@@ -50,7 +50,7 @@ def test_supports_returns_false_when_a_required_key_is_missing():
 # --- a real key goes through the shared machinery -----------------------------
 
 def test_a_key_press_reaches_emit_as_an_action():
-    device = DummyKeyboard([key_event(evdev.ecodes.KEY_UP, KEY_PRESSED)])
+    device = FakeEvdevDevice([key_event(evdev.ecodes.KEY_UP, KEY_PRESSED)])
     emit, events, done = collect_expected(1)
     keyboard = KeyboardInput(device)
 
@@ -77,7 +77,7 @@ def test_a_key_press_reaches_emit_as_an_action():
     ],
 )
 def test_translate_event_to_action_maps_every_key(code, expected_action):
-    keyboard = KeyboardInput(DummyKeyboard([]))
+    keyboard = KeyboardInput(FakeEvdevDevice([]))
 
     assert keyboard.translate_event_to_action(key_event(code, KEY_PRESSED)) == expected_action
 
@@ -92,7 +92,7 @@ def test_translate_event_to_action_maps_every_key(code, expected_action):
     ],
 )
 def test_translate_event_to_action_repeats_movement_keys(code, expected_action):
-    keyboard = KeyboardInput(DummyKeyboard([]))
+    keyboard = KeyboardInput(FakeEvdevDevice([]))
 
     assert keyboard.translate_event_to_action(key_event(code, KEY_REPEATED)) == expected_action
 
@@ -102,25 +102,25 @@ def test_translate_event_to_action_repeats_movement_keys(code, expected_action):
     [evdev.ecodes.KEY_ENTER, evdev.ecodes.KEY_BACKSPACE, evdev.ecodes.KEY_ESC],
 )
 def test_translate_event_to_action_does_not_repeat_select_and_back(code):
-    keyboard = KeyboardInput(DummyKeyboard([]))
+    keyboard = KeyboardInput(FakeEvdevDevice([]))
 
     assert keyboard.translate_event_to_action(key_event(code, KEY_REPEATED)) is None
 
 
 def test_translate_event_to_action_return_none_if_key_released():
-    keyboard = KeyboardInput(DummyKeyboard([]))
+    keyboard = KeyboardInput(FakeEvdevDevice([]))
 
     assert keyboard.translate_event_to_action(key_event(evdev.ecodes.KEY_UP, KEY_RELEASED)) is None
 
 
 def test_translate_event_to_action_return_none_with_unknown_keys():
-    keyboard = KeyboardInput(DummyKeyboard([]))
+    keyboard = KeyboardInput(FakeEvdevDevice([]))
 
     assert keyboard.translate_event_to_action(key_event(evdev.ecodes.KEY_UNKNOWN, KEY_PRESSED)) is None
 
 
 def test_translate_event_to_action_return_none_with_incorrect_event_type():
     event = evdev.InputEvent(0, 0, evdev.ecodes.EV_REL, evdev.ecodes.KEY_UP, KEY_PRESSED)
-    keyboard = KeyboardInput(DummyKeyboard([]))
+    keyboard = KeyboardInput(FakeEvdevDevice([]))
 
     assert keyboard.translate_event_to_action(event) is None

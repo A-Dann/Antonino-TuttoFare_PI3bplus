@@ -4,14 +4,14 @@ import os
 import threading
 
 
-class DummyKeyboard:
+class FakeEvdevDevice:
     """Fake evdev device: a pipe plays the role of /dev/input/eventN.
 
     send() writes a byte into the pipe, which makes select() report the
     device as ready, exactly as a real key press would.
     """
 
-    name = "dummy_keyboard"
+    name = "fake_device"
 
     def __init__(self, events, error=None, first_read_error=None):
         self._read_fd, self._write_fd = os.pipe()

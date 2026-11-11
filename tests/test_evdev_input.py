@@ -7,7 +7,7 @@ import pytest
 
 from core.input_actions import InputActions
 from hal.evdev_input import EvdevInput
-from tests.fakes import DummyKeyboard, collect, collect_expected
+from tests.fakes import FakeEvdevDevice, collect, collect_expected
 
 # --- a minimal concrete driver ----------------------------------------------
 #
@@ -66,22 +66,22 @@ def test_a_subclass_with_both_abstract_methods_can_be_created():
 # --- name --------------------------------------------------------------------
 
 def test_name_is_the_device_name():
-    driver = FakeEvdevInput(DummyKeyboard([]))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
 
-    assert driver.name == "dummy_keyboard"
+    assert driver.name == "fake_device"
 
 
 # --- start / stop ------------------------------------------------------------
 
 def test_start_does_not_block():
-    driver = FakeEvdevInput(DummyKeyboard([]))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
 
     driver.start(lambda event: None)
     driver.stop()  # reached only if start() returned
 
 
 def test_stop_ends_the_thread():
-    driver = FakeEvdevInput(DummyKeyboard([]))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
     driver.start(lambda event: None)
 
     driver.stop()
@@ -90,7 +90,7 @@ def test_stop_ends_the_thread():
 
 
 def test_stop_closes_the_device():
-    device = DummyKeyboard([])
+    device = FakeEvdevDevice([])
     driver = FakeEvdevInput(device)
     driver.start(lambda event: None)
 
@@ -100,7 +100,7 @@ def test_stop_closes_the_device():
 
 
 def test_stop_can_be_called_twice():
-    driver = FakeEvdevInput(DummyKeyboard([]))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
     driver.start(lambda event: None)
 
     driver.stop()
@@ -108,7 +108,7 @@ def test_stop_can_be_called_twice():
 
 
 def test_stop_before_start_closes_the_device_without_error():
-    device = DummyKeyboard([])
+    device = FakeEvdevDevice([])
     driver = FakeEvdevInput(device)
 
     driver.stop()
@@ -119,7 +119,7 @@ def test_stop_before_start_closes_the_device_without_error():
 # --- read_loop ---------------------------------------------------------------
 
 def test_read_loop_emits_action_for_incoming_event():
-    device = DummyKeyboard([raw_event(evdev.ecodes.KEY_UP)])
+    device = FakeEvdevDevice([raw_event(evdev.ecodes.KEY_UP)])
     emit, events, done = collect_expected(1)
     driver = FakeEvdevInput(device)
 
@@ -132,7 +132,7 @@ def test_read_loop_emits_action_for_incoming_event():
 
 
 def test_read_loop_uses_the_device_name_as_source():
-    device = DummyKeyboard([raw_event(evdev.ecodes.KEY_UP)])
+    device = FakeEvdevDevice([raw_event(evdev.ecodes.KEY_UP)])
     emit, events, done = collect_expected(1)
     driver = FakeEvdevInput(device)
 
@@ -141,11 +141,11 @@ def test_read_loop_uses_the_device_name_as_source():
     assert done.wait(timeout=2)
     driver.stop()
 
-    assert events[0].source == "dummy_keyboard"
+    assert events[0].source == "fake_device"
 
 
 def test_read_loop_ignores_events_that_have_no_action():
-    device = DummyKeyboard([raw_event(evdev.ecodes.KEY_A), raw_event(evdev.ecodes.KEY_DOWN)])
+    device = FakeEvdevDevice([raw_event(evdev.ecodes.KEY_A), raw_event(evdev.ecodes.KEY_DOWN)])
     emit, events, done = collect_expected(1)
     driver = FakeEvdevInput(device)
 
@@ -158,7 +158,7 @@ def test_read_loop_ignores_events_that_have_no_action():
 
 
 def test_read_loop_emits_several_events_in_order():
-    device = DummyKeyboard([
+    device = FakeEvdevDevice([
         raw_event(evdev.ecodes.KEY_UP),
         raw_event(evdev.ecodes.KEY_DOWN),
         raw_event(evdev.ecodes.KEY_ENTER),
@@ -175,7 +175,7 @@ def test_read_loop_emits_several_events_in_order():
 
 
 def test_read_loop_ends_when_the_device_is_unplugged(caplog):
-    device = DummyKeyboard([], error=OSError("device unplugged"))
+    device = FakeEvdevDevice([], error=OSError("device unplugged"))
     emit, events, done = collect_expected(1)
     driver = FakeEvdevInput(device)
 
@@ -191,7 +191,7 @@ def test_read_loop_ends_when_the_device_is_unplugged(caplog):
 
 
 def test_unplugged_device_is_closed_only_by_stop():
-    device = DummyKeyboard([], error=OSError("device unplugged"))
+    device = FakeEvdevDevice([], error=OSError("device unplugged"))
     driver = FakeEvdevInput(device)
     driver.start(lambda event: None)
     device.send()
@@ -205,7 +205,7 @@ def test_unplugged_device_is_closed_only_by_stop():
 
 
 def test_read_loop_survives_a_read_with_no_events_available():
-    device = DummyKeyboard([raw_event(evdev.ecodes.KEY_UP)], first_read_error=BlockingIOError())
+    device = FakeEvdevDevice([raw_event(evdev.ecodes.KEY_UP)], first_read_error=BlockingIOError())
     emit, events, done = collect_expected(1)
     driver = FakeEvdevInput(device)
 
@@ -222,7 +222,7 @@ def test_read_loop_survives_a_read_with_no_events_available():
 
 def test_emit_action_emits_action():
     emit, events = collect()
-    driver = FakeEvdevInput(DummyKeyboard([]))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
 
     driver.emit_action(raw_event(evdev.ecodes.KEY_UP), emit)
 
@@ -231,7 +231,7 @@ def test_emit_action_emits_action():
 
 def test_emit_action_does_not_emit_when_action_is_none():
     emit, events = collect()
-    driver = FakeEvdevInput(DummyKeyboard([]))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
 
     driver.emit_action(raw_event(evdev.ecodes.KEY_A), emit)
 
