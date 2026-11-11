@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import logging
+
 import evdev
 
 from core.input_actions import InputActions
 from hal.evdev_input import EvdevInput
+
 log = logging.getLogger(__name__)
 
 KEY_RELEASED = 0
