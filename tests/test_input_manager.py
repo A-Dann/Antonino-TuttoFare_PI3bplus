@@ -58,7 +58,7 @@ class SecondDriver(FakeDriverSupport):
     pass
 
 class FailingStartDriver(FakeDriverSupport):
-    instances = []
+    instances: list[FailingStartDriver] = []
 
     def __init__(self, device):
         super().__init__(device)
