@@ -15,7 +15,7 @@ class DummyInput(InputInterface):
     def __init__(self, actions: list[InputActions], delay: float = 0.1) -> None:
         self._actions = actions
         self._delay = delay
-        self._thread = None
+        self._thread: threading.Thread | None = None
         self._stop_signal = threading.Event()
 
     @property

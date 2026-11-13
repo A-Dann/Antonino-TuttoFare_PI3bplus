@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 class EvdevInput(InputInterface):
     def __init__(self, device: evdev.InputDevice) -> None:
         self._device = device
-        self._thread = None
+        self._thread: threading.Thread | None = None
         self._stop_signal = threading.Event()
 
     @property
@@ -29,11 +29,11 @@ class EvdevInput(InputInterface):
     def supports(cls, device: evdev.InputDevice) -> bool:
         pass
 
-    def start(self, emit) -> None:
+    def start(self, emit: Callable[[InputEvent], None]) -> None:
         self._thread = threading.Thread(target=self.read_loop, args=(emit,), daemon=True)
         self._thread.start()
 
-    def read_loop(self, emit) -> None:
+    def read_loop(self, emit: Callable[[InputEvent], None]) -> None:
         while not self._stop_signal.is_set():
             try:
                 selected_fd, _, _ = select.select([self._device.fd],[],[], 0.5)
