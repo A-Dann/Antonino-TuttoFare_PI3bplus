@@ -1,24 +1,26 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from core.context import AppContext
 from core.state_keys import StateKeys
+from ui.screens import Screen
 
 if TYPE_CHECKING:
-    from core.context import AppContext
     from core.state_manager import StateManager
-    from ui.screens import MenuScreen
 
 log = logging.getLogger(__name__)
+ActionMap = dict[str, Callable[[AppContext], None]]
 
 class Navigator:
     def __init__(self, state_manager: StateManager) -> None:
         self._state_manager = state_manager
-        self._screens = {}
-        self._actions = {}
+        self._screens: dict[str, Screen] = {}
+        self._actions: dict[str, ActionMap] = {}
 
-    def register_screen(self, screen, actions=None) -> None:
+    def register_screen(self, screen: Screen, actions: ActionMap | None = None) -> None:
         if screen.key in self._screens:
             log.warning("Screen with key %s is already registered.", screen.key)
             return
@@ -27,7 +29,7 @@ class Navigator:
         if actions:
             self._actions[screen.key] = actions
 
-    def get_active_screen(self) -> MenuScreen | None:
+    def get_active_screen(self) -> Screen | None:
         current_key = self._state_manager.get(StateKeys.ACTIVE_SCREEN)
         return self._screens.get(current_key)
 

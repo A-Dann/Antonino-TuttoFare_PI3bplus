@@ -4,7 +4,7 @@ from core.state_manager import StateManager
 from hal.display_interface import DisplayInterface
 from ui.navigation import Navigator
 from ui.renderer import Renderer
-from ui.screens import MenuItem, MenuScreen
+from ui.screens import MenuItem, MenuScreen, Screen
 
 # --- helper section ---
 
@@ -125,12 +125,10 @@ def test_render_does_not_draw_for_unregistered_screen_type(caplog):
     renderer.render_if_needed()
 
     # Create a new screen type that is not registered in the draw functions
-    class UnregisteredScreen:
-        key = "unregistered_screen"
-        title = "Unregistered Screen"
-        options = [MenuItem("x", "X"), MenuItem("y", "Y")]
+    class UnregisteredScreen(Screen):
+        pass
 
-    unregistered_screen = UnregisteredScreen()
+    unregistered_screen = UnregisteredScreen(key="unregistered_screen")
     navigator.register_screen(unregistered_screen)
     navigator.navigate_to("unregistered_screen")
 

@@ -7,7 +7,7 @@ from core.state_keys import StateKeys
 from core.state_manager import StateManager
 from plugins.menu.menu_plugin import MenuPlugin
 from ui.navigation import Navigator
-from ui.screens import MenuItem, MenuScreen
+from ui.screens import MenuItem, MenuScreen, Screen
 
 # --- Helper functions ---
 
@@ -102,13 +102,12 @@ def test_move_updates_selected_index_in_state_manager():
 def test_input_is_ignored_when_active_screen_is_not_a_menu():
     ctx, _ = create_context()
 
-    class NonMenuScreen:
-        key = "NonMenu"
-        options = [MenuItem("x", "Option X")]
+    class NonMenuScreen(Screen):
+        pass
 
     non_menu_calls = []
 
-    ctx.navigator.register_screen(NonMenuScreen(), {"x": lambda ctx: non_menu_calls.append("x")})
+    ctx.navigator.register_screen(NonMenuScreen(key="NonMenu"), {"x": lambda ctx: non_menu_calls.append("x")})
     ctx.navigator.navigate_to("NonMenu")
 
     # Publish an input action while on a non-menu screen

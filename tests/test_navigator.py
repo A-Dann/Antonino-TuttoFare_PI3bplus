@@ -5,7 +5,7 @@ from core.events import Events
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
 from ui.navigation import Navigator
-from ui.screens import MenuScreen
+from ui.screens import Screen
 
 # --- Helper Funcions ---
 
@@ -17,7 +17,7 @@ def make_navigator():
 
 
 def make_screen(key):
-    return MenuScreen(key=key, title=key, options=[])
+    return Screen(key=key)
 
 
 # --- register_screen -------------------------------------------------------
