@@ -27,6 +27,7 @@ class EvdevInput(InputInterface):
     @classmethod
     @abstractmethod
     def supports(cls, device: evdev.InputDevice) -> bool:
+        """ Determine whether this driver supports the given input device. """
         pass
 
     def start(self, emit: Callable[[InputEvent], None]) -> None:
@@ -58,6 +59,8 @@ class EvdevInput(InputInterface):
 
     @abstractmethod
     def translate_event_to_action(self, raw_event: evdev.InputEvent) -> InputActions | None:
+        """ Translate a raw input event into a universal InputAction.
+            Returns None if the event is not relevant. """
         pass
 
     def stop(self) -> None:
