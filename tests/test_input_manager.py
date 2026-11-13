@@ -57,6 +57,15 @@ class FirstDriver(FakeDriverSupport):
 class SecondDriver(FakeDriverSupport):
     pass
 
+class FailingStartDriver(FakeDriverSupport):
+    instances = []
+
+    def __init__(self, device):
+        super().__init__(device)
+        FailingStartDriver.instances.append(self)
+
+    def start(self, emit):
+        raise RuntimeError("cannot start")
 
 def emit(event):
     pass
@@ -99,6 +108,50 @@ def build_manager(monkeypatch, paths, driver_classes):
     monkeypatch.setattr(evdev, "InputDevice", open_device)
 
     return InputManager(emit, driver_classes), paths, opened_devices
+
+
+# --- a device that cannot be opened ------------------------------------------
+
+
+def test_scan_skips_a_device_that_cannot_be_opened(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [EVENT3], [FakeDriverSupport])
+
+    def failing_open(path):
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(evdev, "InputDevice", failing_open)
+
+    manager.scan()
+
+    assert manager.drivers == {}
+
+
+def test_scan_does_not_retry_a_device_that_cannot_be_opened(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [EVENT3], [FakeDriverSupport])
+    attempts = []
+
+    def failing_open(path):
+        attempts.append(path)
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(evdev, "InputDevice", failing_open)
+
+    manager.scan()
+    manager.scan()
+
+    assert attempts == [EVENT3]
+
+
+# --- a driver that fails to start --------------------------------------------
+
+
+def test_scan_stops_a_driver_that_fails_to_start_and_does_not_register_it(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [EVENT3], [FailingStartDriver])
+
+    manager.scan()
+
+    assert FailingStartDriver.instances[-1].stopped
+    assert manager.drivers == {}
 
 
 # --- a supported device ------------------------------------------------------

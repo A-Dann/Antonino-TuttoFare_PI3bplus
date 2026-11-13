@@ -1,9 +1,12 @@
+import logging
 from collections.abc import Callable
 
 import evdev
 
 from core.input_event import InputEvent
 from hal.evdev_input import EvdevInput
+
+log = logging.getLogger(__name__)
 
 
 class InputManager:
@@ -31,17 +34,32 @@ class InputManager:
             self._remove_device(path)
 
     def _add_device(self, path: str) -> None:
-        device = evdev.InputDevice(path)
+        try:
+            device = evdev.InputDevice(path)
+        except OSError as e:
+            log.warning("Failed to open device %s: %s", path, e)
+            self._ignored.add(path)
+            return
+
         driver_class = self._find_driver_class(device)
 
         if driver_class is None:
+            log.debug("No matching driver found for device %s, ignoring.", path)
             device.close()
             self._ignored.add(path)
             return
 
         driver = driver_class(device)
-        driver.start(self._emit)
+        try:
+            driver.start(self._emit)
+        except Exception as e:
+            log.exception("Failed to start driver for %s: %s", path, e)
+            driver.stop()
+            self._ignored.add(path)
+            return
+
         self._drivers[path] = driver
+        log.info("Device successfully started: %s (%s)", path, driver_class.__name__)
 
     def _remove_device(self, path: str) -> None:
         if path in self._drivers:
