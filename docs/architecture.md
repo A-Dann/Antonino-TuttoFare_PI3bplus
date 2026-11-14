@@ -3,7 +3,7 @@
 > Status: core, plugin system, navigator, renderer, console display, the
 > scripted (dummy) input device, the explicit quit mechanism, the evdev
 > input base class, the keyboard driver and the input manager (device
-> discovery with a scan thread) are implemented.
+> discovery with a scan thread) are implemented and tested.
 > Planned: wiring `InputManager` in `main.py` (it still uses `DummyInput`),
 > DSI display backend, touch strip input, BACK / navigation history.
 
