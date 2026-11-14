@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import threading
+import time
+
 import evdev
 
 from hal.input_manager import InputManager
@@ -96,18 +99,171 @@ def make_open_device():
     return open_device, opened_devices
 
 
-def build_manager(monkeypatch, paths, driver_classes):
+def build_manager(monkeypatch, paths, driver_classes, scan_interval=0.01):
     """Replace the two evdev functions with fakes and build a manager.
 
     Return (manager, paths, opened_devices): the test changes `paths` to plug or
     unplug devices, and reads `opened_devices` to see what the manager opened.
+    The scan interval is tiny by default so the tests that start the thread are fast.
     """
     list_devices, paths = make_list_devices(paths)
     open_device, opened_devices = make_open_device()
     monkeypatch.setattr(evdev, "list_devices", list_devices)
     monkeypatch.setattr(evdev, "InputDevice", open_device)
 
-    return InputManager(emit, driver_classes), paths, opened_devices
+    return InputManager(emit, driver_classes, scan_interval), paths, opened_devices
+
+
+def count_scans(monkeypatch, manager, expected, failing=False):
+    """Wrap manager.scan and return (done, calls).
+
+    `done` is set once `expected` scans have finished (the real scan has already
+    run when it is set), so a test waits on it instead of guessing a sleep.
+    With failing=True every scan raises instead of running.
+    """
+    done = threading.Event()
+    calls = []
+    real_scan = manager.scan
+
+    def scan():
+        calls.append(1)
+        try:
+            if failing:
+                raise RuntimeError("boom")
+            real_scan()
+        finally:
+            if len(calls) >= expected:
+                done.set()
+
+    monkeypatch.setattr(manager, "scan", scan)
+    return done, calls
+
+
+# --- stop --------------------------------------------------------------------
+
+def test_stop_before_start_does_not_fail(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [], [])
+
+    manager.stop()
+
+
+def test_stop_can_be_called_twice(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [EVENT3], [FakeDriverSupport])
+    manager.scan()
+
+    manager.stop()
+    manager.stop()
+
+    assert manager.drivers == {}
+
+
+def test_stop_stops_every_active_driver(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [EVENT3, EVENT4], [FakeDriverSupport])
+    manager.scan()
+    drivers = list(manager.drivers.values())
+
+    manager.stop()
+
+    assert len(drivers) == 2
+    assert all(driver.stopped for driver in drivers)
+    assert manager.drivers == {}
+
+
+def test_stop_forgets_the_ignored_devices(monkeypatch):
+    manager, _, opened_devices = build_manager(monkeypatch, [EVENT3], [FakeDriverNotSupport])
+    manager.scan()
+
+    manager.stop()
+    manager.scan()
+
+    assert len(opened_devices) == 2
+
+
+# --- the scan thread ---------------------------------------------------------
+
+def test_start_scans_repeatedly_in_the_background(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [], [FakeDriverSupport])
+    done, calls = count_scans(monkeypatch, manager, 3)
+
+    manager.start()
+    assert done.wait(timeout=2)
+    manager.stop()
+
+    assert len(calls) >= 3
+
+
+def test_start_finds_a_device_without_anyone_calling_scan(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [EVENT3], [FakeDriverSupport])
+    done, _ = count_scans(monkeypatch, manager, 1)
+
+    manager.start()
+    assert done.wait(timeout=2)
+    found = set(manager.drivers)
+    manager.stop()
+
+    assert found == {EVENT3}
+
+
+def test_start_twice_creates_one_thread(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [], [FakeDriverSupport])
+
+    manager.start()
+    first_thread = manager._thread
+    manager.start()
+    second_thread = manager._thread
+    manager.stop()
+
+    assert second_thread is first_thread
+
+
+def test_stop_ends_the_thread(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [], [FakeDriverSupport])
+    manager.start()
+    thread = manager._thread
+
+    manager.stop()
+
+    assert thread is not None
+    assert not thread.is_alive()
+
+
+def test_stop_does_not_wait_for_the_scan_interval(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [], [FakeDriverSupport], scan_interval=30)
+    done, _ = count_scans(monkeypatch, manager, 1)
+    manager.start()
+    assert done.wait(timeout=2)  # the thread is now waiting for the next scan
+
+    started = time.perf_counter()
+    manager.stop()
+    elapsed = time.perf_counter() - started
+
+    assert elapsed < 1
+
+
+def test_scan_loop_survives_a_failing_scan(monkeypatch):
+    manager, _, _ = build_manager(monkeypatch, [], [FakeDriverSupport])
+    done, calls = count_scans(monkeypatch, manager, 3, failing=True)
+
+    manager.start()
+    assert done.wait(timeout=2)
+    manager.stop()
+
+    assert len(calls) >= 3
+
+
+def test_scan_loop_still_waits_between_failing_scans(monkeypatch):
+    interval = 0.05
+    manager, _, _ = build_manager(monkeypatch, [], [FakeDriverSupport], scan_interval=interval)
+    done, _ = count_scans(monkeypatch, manager, 3, failing=True)
+
+    started = time.perf_counter()
+    manager.start()
+    assert done.wait(timeout=2)
+    elapsed = time.perf_counter() - started
+    manager.stop()
+
+    # 3 scans mean at least 2 waits: without them the loop would spin at full speed
+    assert elapsed >= 2 * interval * 0.8
 
 
 # --- a device that cannot be opened ------------------------------------------

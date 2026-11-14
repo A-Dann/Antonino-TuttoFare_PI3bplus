@@ -1,4 +1,5 @@
 import logging
+import threading
 from collections.abc import Callable
 
 import evdev
@@ -8,9 +9,20 @@ from hal.evdev_input import EvdevInput
 
 log = logging.getLogger(__name__)
 
+JOIN_TIMEOUT = 5.0
+
 
 class InputManager:
-    def __init__(self, emit: Callable[[InputEvent], None], driver_classes: list[type[EvdevInput]]) -> None:
+    def __init__(
+        self,
+        emit: Callable[[InputEvent], None],
+        driver_classes: list[type[EvdevInput]],
+        scan_interval: float = 2.0,
+    ) -> None:
+
+        self._thread: threading.Thread | None = None
+        self._stop_signal = threading.Event()
+        self._scan_interval = scan_interval
         self._emit = emit
         self._driver_classes = driver_classes
         self._drivers: dict[str, EvdevInput] = {}   # path -> running driver
@@ -21,7 +33,21 @@ class InputManager:
         return dict(self._drivers)
 
     def start(self) -> None:
-        pass
+        if self._thread is not None and self._thread.is_alive():
+            log.debug("Thread is already alive")
+            return
+
+        self._thread = threading.Thread(target=self._scan_loop, daemon=True)
+        self._thread.start()
+
+    def _scan_loop(self) -> None:
+        while not self._stop_signal.is_set():
+            try:
+                self.scan()
+            except Exception:
+                log.exception("An error has occurred")
+
+            self._stop_signal.wait(self._scan_interval)
 
     def scan(self) -> None:
         present = set(evdev.list_devices())
@@ -52,8 +78,8 @@ class InputManager:
         driver = driver_class(device)
         try:
             driver.start(self._emit)
-        except Exception as e:
-            log.exception("Failed to start driver for %s: %s", path, e)
+        except Exception:
+            log.exception("Failed to start driver for %s", path)
             driver.stop()
             self._ignored.add(path)
             return
@@ -75,4 +101,13 @@ class InputManager:
         return None
 
     def stop(self) -> None:
-        pass
+        self._stop_signal.set()
+        if self._thread is not None:
+            self._thread.join(JOIN_TIMEOUT)
+            if self._thread.is_alive():
+                log.warning("Thread is still alive after join timed-out")
+
+        paths = list(self._drivers)
+        for path in paths:
+            self._remove_device(path)
+        self._ignored.clear()
