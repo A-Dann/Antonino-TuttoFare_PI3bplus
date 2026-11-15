@@ -60,6 +60,7 @@ class FirstDriver(FakeDriverSupport):
 class SecondDriver(FakeDriverSupport):
     pass
 
+
 class FailingStartDriver(FakeDriverSupport):
     instances: list[FailingStartDriver] = []
 
@@ -69,6 +70,7 @@ class FailingStartDriver(FakeDriverSupport):
 
     def start(self, emit):
         raise RuntimeError("cannot start")
+
 
 def emit(event):
     pass
