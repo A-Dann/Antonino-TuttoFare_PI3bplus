@@ -14,5 +14,5 @@ class Plugin(ABC):
     def start(self, ctx: AppContext) -> None:
         """Called once at startup."""
 
-    def stop(self) -> None:
-        """Optional: called at shutdown."""
+    def stop(self) -> None:  # noqa: B027
+      """Optional: called at shutdown."""
