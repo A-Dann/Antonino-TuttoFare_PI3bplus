@@ -33,6 +33,7 @@ graph TD
         StateMgr[StateManager]
         PluginMgr[PluginManager - discovers *_plugin.py]
         Context[AppContext]
+        Interfaces[interfaces - Plugin, InputInterface, DisplayInterface]
     end
  
     subgraph UI [ui]
@@ -42,6 +43,7 @@ graph TD
  
     subgraph Plugins [plugins]
         Menu[menu]
+        Nav[navigation - planned, BACK]
         Wifi[wifi]
         AiAgent[ai_agent]
     end
@@ -59,6 +61,9 @@ graph TD
     Context --- StateMgr
     Context --- Navigator
     PluginMgr -->|start ctx| Plugins
+    EvdevDrivers -.->|implements| Interfaces
+    TermIn -.->|implements| Interfaces
+    HalDisplay -.->|implements| Interfaces
     Plugins -->|set state| StateMgr
     Plugins --> Navigator
     StateMgr -->|publish STATE_CHANGED| EventBus
@@ -241,6 +246,14 @@ sequenceDiagram
   starts as `True`; the main loop runs while it is true, and an action
   (for example the Exit menu entry) quits by setting it to `False`.
   Quitting never touches the active screen.
+- **Interfaces**: all the contracts live in `core/interfaces`
+  (`Plugin`, `InputInterface`, `DisplayInterface`). `hal` and `plugins`
+  implement them; `ui` and `main.py` use them. This way `ui` never has to
+  import `hal`.
+- **Layout**: `hal/input` (`EvdevInput`, `KeyboardInput`, `TerminalInput`,
+  `InputManager`) and `hal/display` (`ConsoleDisplay`). The tests mirror the
+  layers: `tests/core`, `tests/hal`, `tests/ui`, `tests/plugins`; the shared
+  fakes are in `tests/fakes.py`.
 - **Dependencies point one way**: `plugins` -> `ui`, `core`;
   `ui` and `hal` -> `core`; `core` imports nothing from the others
   at runtime (type-only imports go under `TYPE_CHECKING`).
@@ -279,8 +292,6 @@ Known limitations, postponed until they are really needed:
   each `start()` should create its own `Event`. `TerminalInput` can be
   restarted, because it clears the signal in `start()`: it must put the
   terminal back in a usable state.
-- The interfaces live in two places: `Plugin` in `core/interfaces`,
-  `InputInterface` and `DisplayInterface` in `hal`.
 - `InputManager.stop()` waits at most `JOIN_TIMEOUT` for the scan thread. If
   a scan is stuck longer, the thread is left running and a warning is logged.
 - A device that could not be opened (for example `PermissionError`, user not
