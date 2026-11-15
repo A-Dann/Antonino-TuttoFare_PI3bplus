@@ -109,6 +109,72 @@ def test_get_active_screen_returns_none_for_unregistered_key():
     assert navigator.get_active_screen() is None
 
 
+# --- go_back --------------------------------------------------------------
+
+def test_go_back_navigates_to_parent_screen():
+    navigator, state_manager, _ = make_navigator()
+    parent_screen = make_screen("ParentScreen")
+    child_screen = make_screen("ChildScreen")
+
+    navigator.register_screen(parent_screen)
+    navigator.register_screen(child_screen, parent=parent_screen.key)
+
+    state_manager.set(StateKeys.ACTIVE_SCREEN, child_screen.key)
+
+    navigator.go_back()
+
+    assert navigator.get_active_screen() is parent_screen
+
+
+def test_go_back_stays_on_the_screen_when_it_has_no_parent(caplog):
+    navigator, state_manager, _ = make_navigator()
+    child_screen = make_screen("ChildScreen")
+    navigator.register_screen(child_screen)
+
+    state_manager.set(StateKeys.ACTIVE_SCREEN, child_screen.key)
+
+    with caplog.at_level(logging.DEBUG):
+        navigator.go_back()
+
+    assert "screen has no parent" in caplog.text
+    assert navigator.get_active_screen() is child_screen
+
+
+def test_go_back_goes_up_one_level_at_a_time():
+    navigator, state_manager, _ = make_navigator()
+    navigator.register_screen(make_screen("A"))
+    navigator.register_screen(make_screen("B"), parent="A")
+    navigator.register_screen(make_screen("C"), parent="B")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "C")
+
+    navigator.go_back()
+    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "B"
+
+    navigator.go_back()
+    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "A"
+
+
+def test_go_back_stays_when_the_parent_is_not_registered(caplog):
+    navigator, state_manager, _ = make_navigator()
+    navigator.register_screen(make_screen("Child"), parent="Missing")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "Child")
+
+    with caplog.at_level(logging.WARNING):
+        navigator.go_back()
+
+    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "Child"
+    assert "unregistered screen" in caplog.text
+
+
+def test_go_back_without_an_active_screen_does_nothing():
+    navigator, state_manager, _ = make_navigator()
+    navigator.register_screen(make_screen("A"))
+
+    navigator.go_back()
+
+    assert state_manager.get(StateKeys.ACTIVE_SCREEN) is None
+
+
 # --- navigate_to ----------------------------------------------------------
 
 def test_navigate_to_sets_active_screen_and_resets_selected_index():

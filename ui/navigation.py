@@ -18,20 +18,40 @@ class Navigator:
     def __init__(self, state_manager: StateManager) -> None:
         self._state_manager = state_manager
         self._screens: dict[str, Screen] = {}
+        self._parents: dict[str, str] = {}
         self._actions: dict[str, ActionMap] = {}
 
-    def register_screen(self, screen: Screen, actions: ActionMap | None = None) -> None:
+    def register_screen(
+        self,
+        screen: Screen,
+        actions: ActionMap | None = None,
+        *,
+        parent: str | None = None,
+    ) -> None:
+
         if screen.key in self._screens:
             log.warning("Screen with key %s is already registered.", screen.key)
             return
 
         self._screens[screen.key] = screen
+        if parent is not None:
+            self._parents[screen.key] = parent
         if actions:
             self._actions[screen.key] = actions
 
     def get_active_screen(self) -> Screen | None:
         current_key = self._state_manager.get(StateKeys.ACTIVE_SCREEN)
         return self._screens.get(current_key)
+
+    def go_back(self) -> None:
+        current_key = self._state_manager.get(StateKeys.ACTIVE_SCREEN)
+        parent_key = self._parents.get(current_key)
+
+        if parent_key is None:
+            log.debug("Cannot go back, screen has no parent.")
+            return
+
+        self.navigate_to(parent_key)
 
     def navigate_to(self, screen_key: str) -> None:
         if screen_key not in self._screens:
