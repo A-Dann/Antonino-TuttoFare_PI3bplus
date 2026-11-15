@@ -105,7 +105,7 @@ class TerminalInput(InputInterface):
     @staticmethod
     def parse_bytes(data: bytes) -> tuple[list[InputActions], bytes]:
         """Translate raw terminal bytes into actions.
- 
+
         Return the actions found and the trailing bytes that may be the start of an
         escape sequence: the caller keeps them and prepends them to the next read.
         Sequences that are not in SEQUENCES (Home, Delete, F-keys...) are ignored.
