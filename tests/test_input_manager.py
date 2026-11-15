@@ -5,7 +5,7 @@ import time
 
 import evdev
 
-from hal.input_manager import InputManager
+from hal.input.input_manager import InputManager
 
 EVENT3 = "/dev/input/event3"
 EVENT4 = "/dev/input/event4"

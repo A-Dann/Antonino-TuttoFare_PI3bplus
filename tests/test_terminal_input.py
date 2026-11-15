@@ -9,7 +9,7 @@ import time
 import pytest
 
 from core.input_actions import InputActions
-from hal.terminal_input import TerminalInput
+from hal.input.terminal_input import TerminalInput
 
 # --- helper functions ------------------------------------------------------
 

@@ -1,4 +1,4 @@
-from hal.console_display import CLEAR_SEQUENCE, ConsoleDisplay
+from hal.display.console_display import CLEAR_SEQUENCE, ConsoleDisplay
 
 # --- helper function ---
 

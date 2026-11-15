@@ -4,7 +4,7 @@ import evdev
 import pytest
 
 from core.input_actions import InputActions
-from hal.keyboard_input import KEY_PRESSED, KEY_RELEASED, KEY_REPEATED, KeyboardInput
+from hal.input.keyboard_input import KEY_PRESSED, KEY_RELEASED, KEY_REPEATED, KeyboardInput
 from tests.fakes import FakeEvdevDevice, collect_expected
 
 

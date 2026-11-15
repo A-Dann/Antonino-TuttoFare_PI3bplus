@@ -5,7 +5,7 @@ from collections.abc import Callable
 import evdev
 
 from core.input_event import InputEvent
-from hal.evdev_input import EvdevInput
+from hal.input.evdev_input import EvdevInput
 
 log = logging.getLogger(__name__)
 

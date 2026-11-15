@@ -5,7 +5,7 @@ import logging
 import evdev
 
 from core.input_actions import InputActions
-from hal.evdev_input import EvdevInput
+from hal.input.evdev_input import EvdevInput
 
 log = logging.getLogger(__name__)
 

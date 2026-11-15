@@ -6,7 +6,7 @@ import evdev
 import pytest
 
 from core.input_actions import InputActions
-from hal.evdev_input import EvdevInput
+from hal.input.evdev_input import EvdevInput
 from tests.fakes import FakeEvdevDevice, collect, collect_expected
 
 # --- a minimal concrete driver ----------------------------------------------

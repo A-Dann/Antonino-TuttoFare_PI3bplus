@@ -7,11 +7,11 @@ from core.input_event import InputEvent
 from core.plugin_manager import PluginManager
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
-from hal.console_display import ConsoleDisplay
-from hal.evdev_input import EvdevInput
-from hal.input_manager import InputManager
-from hal.keyboard_input import KeyboardInput
-from hal.terminal_input import TerminalInput
+from hal.display.console_display import ConsoleDisplay
+from hal.input.evdev_input import EvdevInput
+from hal.input.input_manager import InputManager
+from hal.input.keyboard_input import KeyboardInput
+from hal.input.terminal_input import TerminalInput
 from ui.navigation import Navigator
 from ui.renderer import Renderer
 
