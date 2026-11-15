@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class StateKeys(str, Enum):
+class StateKeys(StrEnum):
     ACTIVE_SCREEN = "active_screen"
     SELECTED_INDEX = "selected_index"
     AI_AGENT_RUNNING = "ai_agent_running"

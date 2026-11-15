@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Events(str, Enum):
+class Events(StrEnum):
     STATE_CHANGED = "state_changed"
     INPUT_ACTION = "input_action"

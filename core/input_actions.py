@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class InputActions(str, Enum):
+class InputActions(StrEnum):
     UP = "up"
     DOWN = "down"
     LEFT = "left"
