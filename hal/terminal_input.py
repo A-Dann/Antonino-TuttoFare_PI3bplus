@@ -12,7 +12,7 @@ from typing import Any
 
 from core.input_actions import InputActions
 from core.input_event import InputEvent
-from hal.input_interface import InputInterface
+from core.interfaces.input_interface import InputInterface
 
 log = logging.getLogger(__name__)
 

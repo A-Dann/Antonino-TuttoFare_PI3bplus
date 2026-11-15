@@ -9,8 +9,8 @@ from ui.screens import MenuScreen
 
 if TYPE_CHECKING:
     from core.event_bus import EventBus
+    from core.interfaces.display_interface import DisplayInterface
     from core.state_manager import StateManager
-    from hal.display_interface import DisplayInterface
     from ui.navigation import Navigator
 
 log = logging.getLogger(__name__)

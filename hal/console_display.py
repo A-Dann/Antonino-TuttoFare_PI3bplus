@@ -1,4 +1,4 @@
-from hal.display_interface import DisplayInterface
+from core.interfaces.display_interface import DisplayInterface
 
 CLEAR_SEQUENCE = "\033[2J\033[H"
 
