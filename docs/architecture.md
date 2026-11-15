@@ -1,14 +1,17 @@
-# System Architecture - Standalone Raspberry Pi Project
 
+# System Architecture - Standalone Raspberry Pi Project
+ 
 > Status: core, plugin system, navigator, renderer, console display, the
 > explicit quit mechanism, the evdev input base class, the keyboard driver,
 > the input manager (device discovery with a scan thread) and the terminal
 > input (keys read from the terminal, for development) are implemented and
 > tested. `main.py` starts the input manager and the terminal input.
-> Planned: DSI display backend, touch strip input, BACK / navigation history.
-
+> The navigator knows the parent of each screen (`go_back`).
+> Planned: DSI display backend, touch strip input, the plugin that turns
+> the BACK key into `go_back`.
+ 
 ## 1. Component Diagram
-
+ 
 ```mermaid
 graph TD
     subgraph Hardware [Physical Hardware]
@@ -17,34 +20,34 @@ graph TD
         Keyboard[Keyboard - development]
         Term[Terminal - development, WSL]
     end
-
+ 
     subgraph HAL [hal - Hardware Abstraction Layer]
         InputManager[InputManager - scan thread, finds devices]
         EvdevDrivers[EvdevInput drivers - one thread per device, e.g. KeyboardInput]
         TermIn[TerminalInput - reads the terminal, own thread]
         HalDisplay[Display backends - ConsoleDisplay, DSI planned]
     end
-
+ 
     subgraph Core [core]
         EventBus[EventBus - queue + publish]
         StateMgr[StateManager]
         PluginMgr[PluginManager - discovers *_plugin.py]
         Context[AppContext]
     end
-
+ 
     subgraph UI [ui]
         Navigator[Navigator - screens and actions]
         Renderer[Renderer - redraw flag + draw functions]
     end
-
+ 
     subgraph Plugins [plugins]
         Menu[menu]
         Wifi[wifi]
         AiAgent[ai_agent]
     end
-
+ 
     Main[main.py - builds and wires everything]
-
+ 
     Keyboard --> EvdevDrivers
     Strip -.->|planned| EvdevDrivers
     Term --> TermIn
@@ -67,13 +70,13 @@ graph TD
     Renderer -->|show_menu| HalDisplay
     HalDisplay --> Display
 ```
-
+ 
 ## 2. Input Sequence
-
+ 
 The UI is a function of the state: plugins only change the state, the
 renderer decides what to draw. Several changes in one loop turn produce a
 single redraw.
-
+ 
 ```mermaid
 sequenceDiagram
     autonumber
@@ -85,7 +88,7 @@ sequenceDiagram
     participant State as StateManager
     participant Render as Renderer
     participant Disp as Display
-
+ 
     User->>Device: key / touch zone
     Device->>Bus: post(INPUT_ACTION, InputEvent)
     Note over Bus: queued, thread-safe
@@ -100,14 +103,14 @@ sequenceDiagram
     Render->>Disp: show_menu(title, labels, index)
     Disp->>User: refreshed display
 ```
-
+ 
 ## 3. Device Discovery Sequence
-
+ 
 `InputManager` knows nothing about keyboards or joysticks: it only asks each
 driver class whether it supports a device. The scan thread repeats `scan()`
 at a fixed interval, so devices plugged in or removed while the app runs are
 picked up.
-
+ 
 ```mermaid
 sequenceDiagram
     autonumber
@@ -117,7 +120,7 @@ sequenceDiagram
     participant Evdev as evdev
     participant Drv as EvdevInput driver
     participant Bus as EventBus
-
+ 
     Main->>Mgr: start()
     Mgr->>Scan: create and start thread
     loop until the stop signal is set
@@ -133,13 +136,13 @@ sequenceDiagram
     Mgr->>Scan: set signal, join (with timeout)
     Mgr->>Drv: stop() every remaining driver
 ```
-
+ 
 ## 4. Terminal Input Sequence
-
+ 
 `TerminalInput` is the input used during development, where there is no
 `/dev/input` (WSL) or the keyboard is the one of the terminal (SSH). It
 changes the mode of the terminal while it runs and always puts it back.
-
+ 
 ```mermaid
 sequenceDiagram
     autonumber
@@ -148,7 +151,7 @@ sequenceDiagram
     participant Reader as read thread
     participant Tty as terminal (stdin)
     participant Bus as EventBus
-
+ 
     Main->>Term: start(emit)
     alt stdin is not a terminal
         Term->>Term: log a warning, no thread
@@ -167,9 +170,9 @@ sequenceDiagram
     Term->>Reader: set signal, join
     Term->>Tty: restore the saved settings
 ```
-
+ 
 ## 5. Rules
-
+ 
 - **Threads**: only the hardware layer runs in its own threads: one per
   input driver (evdev drivers and `TerminalInput`), plus the scan thread of
   `InputManager`. They never touch the state, the navigator or the
@@ -196,6 +199,17 @@ sequenceDiagram
   index *before* changing the active screen: `StateManager.set` notifies
   subscribers synchronously, so with the opposite order a subscriber could
   see the new screen together with the old index.
+- **Navigation tree**: screens form a tree. A screen is registered with an
+  optional `parent` (the *key* of another screen, keyword-only); the
+  navigator stores only the key, so it needs no access to the parent
+  object. `Navigator.go_back()` goes to the parent of the active screen; a
+  screen without a parent (the main menu) stays where it is. The parent is
+  not read at the time of registration, so a child may be registered before
+  its parent; if the parent is never registered, `go_back` logs a warning
+  and stays. A screen has one parent only: where the same screen can be
+  reached from two places, a history stack would be needed (see deferred).
+  `go_back` is the only code that knows what "back" means; whoever reacts
+  to the BACK key just calls it.
 - **Rendering**: the `Renderer` never draws from an event handler. It only
   raises a flag; the main loop calls `render_if_needed()` once per turn.
   The display is used from the main thread only. The draw function is
@@ -244,14 +258,22 @@ sequenceDiagram
 - **Logging**: with the console display, logs go to a file (`app.log`,
   ignored by git), otherwise they would be mixed with the menu on the
   terminal.
-
 ## 6. Deferred items
-
+ 
 Known limitations, postponed until they are really needed:
-
+ 
 - `EventBus` has no `unsubscribe`, so a plugin cannot clean up its
   subscriptions in `stop()`.
 - `StateManager.set` accepts unknown keys without any warning.
+- There is no history stack: `go_back` always goes to the fixed parent, so a
+  screen reachable from two menus returns to its declared parent only.
+- No popups yet. When one is needed, BACK should close the popup before
+  going to the parent screen.
+- The selected index is not remembered: going back to a menu always puts the
+  cursor on the first entry.
+- The main menu key belongs to the menu plugin. When a second plugin
+  registers screens that need the main menu as parent, the key must live in
+  a shared place.
 - `InputManager` cannot be restarted after `stop()`, because the stop signal
   stays set. A new instance is created instead. If a restart is ever needed,
   each `start()` should create its own `Event`. `TerminalInput` can be
@@ -286,3 +308,4 @@ Known limitations, postponed until they are really needed:
 - Device discovery is done by polling. Reacting to hot-plug events (udev)
   would remove the delay, but it adds a dependency and cannot be tried on
   WSL.
+ 
