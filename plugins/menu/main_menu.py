@@ -19,7 +19,7 @@ def _action_exit(ctx):
     ctx.state_manager.set(StateKeys.RUNNING, False)
 
 main_screen = MenuScreen(
-    key="Main",
+    key="main",
     title="Main Menu",
     options=[
         MenuItem(id="desktop", label="Desktop Mode"),

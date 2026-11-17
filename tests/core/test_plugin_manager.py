@@ -6,6 +6,7 @@ from core.interfaces.plugin_interface import Plugin
 from core.plugin_manager import PluginManager
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
+from plugins.menu.main_menu import main_screen
 from ui.navigation import Navigator
 
 # --- helpers ---------------------------------------------------------------
@@ -52,7 +53,7 @@ def test_discover_finds_the_menu_plugin_and_start_all_activates_main_screen():
     manager.discover()
     manager.start_all()
 
-    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "Main"
+    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == main_screen.key
 
 
 # --- start_all -------------------------------------------------------------

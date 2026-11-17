@@ -44,8 +44,8 @@ def test_set_changes_the_stored_value():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
 
-    state_manager.set(StateKeys.ACTIVE_SCREEN, "Main")
-    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "Main"
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "a")
+    assert state_manager.get(StateKeys.ACTIVE_SCREEN) == "a"
 
 
 def test_set_publishes_state_changed_with_key_and_value():
@@ -55,9 +55,9 @@ def test_set_publishes_state_changed_with_key_and_value():
     received = []
     event_bus.subscribe(Events.STATE_CHANGED, received.append)
 
-    state_manager.set(StateKeys.ACTIVE_SCREEN, "Main")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "a")
 
-    assert received == [{"key": StateKeys.ACTIVE_SCREEN, "value": "Main"}]
+    assert received == [{"key": StateKeys.ACTIVE_SCREEN, "value": "a"}]
 
 
 def test_set_with_same_value_does_not_publish():
@@ -67,8 +67,8 @@ def test_set_with_same_value_does_not_publish():
     received = []
     event_bus.subscribe(Events.STATE_CHANGED, received.append)
 
-    state_manager.set(StateKeys.ACTIVE_SCREEN, "Main")
-    state_manager.set(StateKeys.ACTIVE_SCREEN, "Main")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "a")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "a")
 
     assert len(received) == 1
 
@@ -80,7 +80,7 @@ def test_set_with_new_value_publishes_again():
     received = []
     event_bus.subscribe(Events.STATE_CHANGED, received.append)
 
-    state_manager.set(StateKeys.ACTIVE_SCREEN, "Main")
-    state_manager.set(StateKeys.ACTIVE_SCREEN, "Settings")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "a")
+    state_manager.set(StateKeys.ACTIVE_SCREEN, "b")
 
     assert len(received) == 2
