@@ -9,6 +9,7 @@ class StateManager:
     def __init__(self, event_bus):
         self._event_bus = event_bus
         self._state = {
+            StateKeys.LANGUAGE: "en",
             StateKeys.ACTIVE_SCREEN: None,
             StateKeys.SELECTED_INDEX: 0,
             StateKeys.AI_AGENT_RUNNING: False,

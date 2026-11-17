@@ -2,6 +2,7 @@ from enum import StrEnum
 
 
 class StateKeys(StrEnum):
+    LANGUAGE = "language"
     ACTIVE_SCREEN = "active_screen"
     SELECTED_INDEX = "selected_index"
     AI_AGENT_RUNNING = "ai_agent_running"
