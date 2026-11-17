@@ -11,6 +11,7 @@ from core.state_keys import StateKeys
 from ui.screens import MenuScreen
 
 from .main_menu import main_actions, main_screen
+from .settings_menu import settings_actions, settings_screen
 
 if TYPE_CHECKING:
     from core.context import AppContext
@@ -24,8 +25,9 @@ class MenuPlugin(Plugin):
 
         # Register the main menu screen and actions
         self._ctx.navigator.register_screen(main_screen, main_actions)
-        ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
-        ctx.navigator.navigate_to(main_screen.key)
+        self._ctx.navigator.register_screen(settings_screen, settings_actions, parent=main_screen.key)
+        self._ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
+        self._ctx.navigator.navigate_to(main_screen.key)
 
     def _handle_input_action(self, event) -> None:
         screen = self._ctx.navigator.get_active_screen()

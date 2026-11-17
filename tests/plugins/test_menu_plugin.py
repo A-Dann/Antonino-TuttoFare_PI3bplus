@@ -5,7 +5,10 @@ from core.input_actions import InputActions
 from core.input_event import InputEvent
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
+from plugins.menu.main_menu import main_screen
 from plugins.menu.menu_plugin import MenuPlugin
+from plugins.menu.settings_menu import settings_screen
+from plugins.navigation.navigation_plugin import NavigationPlugin
 from ui.navigation import Navigator
 from ui.screens import MenuItem, MenuScreen, Screen
 
@@ -39,6 +42,16 @@ def create_context():
     navigator.navigate_to(test_menu.key)
 
     return ctx, calls
+
+def create_main_menu_context():
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+    navigator = Navigator(state_manager)
+    ctx = AppContext(event_bus, state_manager, navigator)
+    MenuPlugin().start(ctx)
+    NavigationPlugin().start(ctx)
+
+    return ctx
 
 def press_input_action(ctx, action):
     input_event = InputEvent(action, "test")
@@ -136,3 +149,34 @@ def test_input_on_menu_without_options_does_nothing(caplog):
 
     # The selected index should remain unchanged
     assert "Error in subscriber" not in caplog.text
+
+
+def test_selecting_settings_opens_the_settings_menu():
+    ctx = create_main_menu_context()
+
+    # Settings is the third option of the main menu
+    press_input_action(ctx, InputActions.DOWN)
+    press_input_action(ctx, InputActions.DOWN)
+    press_input_action(ctx, InputActions.SELECT)
+
+    assert ctx.navigator.get_active_screen() == settings_screen
+
+
+def test_back_from_the_settings_menu_returns_to_the_main_menu():
+    ctx = create_main_menu_context()
+    ctx.navigator.navigate_to(settings_screen.key)
+
+    press_input_action(ctx, InputActions.BACK)
+
+    assert ctx.navigator.get_active_screen() == main_screen
+
+
+def test_back_to_main_menu_entry_returns_to_the_main_menu():
+    ctx = create_main_menu_context()
+    ctx.navigator.navigate_to(settings_screen.key)
+
+    # The last option is "Back to Main Menu": UP from the first wraps to it
+    press_input_action(ctx, InputActions.UP)
+    press_input_action(ctx, InputActions.SELECT)
+
+    assert ctx.navigator.get_active_screen() == main_screen

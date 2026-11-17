@@ -3,6 +3,8 @@ import logging
 from core.state_keys import StateKeys
 from ui.screens import MenuItem, MenuScreen
 
+from .settings_menu import settings_screen
+
 log = logging.getLogger(__name__)
 
 def _action_desktop_mode(ctx):
@@ -13,6 +15,7 @@ def _action_dual_audio(ctx):
 
 def _action_settings(ctx):
     log.info("Settings selected")
+    ctx.navigator.navigate_to(settings_screen.key)
 
 def _action_exit(ctx):
     log.info("Turning off application")
