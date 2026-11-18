@@ -95,7 +95,7 @@ class TerminalInput(InputInterface):
                 for action in actions:
                     self._emit_action(action, emit)
             except OSError:
-                if self._stop_signal.is_set():
+                if not self._stop_signal.is_set():
                     log.exception("Error during TerminalInput read loop")
                 break
 

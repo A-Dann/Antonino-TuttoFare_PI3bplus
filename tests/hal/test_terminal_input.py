@@ -5,10 +5,12 @@ import sys
 import termios
 import threading
 import time
+import types
 
 import pytest
 
 from core.input_actions import InputActions
+from hal.input import terminal_input
 from hal.input.terminal_input import TerminalInput
 
 # --- helper functions ------------------------------------------------------
@@ -180,6 +182,27 @@ def test_read_loop_joins_a_sequence_split_between_two_reads(terminal, driver):
 
     assert done.wait(timeout=2)
     assert [event.action for event in events] == [InputActions.UP, InputActions.SELECT]
+
+
+def test_read_loop_logs_an_error_when_the_read_fails(terminal, monkeypatch, caplog):
+    master, _ = terminal
+
+    def failing_read(fd, size):
+        raise OSError("read failed")
+
+    # Only the `os` seen by terminal_input is replaced; the `os` of this test file is the real one.
+    monkeypatch.setattr(terminal_input, "os", types.SimpleNamespace(read=failing_read))
+    terminal_driver = TerminalInput()
+
+    with caplog.at_level(logging.ERROR):
+        terminal_driver.start(emit)
+        os.write(master, b"x")  # makes select() report the terminal as readable
+        terminal_driver._thread.join(timeout=2)
+
+    assert not terminal_driver._thread.is_alive()
+    assert "Error during TerminalInput read loop" in caplog.text
+
+    terminal_driver.stop()
 
 
 # --- parse_bytes: keys that are translated ---------------------------------
