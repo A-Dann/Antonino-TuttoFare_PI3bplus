@@ -74,10 +74,13 @@ class PluginManager:
 
     def start_all(self):
         """Initialize and start all discovered plugins."""
-        for name, module in self._plugins.items():
+        for name, plugin in self._plugins.items():
+            if name in self._started:
+                continue
+
             try:
                 log.info("Starting plugin: %s", name)
-                module.start(self._ctx)
+                plugin.start(self._ctx)
                 self._started.append(name)
             except Exception:
                 log.exception("Error starting plugin %s", name)

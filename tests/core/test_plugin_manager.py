@@ -93,6 +93,40 @@ def test_start_all_keeps_starting_after_a_plugin_fails():
     assert calls == [("start", "healthy")]
 
 
+def test_start_all_called_twice_starts_each_plugin_once():
+    calls = []
+    manager, _ = make_manager(RecordingPlugin("only", calls))
+
+    manager.start_all()
+    manager.start_all()
+
+    assert calls == [("start", "only")]
+
+
+def test_start_all_called_twice_then_stop_all_stops_each_plugin_once():
+    calls = []
+    manager, _ = make_manager(RecordingPlugin("only", calls))
+    manager.start_all()
+    manager.start_all()
+    calls.clear()
+
+    manager.stop_all()
+
+    assert calls == [("stop", "only")]
+
+
+def test_start_all_retries_a_plugin_that_failed_to_start():
+    calls = []
+    broken = RecordingPlugin("flaky", calls, fail_on_start=True)
+    manager, _ = make_manager(broken)
+    manager.start_all()
+
+    broken.fail_on_start = False  # the cause of the failure is gone
+    manager.start_all()
+
+    assert calls == [("start", "flaky")]
+
+
 # --- stop_all --------------------------------------------------------------
 
 def test_stop_all_stops_plugins_in_reverse_start_order():
