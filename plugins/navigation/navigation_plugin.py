@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 
 class NavigationPlugin(Plugin):
     def start(self, ctx: AppContext) -> None:
-        log.info("Starting NavigationPlugin")
         self._ctx = ctx
 
         ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)

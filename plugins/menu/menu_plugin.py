@@ -20,7 +20,6 @@ log = logging.getLogger(__name__)
 
 class MenuPlugin(Plugin):
     def start(self, ctx: AppContext) -> None:
-        log.info("Starting MenuPlugin")
         self._ctx = ctx
 
         # Register the main menu screen and actions
