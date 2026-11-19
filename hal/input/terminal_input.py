@@ -13,6 +13,7 @@ from typing import Any
 from core.input_actions import InputActions
 from core.input_event import InputEvent
 from core.interfaces.input_interface import InputInterface
+from hal.input.wakeup import WakeUp
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +23,6 @@ SS3_INTRODUCER = ord("O")
 
 # Time to wait for the rest of an escape sequence before a lone ESC is taken as the Esc key.
 ESC_TIMEOUT = 0.1
-READ_TIMEOUT = 0.5
 JOIN_TIMEOUT = 1.0
 
 # Single-byte keys.
@@ -46,6 +46,7 @@ SEQUENCES: dict[bytes, InputActions] = {
 
 class TerminalInput(InputInterface):
     def __init__(self) -> None:
+        self._wakeup: WakeUp | None = None
         self._thread: threading.Thread | None = None
         self._stop_signal = threading.Event()
         self._fd: int | None = None
@@ -70,16 +71,19 @@ class TerminalInput(InputInterface):
         tty.setcbreak(fd)
 
         self._stop_signal.clear()
-        self._thread = threading.Thread(target=self.read_loop, args=(emit, fd), daemon=True)
+        self._wakeup = WakeUp()
+        self._thread = threading.Thread(target=self.read_loop, args=(emit, fd, self._wakeup), daemon=True)
         self._thread.start()
 
-    def read_loop(self, emit: Callable[[InputEvent], None], fd: int) -> None:
+    def read_loop(self, emit: Callable[[InputEvent], None], fd: int, wakeup: WakeUp) -> None:
         pending = b""
         while not self._stop_signal.is_set():
             try:
-                timeout = ESC_TIMEOUT if pending else READ_TIMEOUT
-                readable, _, _ = select.select([fd], [], [], timeout)
+                timeout = ESC_TIMEOUT if pending else None
+                readable, _, _ = select.select([fd, wakeup.fileno()], [], [], timeout)
 
+                if wakeup.fileno() in readable:
+                    break
                 if not readable:
                     if pending == bytes([ESC]):
                         self._emit_action(InputActions.BACK, emit)
@@ -150,10 +154,16 @@ class TerminalInput(InputInterface):
 
     def stop(self) -> None:
         self._stop_signal.set()
+        if self._wakeup is not None:
+            self._wakeup.set()
         if self._thread is not None and self._thread.is_alive():
             self._thread.join(timeout=JOIN_TIMEOUT)
+            if self._thread.is_alive():
+                log.warning("Thread of %s is still alive after join timed-out", self.name)
 
         self._restore_terminal()
+        self._close_wakeup()
+
 
     def _restore_terminal(self) -> None:
         if self._fd is None or self._saved_settings is None:
@@ -165,3 +175,11 @@ class TerminalInput(InputInterface):
             log.exception("Failed to restore terminal settings")
         finally:
             self._saved_settings = None
+
+    def _close_wakeup(self) -> None:
+        if self._wakeup is None:
+            return
+        if self._thread is not None and self._thread.is_alive():
+            return  # the thread may still use it; a later stop() will retry
+        self._wakeup.close()
+        self._wakeup = None

@@ -345,3 +345,89 @@ def test_stop_restores_the_terminal(terminal):
     terminal_driver.stop()
 
     assert termios.tcgetattr(slave) == original
+
+
+# --- stop: wake-up of the read loop ------------------------------------------
+
+
+def test_stop_does_not_wait_for_a_timeout(terminal, driver):
+    master, _ = terminal
+    collect, _, done = collect_events(1)
+    driver.start(collect)
+    os.write(master, b"\n")
+    assert done.wait(timeout=2)
+    time.sleep(0.05)  # the thread is back to waiting in select
+
+    started = time.perf_counter()
+    driver.stop()
+    elapsed = time.perf_counter() - started
+
+    assert elapsed < 0.2
+
+
+@pytest.mark.skipif(not os.path.isdir("/proc/self/fd"), reason="needs /proc")
+def test_stop_does_not_leak_file_descriptors(terminal):
+    before = len(os.listdir("/proc/self/fd"))
+    terminal_driver = TerminalInput()
+    terminal_driver.start(emit)
+
+    terminal_driver.stop()
+
+    assert len(os.listdir("/proc/self/fd")) == before
+
+
+@pytest.mark.skipif(not os.path.isdir("/proc/self/fd"), reason="needs /proc")
+def test_start_twice_then_stop_does_not_leak_file_descriptors(terminal):
+    before = len(os.listdir("/proc/self/fd"))
+    terminal_driver = TerminalInput()
+    terminal_driver.start(emit)
+    terminal_driver.start(emit)
+
+    terminal_driver.stop()
+
+    assert len(os.listdir("/proc/self/fd")) == before
+
+
+# --- stop: a thread that does not end ----------------------------------------
+
+
+class StuckTerminalInput(TerminalInput):
+    """A driver whose thread ignores the stop request until `release` is set."""
+
+    def __init__(self):
+        super().__init__()
+        self.release = threading.Event()
+
+    def read_loop(self, emit, fd, wakeup):
+        self.release.wait()
+
+
+def test_stop_logs_a_warning_when_the_thread_does_not_end(terminal, monkeypatch, caplog):
+    monkeypatch.setattr(terminal_input, "JOIN_TIMEOUT", 0.05)
+    terminal_driver = StuckTerminalInput()
+    terminal_driver.start(emit)
+
+    with caplog.at_level(logging.WARNING):
+        terminal_driver.stop()
+
+    assert "still alive" in caplog.text
+
+    terminal_driver.release.set()
+    terminal_driver._thread.join(timeout=2)
+    terminal_driver.stop()  # cleanup: closes the wake-up
+
+
+def test_stop_keeps_the_wakeup_open_while_the_thread_is_alive(terminal, monkeypatch):
+    monkeypatch.setattr(terminal_input, "JOIN_TIMEOUT", 0.05)
+    terminal_driver = StuckTerminalInput()
+    terminal_driver.start(emit)
+
+    terminal_driver.stop()
+
+    assert terminal_driver._wakeup is not None
+
+    terminal_driver.release.set()
+    terminal_driver._thread.join(timeout=2)
+    terminal_driver.stop()
+
+    assert terminal_driver._wakeup is None
