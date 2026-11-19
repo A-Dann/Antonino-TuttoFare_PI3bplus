@@ -35,6 +35,10 @@ class EvdevInput(InputInterface):
         pass
 
     def start(self, emit: Callable[[InputEvent], None]) -> None:
+        if self._thread is not None and self._thread.is_alive():
+            log.debug("%s is already running", self._device.name)
+            return
+
         self._wakeup = WakeUp()
         self._thread = threading.Thread(target=self.read_loop, args=(emit, self._wakeup), daemon=True)
         self._thread.start()

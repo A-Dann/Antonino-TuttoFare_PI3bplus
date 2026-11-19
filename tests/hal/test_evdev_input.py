@@ -77,6 +77,22 @@ def test_name_is_the_device_name():
 
 # --- start / stop ------------------------------------------------------------
 
+def test_start_twice_creates_only_one_thread(caplog):
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
+    driver.start(lambda event: None)
+    first_thread = driver._thread
+    first_wakeup = driver._wakeup
+
+    with caplog.at_level(logging.DEBUG):
+        driver.start(lambda event: None)
+
+    assert driver._thread is first_thread
+    assert driver._wakeup is first_wakeup
+    assert "already running" in caplog.text
+
+    driver.stop()
+
+
 def test_start_does_not_block():
     driver = FakeEvdevInput(FakeEvdevDevice([]))
 
