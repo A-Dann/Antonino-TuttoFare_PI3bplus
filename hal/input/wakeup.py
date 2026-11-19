@@ -15,12 +15,12 @@ class WakeUp:
         os.set_blocking(write_fd, False)
         self._read_fd: int | None = read_fd
         self._write_fd: int | None = write_fd
-    
+
     def fileno(self) -> int:
         if self._read_fd is None:
             raise ValueError("WakeUp is closed")
         return self._read_fd
-    
+
     def set(self) -> None:
         if self._write_fd is None:
             return
