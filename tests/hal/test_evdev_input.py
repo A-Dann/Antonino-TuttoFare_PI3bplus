@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import logging
+import os
+import threading
+import time
 
 import evdev
 import pytest
 
 from core.input_actions import InputActions
+from hal.input import evdev_input
 from hal.input.evdev_input import EvdevInput
 from tests.fakes import FakeEvdevDevice, collect, collect_expected
 
@@ -236,3 +240,76 @@ def test_emit_action_does_not_emit_when_action_is_none():
     driver.emit_action(raw_event(evdev.ecodes.KEY_A), emit)
 
     assert events == []
+
+
+# --- stop: wake-up of the read loop ------------------------------------------
+
+def test_stop_does_not_wait_for_a_timeout():
+    device = FakeEvdevDevice([raw_event(evdev.ecodes.KEY_UP)])
+    emit, _, done = collect_expected(1)
+    driver = FakeEvdevInput(device)
+    driver.start(emit)
+    device.send()
+    assert done.wait(timeout=2)
+    time.sleep(0.05)  # the thread is back to waiting in select
+
+    started = time.perf_counter()
+    driver.stop()
+    elapsed = time.perf_counter() - started
+
+    assert elapsed < 0.2
+
+
+@pytest.mark.skipif(not os.path.isdir("/proc/self/fd"), reason="needs /proc")
+def test_stop_does_not_leak_file_descriptors():
+    before = len(os.listdir("/proc/self/fd"))
+    driver = FakeEvdevInput(FakeEvdevDevice([]))
+    driver.start(lambda event: None)
+
+    driver.stop()
+
+    assert len(os.listdir("/proc/self/fd")) == before
+
+
+# --- stop: a thread that does not end ----------------------------------------
+
+class StuckInput(FakeEvdevInput):
+    """A driver whose thread ignores the stop request until `release` is set."""
+
+    def __init__(self, device):
+        super().__init__(device)
+        self.release = threading.Event()
+
+    def read_loop(self, emit, wakeup):
+        self.release.wait()
+
+
+def test_stop_logs_a_warning_when_the_thread_does_not_end(monkeypatch, caplog):
+    monkeypatch.setattr(evdev_input, "JOIN_TIMEOUT", 0.05)
+    driver = StuckInput(FakeEvdevDevice([]))
+    driver.start(lambda event: None)
+
+    with caplog.at_level(logging.WARNING):
+        driver.stop()
+
+    assert "still alive" in caplog.text
+
+    driver.release.set()
+    driver._thread.join(timeout=2)
+    driver.stop()  # cleanup: closes the wake-up
+
+
+def test_stop_keeps_the_wakeup_open_while_the_thread_is_alive(monkeypatch):
+    monkeypatch.setattr(evdev_input, "JOIN_TIMEOUT", 0.05)
+    driver = StuckInput(FakeEvdevDevice([]))
+    driver.start(lambda event: None)
+
+    driver.stop()
+
+    assert driver._wakeup is not None
+
+    driver.release.set()
+    driver._thread.join(timeout=2)
+    driver.stop()
+
+    assert driver._wakeup is None

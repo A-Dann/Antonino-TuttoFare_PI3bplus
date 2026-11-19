@@ -11,11 +11,15 @@ import evdev
 from core.input_actions import InputActions
 from core.input_event import InputEvent
 from core.interfaces.input_interface import InputInterface
+from hal.input.wakeup import WakeUp
 
 log = logging.getLogger(__name__)
 
+JOIN_TIMEOUT = 1.0
+
 class EvdevInput(InputInterface):
     def __init__(self, device: evdev.InputDevice) -> None:
+        self._wakeup: WakeUp | None = None
         self._device = device
         self._thread: threading.Thread | None = None
         self._stop_signal = threading.Event()
@@ -31,14 +35,17 @@ class EvdevInput(InputInterface):
         pass
 
     def start(self, emit: Callable[[InputEvent], None]) -> None:
-        self._thread = threading.Thread(target=self.read_loop, args=(emit,), daemon=True)
+        self._wakeup = WakeUp()
+        self._thread = threading.Thread(target=self.read_loop, args=(emit, self._wakeup), daemon=True)
         self._thread.start()
 
-    def read_loop(self, emit: Callable[[InputEvent], None]) -> None:
+    def read_loop(self, emit: Callable[[InputEvent], None], wakeup: WakeUp) -> None:
         while not self._stop_signal.is_set():
             try:
-                selected_fd, _, _ = select.select([self._device.fd],[],[], 0.5)
-                if self._device.fd in selected_fd:
+                readable, _, _ = select.select([self._device.fd, wakeup.fileno()], [], [])
+                if wakeup.fileno() in readable:
+                    break
+                if self._device.fd in readable:
                     for raw_event in self._device.read():
                         self.emit_action(raw_event, emit)
 
@@ -65,7 +72,19 @@ class EvdevInput(InputInterface):
 
     def stop(self) -> None:
         self._stop_signal.set()
+        if self._wakeup is not None:
+            self._wakeup.set()
         if self._thread is not None:
-            self._thread.join(timeout=1)
+            self._thread.join(timeout=JOIN_TIMEOUT)
+            if self._thread.is_alive():
+                log.warning("Thread of %s is still alive after join timed-out", self._device.name)
         self._device.close()
+        self._close_wakeup()
 
+    def _close_wakeup(self) -> None:
+        if self._wakeup is None:
+            return
+        if self._thread is not None and self._thread.is_alive():
+            return  # the thread may still use it; a later stop() will retry
+        self._wakeup.close()
+        self._wakeup = None
