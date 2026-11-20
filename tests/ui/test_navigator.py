@@ -7,7 +7,7 @@ from core.state_manager import StateManager
 from ui.navigation import Navigator
 from ui.screens import Screen
 
-# --- Helper Funcions ---
+# --- Helper Funcions -------------------------------------------------------
 
 def make_navigator():
     event_bus = EventBus()
