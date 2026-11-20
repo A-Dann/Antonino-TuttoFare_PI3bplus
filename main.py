@@ -12,6 +12,7 @@ from hal.input.evdev_input import EvdevInput
 from hal.input.input_manager import InputManager
 from hal.input.keyboard_input import KeyboardInput
 from hal.input.terminal_input import TerminalInput
+from plugins.menu.main_menu import main_screen
 from ui.navigation import Navigator
 from ui.renderer import Renderer
 
@@ -46,6 +47,8 @@ def main() -> None:
     ctx.plugin_manager = PluginManager(ctx)
     ctx.plugin_manager.discover()
     ctx.plugin_manager.start_all()
+
+    navigator.navigate_to(main_screen.key)
 
     terminal_input = TerminalInput()
 

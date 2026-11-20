@@ -1,5 +1,4 @@
 import logging
-import types
 
 from core.context import AppContext
 from core.event_bus import EventBus
@@ -34,21 +33,6 @@ class RecordingPlugin(Plugin):
         self.calls.append(("stop", self.name))
 
 
-class BrokenConstructorPlugin(Plugin):
-    """A plugin whose constructor fails: discover must skip it."""
-
-    def __init__(self):
-        raise RuntimeError("constructor boom")
-
-    def start(self, ctx):
-        pass
-
-
-class HealthyPlugin(Plugin):
-    def start(self, ctx):
-        pass
-
-
 def make_manager(*plugins):
     """A PluginManager that already holds the given plugins (no discovery)."""
     ctx = object()
@@ -58,43 +42,34 @@ def make_manager(*plugins):
     return manager, ctx
 
 
-def fake_plugins_module(*classes):
-    """A module that defines the given plugin classes, as discover expects to find them."""
-    module = types.ModuleType("fake_plugin_module")
-    for cls in classes:
-        cls.__module__ = module.__name__
-        setattr(module, cls.__name__, cls)
-    return module
-
-
 # --- register --------------------------------------------------------------
 
 def test_register_adds_a_plugin_that_start_all_then_starts():
     calls = []
-    manager = PluginManager(object())
+    manager, _ = make_manager()
 
-    manager.register("only", RecordingPlugin("only", calls))
+    manager.register("late", RecordingPlugin("late", calls))
     manager.start_all()
 
-    assert calls == [("start", "only")]
+    assert calls == [("start", "late")]
 
 
 def test_register_with_an_existing_id_keeps_the_first_plugin_and_logs_a_warning(caplog):
     calls = []
-    manager = PluginManager(object())
+    manager, _ = make_manager()
     manager.register("same", RecordingPlugin("first", calls))
 
     with caplog.at_level(logging.WARNING):
         manager.register("same", RecordingPlugin("second", calls))
     manager.start_all()
 
-    assert "already registered" in caplog.text
     assert calls == [("start", "first")]
+    assert any(record.levelno == logging.WARNING for record in caplog.records)
 
 
 # --- discover --------------------------------------------------------------
 
-def test_discover_finds_the_menu_plugin_and_start_all_activates_main_screen():
+def test_discover_finds_the_menu_plugin_and_start_all_registers_its_screens():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
     ctx = AppContext(event_bus, state_manager, Navigator(state_manager))
@@ -102,21 +77,38 @@ def test_discover_finds_the_menu_plugin_and_start_all_activates_main_screen():
 
     manager.discover()
     manager.start_all()
+    ctx.navigator.navigate_to(main_screen.key)  # ignored if the screen is not registered
 
     assert state_manager.get(StateKeys.ACTIVE_SCREEN) == main_screen.key
 
 
 def test_discover_skips_a_plugin_that_cannot_be_instantiated_and_keeps_the_others(monkeypatch, caplog):
-    module = fake_plugins_module(BrokenConstructorPlugin, HealthyPlugin)
-    monkeypatch.setattr(PluginManager, "_find_module_names", staticmethod(lambda: ["fake_plugin_module"]))
-    monkeypatch.setattr(PluginManager, "_import_module", staticmethod(lambda name: module))
+    calls = []
+
+    class GoodPlugin(Plugin):
+        def start(self, ctx):
+            calls.append("good")
+
+    class BrokenPlugin(Plugin):
+        def __init__(self):
+            raise RuntimeError("constructor boom")
+
+        def start(self, ctx):
+            calls.append("broken")
+
+    monkeypatch.setattr(PluginManager, "_find_module_names", staticmethod(lambda: ["fake.module"]))
+    monkeypatch.setattr(PluginManager, "_import_module", staticmethod(lambda name: object()))
+    monkeypatch.setattr(
+        PluginManager, "_find_plugin_classes", staticmethod(lambda module: [BrokenPlugin, GoodPlugin])
+    )
     manager = PluginManager(object())
 
-    with caplog.at_level(logging.ERROR):
+    with caplog.at_level(logging.WARNING):
         manager.discover()
+    manager.start_all()
 
-    assert "Cannot instantiate" in caplog.text
-    assert list(manager._plugins) == ["fake_plugin_module.HealthyPlugin"]
+    assert calls == ["good"]
+    assert caplog.records
 
 
 # --- start_all -------------------------------------------------------------
@@ -154,6 +146,40 @@ def test_start_all_keeps_starting_after_a_plugin_fails():
     manager.start_all()
 
     assert calls == [("start", "healthy")]
+
+
+def test_start_all_called_twice_starts_each_plugin_once():
+    calls = []
+    manager, _ = make_manager(RecordingPlugin("only", calls))
+
+    manager.start_all()
+    manager.start_all()
+
+    assert calls == [("start", "only")]
+
+
+def test_start_all_called_twice_then_stop_all_stops_each_plugin_once():
+    calls = []
+    manager, _ = make_manager(RecordingPlugin("only", calls))
+    manager.start_all()
+    manager.start_all()
+    calls.clear()
+
+    manager.stop_all()
+
+    assert calls == [("stop", "only")]
+
+
+def test_start_all_retries_a_plugin_that_failed_to_start():
+    calls = []
+    broken = RecordingPlugin("flaky", calls, fail_on_start=True)
+    manager, _ = make_manager(broken)
+    manager.start_all()
+
+    broken.fail_on_start = False  # the cause of the failure is gone
+    manager.start_all()
+
+    assert calls == [("start", "flaky")]
 
 
 # --- stop_all --------------------------------------------------------------

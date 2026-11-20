@@ -50,6 +50,7 @@ def create_main_menu_context():
     ctx = AppContext(event_bus, state_manager, navigator)
     MenuPlugin().start(ctx)
     NavigationPlugin().start(ctx)
+    navigator.navigate_to(main_screen.key)
 
     return ctx
 

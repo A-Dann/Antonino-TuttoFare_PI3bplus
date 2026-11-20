@@ -26,7 +26,6 @@ class MenuPlugin(Plugin):
         self._ctx.navigator.register_screen(main_screen, main_actions)
         self._ctx.navigator.register_screen(settings_screen, settings_actions, parent=main_screen.key)
         self._ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
-        self._ctx.navigator.navigate_to(main_screen.key)
 
     def _handle_input_action(self, event) -> None:
         screen = self._ctx.navigator.get_active_screen()
