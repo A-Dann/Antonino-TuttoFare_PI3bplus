@@ -31,7 +31,13 @@ class PluginManager:
             if module is None:
                 continue
             for cls in self._find_plugin_classes(module):
-                self._register(module_name, cls)
+                plugin_id = f"{module_name}.{cls.__name__}"
+                try:
+                    plugin = cls()
+                except Exception:
+                    log.exception("Cannot instantiate %s", plugin_id)
+                    continue
+                self.register(plugin_id, plugin)
 
     @staticmethod
     def _find_module_names() -> list[str]:
@@ -64,16 +70,16 @@ class PluginManager:
             log.warning("%s defines no Plugin subclass", module.__name__)
         return classes
 
-    def _register(self, module_name: str, cls: type[Plugin]) -> None:
-        plugin_id = f"{module_name}.{cls.__name__}"
-        try:
-            self._plugins[plugin_id] = cls()
-            log.info("Discovered plugin: %s", plugin_id)
-        except Exception:
-            log.exception("Cannot instantiate %s", plugin_id)
+    def register(self, plugin_id: str, plugin: Plugin) -> None:
+        if plugin_id in self._plugins:
+            log.warning("Plugin %s is already registered.", plugin_id)
+            return
+
+        self._plugins[plugin_id] = plugin
+        log.info("Registered plugin: %s", plugin_id)
 
     def start_all(self):
-        """Initialize and start all discovered plugins."""
+        """Initialize and start all registered plugins."""
         for name, plugin in self._plugins.items():
             if name in self._started:
                 continue
