@@ -10,6 +10,7 @@ from ui.screens import MenuScreen
 if TYPE_CHECKING:
     from core.event_bus import EventBus
     from core.interfaces.display_interface import DisplayInterface
+    from core.state_changed import StateChanged
     from core.state_manager import StateManager
     from ui.navigation import Navigator
 
@@ -37,9 +38,8 @@ class Renderer:
     def start(self) -> None:
         self._event_bus.subscribe(Events.STATE_CHANGED, self._handle_event)
 
-    def _handle_event(self, data: dict) -> None:
-        key = data.get("key")
-        if key in [StateKeys.ACTIVE_SCREEN, StateKeys.SELECTED_INDEX]:
+    def _handle_event(self, event: StateChanged) -> None:
+        if event.key in (StateKeys.ACTIVE_SCREEN, StateKeys.SELECTED_INDEX):
             self._need_redraw = True
 
     def render_if_needed(self) -> None:

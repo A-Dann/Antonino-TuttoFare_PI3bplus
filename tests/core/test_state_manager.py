@@ -1,5 +1,6 @@
 from core.event_bus import EventBus
 from core.events import Events
+from core.state_changed import StateChanged
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
 
@@ -57,7 +58,7 @@ def test_set_publishes_state_changed_with_key_and_value():
 
     state_manager.set(StateKeys.ACTIVE_SCREEN, "a")
 
-    assert received == [{"key": StateKeys.ACTIVE_SCREEN, "value": "a"}]
+    assert received == [StateChanged(StateKeys.ACTIVE_SCREEN, "a")]
 
 
 def test_set_with_same_value_does_not_publish():

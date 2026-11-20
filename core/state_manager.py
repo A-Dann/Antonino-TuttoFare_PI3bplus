@@ -1,6 +1,7 @@
 import logging
 
 from core.events import Events
+from core.state_changed import StateChanged
 from core.state_keys import StateKeys
 
 log = logging.getLogger(__name__)
@@ -28,4 +29,4 @@ class StateManager:
             return
 
         self._state[key] = value
-        self._event_bus.publish(Events.STATE_CHANGED, {"key": key, "value": value})
+        self._event_bus.publish(Events.STATE_CHANGED, StateChanged(key, value))
