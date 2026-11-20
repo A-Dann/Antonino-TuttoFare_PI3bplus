@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class Screen:
     key: str
 
-@dataclass
+@dataclass(frozen=True)
 class MenuItem:
     id: str
     label: str
     icon: str | None = None
 
-@dataclass
+@dataclass(frozen=True)
 class MenuScreen(Screen):
     title: str
-    options: list[MenuItem]
+    options: tuple[MenuItem, ...]

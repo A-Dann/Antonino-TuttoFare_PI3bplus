@@ -25,11 +25,11 @@ def create_context():
     test_menu = MenuScreen(
         key="Test",
         title="Test Menu",
-        options=[
+        options=(
             MenuItem("a", "Option A"),
             MenuItem("b", "Option B"),
             MenuItem("c", "Option C")
-        ]
+        )
     )
 
     calls = []
@@ -135,7 +135,7 @@ def test_input_on_menu_without_options_does_nothing(caplog):
     ctx, _ = create_context()
 
     # Create a menu screen with no options
-    empty_menu = MenuScreen(key="Empty", title="Empty Menu", options=[])
+    empty_menu = MenuScreen(key="Empty", title="Empty Menu", options=())
     ctx.navigator.register_screen(empty_menu, {})
     ctx.navigator.navigate_to(empty_menu.key)
 

@@ -40,7 +40,7 @@ def _renderer_initialization():
         screen=MenuScreen(
             key="test_screen",
             title="Test Screen",
-            options=[MenuItem("a", "A"), MenuItem("b", "B")]
+            options=(MenuItem("a", "A"), MenuItem("b", "B"))
         )
     )
     navigator.navigate_to("test_screen")
