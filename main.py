@@ -18,7 +18,7 @@ from ui.renderer import Renderer
 logging.basicConfig(
     level=logging.INFO,
     filename="app.log",
-    filemode="w",
+    filemode="a",
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     encoding="utf-8"
 )
