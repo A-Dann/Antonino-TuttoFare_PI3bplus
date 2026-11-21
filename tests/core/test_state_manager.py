@@ -4,15 +4,15 @@ from core.event_bus import EventBus
 from core.events import Events
 from core.state_changed import StateChanged
 from core.state_keys import StateKeys
-from core.state_manager import StateManager
+from core.state_manager import DEFAULT_LANGUAGE, StateManager
 
 # --- get -------------------------------------------------------------------
 
-def test_initial_language_is_english():
+def test_initial_language_is_default():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
 
-    assert state_manager.get(StateKeys.LANGUAGE) == "en"
+    assert state_manager.get(StateKeys.LANGUAGE) == DEFAULT_LANGUAGE
 
 
 def test_initial_active_screen_is_none():

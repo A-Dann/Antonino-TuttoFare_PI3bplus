@@ -7,11 +7,13 @@ from core.state_keys import StateKeys
 
 log = logging.getLogger(__name__)
 
+DEFAULT_LANGUAGE = "en"
+
 class StateManager:
     def __init__(self, event_bus) -> None:
         self._event_bus = event_bus
         self._state = {
-            StateKeys.LANGUAGE: "en",
+            StateKeys.LANGUAGE: DEFAULT_LANGUAGE,
             StateKeys.ACTIVE_SCREEN: None,
             StateKeys.SELECTED_INDEX: 0,
             StateKeys.AI_AGENT_RUNNING: False,
