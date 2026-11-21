@@ -346,8 +346,10 @@ sequenceDiagram
   display, then the plugins.
 - **Logging**: with the console display, logs go to a file (`app.log`,
   ignored by git), otherwise they would be mixed with the menu on the
-  terminal. The file is opened in append mode, so the log of a crash is
-  still there after a restart.
+  terminal. The file rotates: when it reaches `LOG_MAX_BYTES` it becomes
+  `app.log.1` and so on, up to `LOG_BACKUP_COUNT` backups, then the oldest
+  is deleted. The log of a crash is still there after a restart, and the
+  space used (on the SD card) has a limit.
 
 ## 7. Deferred items
 
@@ -356,8 +358,6 @@ Known limitations, postponed until they are really needed:
 - `EventBus` has no `unsubscribe`, so a plugin cannot clean up its
   subscriptions in `stop()`.
 - `StateManager.set` accepts unknown keys without any warning.
-- `app.log` grows without limit. A `RotatingFileHandler` (maximum size and a
-  few backups) would protect the SD card.
 - There is no history stack: `go_back` always goes to the fixed parent, so a
   screen reachable from two menus returns to its declared parent only.
 - No popups yet. When one is needed, BACK should close the popup before

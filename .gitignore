@@ -23,7 +23,7 @@ _Progetto Audio/
 .mypy_cache/
 .ruff_cache/
 .coverage
-app.log
+app.log*
 htmlcov/
 
 # Editor / OS

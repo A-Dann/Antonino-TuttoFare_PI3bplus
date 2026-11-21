@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import RotatingFileHandler
 
 from core.context import AppContext
 from core.event_bus import EventBus
@@ -16,12 +17,14 @@ from plugins.menu.main_menu import main_screen
 from ui.navigation import Navigator
 from ui.renderer import Renderer
 
+LOG_FILE = "app.log"
+LOG_MAX_BYTES = 1_000_000
+LOG_BACKUP_COUNT = 3
+
 logging.basicConfig(
     level=logging.INFO,
-    filename="app.log",
-    filemode="a",
+    handlers=[RotatingFileHandler(LOG_FILE, maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUP_COUNT, encoding="utf-8")],
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    encoding="utf-8"
 )
 
 SCAN_INTERVAL = 2.0
