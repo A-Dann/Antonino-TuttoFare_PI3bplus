@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from core.events import Events
 from core.state_keys import StateKeys
-from ui.screens import MenuScreen
+from ui.screens import MenuScreen, Screen
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from core.event_bus import EventBus
     from core.interfaces.display_interface import DisplayInterface
     from core.state_changed import StateChanged
     from core.state_manager import StateManager
+    from core.translator import Translator
     from ui.navigation import Navigator
 
 log = logging.getLogger(__name__)
@@ -21,17 +24,19 @@ class Renderer:
         self,
         event_bus: EventBus,
         state_manager: StateManager,
+        translator: Translator,
         navigator: Navigator,
         display: DisplayInterface
     ) -> None:
 
         self._event_bus = event_bus
         self._state_manager = state_manager
+        self._translator = translator
         self._navigator = navigator
         self._display = display
 
         self._need_redraw = True
-        self._draw_functions = {
+        self._draw_functions: dict[type[Screen], Callable[[Any, int], None]] = {
             MenuScreen: self._draw_menu,
         }
 
@@ -39,7 +44,7 @@ class Renderer:
         self._event_bus.subscribe(Events.STATE_CHANGED, self._handle_event)
 
     def _handle_event(self, event: StateChanged) -> None:
-        if event.key in (StateKeys.ACTIVE_SCREEN, StateKeys.SELECTED_INDEX):
+        if event.key in (StateKeys.LANGUAGE, StateKeys.ACTIVE_SCREEN, StateKeys.SELECTED_INDEX):
             self._need_redraw = True
 
     def render_if_needed(self) -> None:
@@ -64,6 +69,8 @@ class Renderer:
         selected_index = self._state_manager.get(StateKeys.SELECTED_INDEX)
         draw_function(active_screen, selected_index)
 
-    def _draw_menu(self, screen, selected_index: int) -> None:
-        options = [option.label for option in screen.options]
-        self._display.show_menu(screen.title, options, selected_index)
+    def _draw_menu(self, screen: MenuScreen, selected_index: int) -> None:
+        screen_title = self._translator.t(screen.title)
+        screen_labels = [self._translator.t(option.label) for option in screen.options]
+
+        self._display.show_menu(screen_title, screen_labels, selected_index)

@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from core.context import AppContext
 from core.event_bus import EventBus
@@ -8,6 +9,7 @@ from core.input_event import InputEvent
 from core.plugin_manager import PluginManager
 from core.state_keys import StateKeys
 from core.state_manager import StateManager
+from core.translator import Translator
 from hal.display.console_display import ConsoleDisplay
 from hal.input.evdev_input import EvdevInput
 from hal.input.input_manager import InputManager
@@ -27,6 +29,8 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
 )
 
+LOCALES_DIR = Path(__file__).parent / "locales"
+
 SCAN_INTERVAL = 2.0
 
 def main() -> None:
@@ -39,12 +43,13 @@ def main() -> None:
 
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
+    translator = Translator(state_manager, LOCALES_DIR)
     navigator = Navigator(state_manager)
     ctx = AppContext(event_bus, state_manager, navigator)
 
     input_manager = InputManager(_emit, driver_classes, SCAN_INTERVAL)
     console_display = ConsoleDisplay()
-    renderer = Renderer(event_bus, state_manager, navigator, console_display)
+    renderer = Renderer(event_bus, state_manager, translator, navigator, console_display)
     renderer.start()
 
     ctx.plugin_manager = PluginManager(ctx)
