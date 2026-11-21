@@ -4,12 +4,13 @@
 > renderer, console display, the evdev input base class, the keyboard driver,
 > the input manager (device discovery with a scan thread) and the terminal
 > input (keys read from the terminal, for development) are implemented and
-> tested. The menu plugin provides the main menu and the settings menu; the
-> navigation plugin turns the BACK key into `go_back`. The entries of both
-> menus only log for now: the screens behind them are not written yet.
-> Planned: translations (`StateKeys.LANGUAGE` already exists in the state;
-> the translator and the language menu entry are not written), DSI display
-> backend, touch strip input.
+> tested. The translator (English, Italian and Spanish, switchable from the
+> Settings menu) is implemented too. The menu plugin provides the main menu,
+> the settings menu and the language menu; the navigation plugin turns the
+> BACK key into `go_back`. Besides Exit, Settings, Change Language and the
+> Back entries, the entries of the menus only log for now: the screens behind
+> them are not written yet. Planned: DSI display backend, touch strip input,
+> saving the language between runs.
 
 ## 1. Component Diagram
 
@@ -33,6 +34,7 @@ graph TD
     subgraph Core [core]
         EventBus[EventBus - queue + publish]
         StateMgr[StateManager]
+        Translator[Translator - key to text, reads LANGUAGE from the state]
         PluginMgr[PluginManager - discovers and registers *_plugin.py]
         Context[AppContext]
         Interfaces[interfaces - Plugin, InputInterface, DisplayInterface]
@@ -44,11 +46,13 @@ graph TD
     end
 
     subgraph Plugins [plugins]
-        Menu[menu - main and settings menus]
+        Menu[menu - main, settings and language menus]
         Nav[navigation - BACK]
         Wifi[wifi - planned]
         AiAgent[ai_agent - planned]
     end
+
+    Locales[locales/*.json - one file per language]
 
     Main[main.py - builds and wires everything]
 
@@ -74,6 +78,9 @@ graph TD
     EventBus -->|notify| Renderer
     Renderer -->|reads| StateMgr
     Renderer -->|reads| Navigator
+    Renderer -->|t key| Translator
+    Translator -->|reads LANGUAGE| StateMgr
+    Translator -->|loads at startup| Locales
     Main -->|navigate_to the first screen| Navigator
     Main -->|render_if_needed each loop turn| Renderer
     Main -->|loops while RUNNING is true| StateMgr
@@ -215,7 +222,41 @@ sequenceDiagram
     Term->>Term: close the wake-up pipe
 ```
 
-## 6. Rules
+## 6. Language Change Sequence
+
+Screens hold translation keys, not texts. The `Renderer` turns a key into
+text each time it draws, and the `Translator` reads the current language from
+the state at that moment. So changing the language is just changing the
+state: no plugin knows the `Translator`, and nothing has to be told to
+refresh.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Bus as EventBus
+    participant Menu as MenuPlugin
+    participant Navig as Navigator
+    participant State as StateManager
+    participant Render as Renderer
+    participant Tr as Translator
+    participant Disp as Display
+
+    User->>Bus: SELECT on "Italiano" (language screen)
+    Bus->>Menu: publish(INPUT_ACTION)
+    Menu->>Navig: execute_action(ctx, "it")
+    Navig->>State: the action runs set(LANGUAGE, "it")
+    State->>Bus: publish(STATE_CHANGED, StateChanged)
+    Bus->>Render: STATE_CHANGED, key is LANGUAGE
+    Note over Render: raises the redraw flag
+    Render->>Render: render_if_needed() in the main loop
+    Render->>Tr: t("language.title"), t("language.en"), ...
+    Tr->>State: get(LANGUAGE)
+    Tr-->>Render: texts from it.json, or from en.json if one is missing
+    Render->>Disp: show_menu(title, labels, index)
+```
+
+## 7. Rules
 
 - **Threads**: only the hardware layer runs in its own threads: one per
   input driver (evdev drivers and `TerminalInput`), plus the scan thread of
@@ -244,7 +285,10 @@ sequenceDiagram
 - **State is the single source of truth**: the active screen, the
   selected index and the language live in `StateManager`. Screens are plain
   data and hold no selection. The state is changed from the main thread
-  only.
+  only. `StateManager` only accepts the keys it knows: setting an unknown key
+  logs a warning, stores nothing and publishes nothing. The language starts
+  as `DEFAULT_LANGUAGE` (`"en"`, defined in `core/state_manager.py`), which
+  is also the fallback language of the translator.
 - **Event payloads** are frozen dataclasses: `InputEvent` for `INPUT_ACTION`
   and `StateChanged` (`key`, `value`) for `STATE_CHANGED`. A handler reads
   attributes, never string keys, so a typo is an error and not a silent
@@ -255,7 +299,10 @@ sequenceDiagram
   screen cannot change after it is created. `Navigator` works with `Screen`
   and does not know the concrete kinds; whoever needs a specific kind
   (renderer, plugins) checks it with `isinstance`. Screen keys are lowercase
-  strings (`"main"`, `"settings"`).
+  strings (`"main"`, `"settings"`, `"language"`). The texts of a screen
+  (`title`, the `label` of an item) are translation keys (`"main.title"`),
+  not texts. The `id` of an item is what the action table uses and is not
+  translated.
 - **Navigation**: screens are changed only through `Navigator.navigate_to()`
   (it ignores the screen that is already active, and an unregistered one with
   a warning). It resets the selected index *before* changing the active
@@ -279,6 +326,23 @@ sequenceDiagram
   The display is used from the main thread only. The draw function is
   chosen with `isinstance`, so subclasses of a registered screen type are
   drawn too.
+- **Translations**: the texts live in `locales/<language>.json`, one file per
+  language, nested by screen (`{"main": {"title": "..."}}`). `Translator`
+  loads every `*.json` of the folder at startup and flattens it to dotted keys
+  (`"main.title"`). `t(key, **params)` reads the language from the state each
+  time, so it follows a change at once. A key missing in the current language
+  falls back to `DEFAULT_LANGUAGE`; a key missing everywhere returns the key
+  itself and logs a warning, so a missing text is visible but never breaks the
+  app. `params` are filled with `str.format`; if that fails, the text is
+  returned as it is. A broken or non-dictionary file is skipped with a
+  warning, and a missing folder does not raise. Only the `Renderer` calls
+  `t()`: plugins and screens never know the `Translator`. Every language file
+  must have the same keys as the default one, and every key used by a screen
+  must exist in it: `tests/test_locales.py` checks both. The language names in
+  the language menu are texts like any other (`language.en`, ...), written in
+  their own language in every file, so a user can always find their own. The
+  language menu offers exactly the languages that have a file (also checked by
+  a test).
 - **Displays are passive**: a `DisplayInterface` implementation draws what
   it is told. `show_menu` replaces whatever was on screen, so the caller
   never has to clear first. It knows nothing about screens or plugins.
@@ -314,9 +378,11 @@ sequenceDiagram
 - **Layout**: `hal/input` (`EvdevInput`, `KeyboardInput`, `TerminalInput`,
   `InputManager`, `WakeUp`) and `hal/display` (`ConsoleDisplay`). The
   plugins are `plugins/menu` (`main_menu.py`, `settings_menu.py`,
-  `menu_plugin.py`) and `plugins/navigation`. The tests mirror the layers:
-  `tests/core`, `tests/hal`, `tests/ui`, `tests/plugins`; the shared fakes
-  are in `tests/fakes.py`.
+  `language_menu.py`, `menu_plugin.py`) and `plugins/navigation`. The
+  language files are in `locales/`, next to `main.py`. The tests mirror the
+  layers: `tests/core`, `tests/hal`, `tests/ui`, `tests/plugins`, plus
+  `tests/test_locales.py` for the language files; the shared fakes are in
+  `tests/fakes.py`.
 - **Dependencies point one way**: `plugins` -> `ui`, `core`;
   `ui` and `hal` -> `core`; `core` imports nothing from the others
   at runtime (type-only imports go under `TYPE_CHECKING`).
@@ -328,7 +394,10 @@ sequenceDiagram
   and talk to the rest only through `ctx` (events and state), never by
   importing each other. A plugin only registers what it provides (its
   screens, its subscriptions) in `start()`: it does not decide which screen
-  is shown first. It reacts only to the actions it owns.
+  is shown first. It reacts only to the actions it owns. The menu plugin
+  registers its screens from one list, `MENUS`, of
+  `(screen, actions, parent key)`: a new menu is one line there, and the test
+  of the translation keys reads the same list.
 - **Plugin manager**: `discover()` finds the plugin classes, creates one
   instance of each (a constructor that fails is logged and skipped) and
   passes it to `register(plugin_id, plugin)`, which is public so that tests
@@ -338,7 +407,8 @@ sequenceDiagram
   is tried again on the next call. `stop_all()` stops only the plugins that
   started, in reverse order.
 - **Wiring**: `main.py` is the only place that creates the services and
-  passes them down. The renderer must be started (subscribed) before the
+  passes them down (the `Translator` is built there from `LOCALES_DIR` and
+  given to the `Renderer`). The renderer must be started (subscribed) before the
   plugins, because `StateManager.set` publishes synchronously. After the
   plugins have started, `main.py` chooses the first screen with
   `navigate_to`, so the order of the plugin files cannot change it. At
@@ -351,17 +421,30 @@ sequenceDiagram
   is deleted. The log of a crash is still there after a restart, and the
   space used (on the SD card) has a limit.
 
-## 7. Deferred items
+## 8. Deferred items
 
 Known limitations, postponed until they are really needed:
 
 - `EventBus` has no `unsubscribe`, so a plugin cannot clean up its
   subscriptions in `stop()`.
-- `StateManager.set` accepts unknown keys without any warning.
 - There is no history stack: `go_back` always goes to the fixed parent, so a
   screen reachable from two menus returns to its declared parent only.
 - No popups yet. When one is needed, BACK should close the popup before
   going to the parent screen.
+- The language is not saved: at every start the app is in `DEFAULT_LANGUAGE`.
+  Saving it needs something that listens to `STATE_CHANGED` for `LANGUAGE`
+  and writes a file, and something that reads it at startup; the menu does not
+  change.
+- `locales/` is found from the position of `main.py`. If the project is ever
+  packaged (`pyproject.toml`), the JSON files must be included in the package.
+- The language menu lists the languages in code (`language_menu.py`), and the
+  files are in `locales/`. A test keeps the two in step, but adding a language
+  still means a new file, a new menu entry and a new line in every file for
+  its name.
+- No plural forms or other grammar rules: `t()` only fills named parameters.
+  No text uses parameters yet.
+- The language menu and the settings menu both have a "back" entry with its
+  own text key. If more menus need the same text, the keys should be shared.
 - The selected index is not remembered: going back to a menu always puts the
   cursor on the first entry.
 - The main menu key belongs to the menu plugin, and `main.py` imports
