@@ -1,25 +1,33 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from ui.screens import MenuItem, MenuScreen
 
 from .language_menu import language_screen
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from core.context import AppContext
+
 log = logging.getLogger(__name__)
 
-def _action_system_info(ctx):
+def _action_system_info(ctx: AppContext) -> None:
     log.info("System Info selected")
 
-def _action_configure_wifi(ctx):
+def _action_configure_wifi(ctx: AppContext) -> None:
     log.info("Configure Wifi selected")
 
-def _action_sync_time_place(ctx):
+def _action_sync_time_place(ctx: AppContext) -> None:
     log.info("Sync Time & Place selected")
 
-def _action_change_language(ctx):
+def _action_change_language(ctx: AppContext) -> None:
     log.info("Change Language selected")
     ctx.navigator.navigate_to(language_screen.key)
 
-def _action_back_to_main_menu(ctx):
+def _action_back_to_main_menu(ctx: AppContext) -> None:
     log.info("Going back to the parent menu")
     ctx.navigator.go_back()
 
@@ -35,7 +43,7 @@ settings_screen = MenuScreen(
     ),
 )
 
-settings_actions = {
+settings_actions: dict[str, Callable[[AppContext], None]] = {
     "sys_info": _action_system_info,
     "configure_wifi": _action_configure_wifi,
     "sync_time_place": _action_sync_time_place,

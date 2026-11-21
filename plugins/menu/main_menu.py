@@ -1,23 +1,31 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from core.state_keys import StateKeys
 from ui.screens import MenuItem, MenuScreen
 
 from .settings_menu import settings_screen
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from core.context import AppContext
+
 log = logging.getLogger(__name__)
 
-def _action_desktop_mode(ctx):
+def _action_desktop_mode(ctx: AppContext) -> None:
     log.info("Desktop Mode selected")
 
-def _action_dual_audio(ctx):
+def _action_dual_audio(ctx: AppContext) -> None:
     log.info("Dual Audio selected")
 
-def _action_settings(ctx):
+def _action_settings(ctx: AppContext) -> None:
     log.info("Settings selected")
     ctx.navigator.navigate_to(settings_screen.key)
 
-def _action_exit(ctx):
+def _action_exit(ctx: AppContext) -> None:
     log.info("Turning off application")
     ctx.state_manager.set(StateKeys.RUNNING, False)
 
@@ -32,7 +40,7 @@ main_screen = MenuScreen(
     ),
 )
 
-main_actions = {
+main_actions: dict[str, Callable[[AppContext], None]] = {
     "desktop_mode": _action_desktop_mode,
     "dual_audio": _action_dual_audio,
     "settings": _action_settings,
