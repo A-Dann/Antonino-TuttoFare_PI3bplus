@@ -19,14 +19,19 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+MENUS = (
+    (main_screen, main_actions, None),
+    (settings_screen, settings_actions, main_screen.key),
+    (language_screen, language_actions, settings_screen.key),
+)
+
 class MenuPlugin(Plugin):
     def start(self, ctx: AppContext) -> None:
         self._ctx = ctx
 
-        # Register the main menu screen and actions
-        self._ctx.navigator.register_screen(main_screen, main_actions)
-        self._ctx.navigator.register_screen(settings_screen, settings_actions, parent=main_screen.key)
-        self._ctx.navigator.register_screen(language_screen, language_actions, parent=settings_screen.key)
+        # Register the menu screen, actions and parent
+        for screen, actions, parent in MENUS:
+            self._ctx.navigator.register_screen(screen, actions, parent=parent)
         self._ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
 
     def _handle_input_action(self, event) -> None:

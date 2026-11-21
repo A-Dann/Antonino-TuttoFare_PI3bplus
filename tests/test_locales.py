@@ -5,9 +5,7 @@ import pytest
 
 from core.state_manager import DEFAULT_LANGUAGE
 from core.translator import _flatten
-from plugins.menu.language_menu import language_screen
-from plugins.menu.main_menu import main_screen
-from plugins.menu.settings_menu import settings_screen
+from plugins.menu.menu_plugin import MENUS
 
 LOCALES_DIR = Path(__file__).parents[1] / "locales"
 LANGUAGES = sorted(file.stem for file in LOCALES_DIR.glob("*.json"))
@@ -46,8 +44,7 @@ def test_every_text_is_a_non_empty_string(language):
 
 # --- the keys used by the screens ------------------------------------------
 
-SCREENS = [main_screen, settings_screen, language_screen]
-
+SCREENS = [screen for screen, _, _ in MENUS]
 
 def test_every_text_key_used_by_the_screens_exists_in_the_default_language():
     texts = load_texts(DEFAULT_LANGUAGE)
