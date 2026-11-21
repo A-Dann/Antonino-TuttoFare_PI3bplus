@@ -8,6 +8,13 @@ from core.state_manager import StateManager
 
 # --- get -------------------------------------------------------------------
 
+def test_initial_language_is_english():
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+
+    assert state_manager.get(StateKeys.LANGUAGE) == "en"
+
+
 def test_initial_active_screen_is_none():
     event_bus = EventBus()
     state_manager = StateManager(event_bus)
