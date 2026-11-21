@@ -1,0 +1,17 @@
+{
+    "main": {
+        "title": "MAIN MENU",
+        "desktop_mode": "Desktop Mode",
+        "dual_audio": "Dual Audio",
+        "settings": "Settings",
+        "exit": "Exit"
+    },
+    "settings": {
+        "title": "SETTINGS",
+        "sys_info": "System Information",
+        "configure_wifi": "Wi-Fi Configuration",
+        "sync_time_place": "Synchronize Time and Place",
+        "change_language": "Change Language",
+        "back_to_menu": "Back to Main Menu"
+    }
+}

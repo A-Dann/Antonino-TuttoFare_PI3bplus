@@ -1,0 +1,17 @@
+{
+    "main": {
+        "title": "MENÚ PRINCIPAL",
+        "desktop_mode": "Modo Escritorio",
+        "dual_audio": "Audio Dual",
+        "settings": "Ajustes",
+        "exit": "Salir"
+    },
+    "settings": {
+        "title": "AJUSTES",
+        "sys_info": "Información del sistema",
+        "configure_wifi": "Configuración Wi-Fi",
+        "sync_time_place": "Sincronizar hora y lugar",
+        "change_language": "Cambiar idioma",
+        "back_to_menu": "Volver al Menú Principal"
+    }
+}

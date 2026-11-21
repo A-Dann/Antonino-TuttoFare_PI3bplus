@@ -1,0 +1,17 @@
+{
+    "main": {
+        "title": "MENU PRINCIPALE",
+        "desktop_mode": "Modalità Desktop",
+        "dual_audio": "Audio Duale",
+        "settings": "Impostazioni",
+        "exit": "Esci"
+    },
+    "settings": {
+        "title": "IMPOSTAZIONI",
+        "sys_info": "Informazioni di sistema",
+        "configure_wifi": "Configurazione Wi-Fi",
+        "sync_time_place": "Sincronizza ora e luogo",
+        "change_language": "Cambia lingua",
+        "back_to_menu": "Torna al Menu Principale"
+    }
+}
