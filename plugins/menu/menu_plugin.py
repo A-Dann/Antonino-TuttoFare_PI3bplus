@@ -10,6 +10,7 @@ from core.interfaces.plugin_interface import Plugin
 from core.state_keys import StateKeys
 from ui.screens import MenuScreen
 
+from .language_menu import language_actions, language_screen
 from .main_menu import main_actions, main_screen
 from .settings_menu import settings_actions, settings_screen
 
@@ -25,6 +26,7 @@ class MenuPlugin(Plugin):
         # Register the main menu screen and actions
         self._ctx.navigator.register_screen(main_screen, main_actions)
         self._ctx.navigator.register_screen(settings_screen, settings_actions, parent=main_screen.key)
+        self._ctx.navigator.register_screen(language_screen, language_actions, parent=settings_screen.key)
         self._ctx.event_bus.subscribe(Events.INPUT_ACTION, self._handle_input_action)
 
     def _handle_input_action(self, event) -> None:

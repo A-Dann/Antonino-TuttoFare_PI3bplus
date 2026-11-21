@@ -2,6 +2,8 @@ import logging
 
 from ui.screens import MenuItem, MenuScreen
 
+from .language_menu import language_screen
+
 log = logging.getLogger(__name__)
 
 def _action_system_info(ctx):
@@ -15,6 +17,7 @@ def _action_sync_time_place(ctx):
 
 def _action_change_language(ctx):
     log.info("Change Language selected")
+    ctx.navigator.navigate_to(language_screen.key)
 
 def _action_back_to_main_menu(ctx):
     log.info("Going back to the parent menu")

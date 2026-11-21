@@ -13,5 +13,12 @@
         "sync_time_place": "Sincronizar hora y lugar",
         "change_language": "Cambiar idioma",
         "back_to_menu": "Volver al Menú Principal"
+    },
+   "language": {
+        "title": "IDIOMA",
+        "en": "English",
+        "it": "Italiano",
+        "es": "Español",
+        "back": "Volver a Ajustes"
     }
 }
