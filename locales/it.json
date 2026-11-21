@@ -14,11 +14,11 @@
         "change_language": "Cambia lingua",
         "back_to_menu": "Torna al Menu Principale"
     },
-   "language": {
+    "language": {
         "title": "LINGUA",
-        "en": "English",
-        "it": "Italiano",
-        "es": "Español",
+        "en": "(en): English",
+        "it": "(it): Italiano",
+        "es": "(es): Español",
         "back": "Torna alle Impostazioni"
     }
 }

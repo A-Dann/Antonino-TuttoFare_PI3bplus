@@ -16,9 +16,9 @@
     },
     "language": {
         "title": "LANGUAGE",
-        "en": "English",
-        "it": "Italiano",
-        "es": "Español",
+        "en": "(en): English",
+        "it": "(it): Italiano",
+        "es": "(es): Español",
         "back": "Back to Settings"
     }
 }
