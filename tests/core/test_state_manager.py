@@ -1,3 +1,5 @@
+import logging
+
 from core.event_bus import EventBus
 from core.events import Events
 from core.state_changed import StateChanged
@@ -85,3 +87,56 @@ def test_set_with_new_value_publishes_again():
     state_manager.set(StateKeys.ACTIVE_SCREEN, "b")
 
     assert len(received) == 2
+
+
+# --- unknown keys ----------------------------------------------------------
+
+def test_get_with_unknown_key_logs_a_warning_with_the_key(caplog):
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+
+    with caplog.at_level(logging.WARNING):
+        state_manager.get("typo")
+
+    assert "Unknown state key: typo" in caplog.text
+
+
+def test_set_with_unknown_key_does_not_store_the_value():
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+
+    state_manager.set("typo", 5)
+
+    assert state_manager.get("typo") is None
+
+
+def test_set_with_unknown_key_does_not_publish():
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+    received = []
+    event_bus.subscribe(Events.STATE_CHANGED, received.append)
+
+    state_manager.set("typo", 5)
+
+    assert received == []
+
+
+def test_set_with_unknown_key_logs_a_warning_with_the_key(caplog):
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+
+    with caplog.at_level(logging.WARNING):
+        state_manager.set("typo", 5)
+
+    assert "Unknown state key: typo" in caplog.text
+
+
+def test_known_keys_do_not_log_a_warning(caplog):
+    event_bus = EventBus()
+    state_manager = StateManager(event_bus)
+
+    with caplog.at_level(logging.WARNING):
+        state_manager.set(StateKeys.SELECTED_INDEX, 3)
+        state_manager.get(StateKeys.SELECTED_INDEX)
+
+    assert "Unknown state key" not in caplog.text
