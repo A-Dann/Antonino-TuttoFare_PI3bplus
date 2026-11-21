@@ -22,13 +22,13 @@ def _action_back_to_main_menu(ctx):
 
 settings_screen = MenuScreen(
     key="settings",
-    title="Settings",
+    title="settings.title",
     options=(
-        MenuItem(id="sys_info", label="System Info"),
-        MenuItem(id="configure_wifi", label="Configure Wi-Fi"),
-        MenuItem(id="sync_time_place", label="Synchronize Time and Place"),
-        MenuItem(id="change_language", label="Change Language"),
-        MenuItem(id="back_to_menu", label="Back to Main Menu"),
+        MenuItem(id="sys_info", label="settings.sys_info"),
+        MenuItem(id="configure_wifi", label="settings.configure_wifi"),
+        MenuItem(id="sync_time_place", label="settings.sync_time_place"),
+        MenuItem(id="change_language", label="settings.change_language"),
+        MenuItem(id="back_to_menu", label="settings.back_to_menu"),
     ),
 )
 

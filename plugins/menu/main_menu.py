@@ -23,17 +23,17 @@ def _action_exit(ctx):
 
 main_screen = MenuScreen(
     key="main",
-    title="Main Menu",
+    title="main.title",
     options=(
-        MenuItem(id="desktop", label="Desktop Mode"),
-        MenuItem(id="dual_audio", label="Dual Audio"),
-        MenuItem(id="settings", label="Settings"),
-        MenuItem(id="exit", label="Exit")
+        MenuItem(id="desktop_mode", label="main.desktop_mode"),
+        MenuItem(id="dual_audio", label="main.dual_audio"),
+        MenuItem(id="settings", label="main.settings"),
+        MenuItem(id="exit", label="main.exit"),
     ),
 )
 
 main_actions = {
-    "desktop": _action_desktop_mode,
+    "desktop_mode": _action_desktop_mode,
     "dual_audio": _action_dual_audio,
     "settings": _action_settings,
     "exit": _action_exit
