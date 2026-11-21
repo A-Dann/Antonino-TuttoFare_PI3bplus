@@ -339,10 +339,10 @@ sequenceDiagram
   `t()`: plugins and screens never know the `Translator`. Every language file
   must have the same keys as the default one, and every key used by a screen
   must exist in it: `tests/test_locales.py` checks both. The language names in
-  the language menu are texts like any other (`language.en`, ...), written in
-  their own language in every file, so a user can always find their own. The
-  language menu offers exactly the languages that have a file (also checked by
-  a test).
+  the language menu are texts like any other (`language.en`, ...). They are
+  the same in every file: each language in its own name, preceded by its code
+  (`(it): Italiano`), so a user can always find their own. The language menu 
+  offers exactly the languages that have a file (also checked by a test).
 - **Displays are passive**: a `DisplayInterface` implementation draws what
   it is told. `show_menu` replaces whatever was on screen, so the caller
   never has to clear first. It knows nothing about screens or plugins.
