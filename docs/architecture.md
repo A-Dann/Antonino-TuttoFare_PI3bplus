@@ -341,7 +341,7 @@ sequenceDiagram
   must exist in it: `tests/test_locales.py` checks both. The language names in
   the language menu are texts like any other (`language.en`, ...). They are
   the same in every file: each language in its own name, preceded by its code
-  (`(it): Italiano`), so a user can always find their own. The language menu 
+  (`(it): Italiano`), so a user can always find their own. The language menu
   offers exactly the languages that have a file (also checked by a test).
 - **Displays are passive**: a `DisplayInterface` implementation draws what
   it is told. `show_menu` replaces whatever was on screen, so the caller
@@ -381,8 +381,8 @@ sequenceDiagram
   `language_menu.py`, `menu_plugin.py`) and `plugins/navigation`. The
   language files are in `locales/`, next to `main.py`. The tests mirror the
   layers: `tests/core`, `tests/hal`, `tests/ui`, `tests/plugins`, plus
-  `tests/test_locales.py` for the language files; the shared fakes are in
-  `tests/fakes.py`.
+  `tests/test_locales.py` for the language files and `tests/test_main.py`
+  for the whole app; the shared fakes are intests `/fakes.py`.
 - **Dependencies point one way**: `plugins` -> `ui`, `core`;
   `ui` and `hal` -> `core`; `core` imports nothing from the others
   at runtime (type-only imports go under `TYPE_CHECKING`).
@@ -407,13 +407,16 @@ sequenceDiagram
   is tried again on the next call. `stop_all()` stops only the plugins that
   started, in reverse order.
 - **Wiring**: `main.py` is the only place that creates the services and
-  passes them down (the `Translator` is built there from `LOCALES_DIR` and
-  given to the `Renderer`). The renderer must be started (subscribed) before the
-  plugins, because `StateManager.set` publishes synchronously. After the
-  plugins have started, `main.py` chooses the first screen with
-  `navigate_to`, so the order of the plugin files cannot change it. At
-  shutdown the inputs (the producers of events) are stopped first, then the
-  display, then the plugins.
+  passes them down. `build_app()` creates them (the `Translator` is built there
+  from `LOCALES_DIR` and given to the `Renderer`), starts the plugins and
+  chooses the first screen, without touching the input devices; `run_one_turn()`
+  is one turn of the main loop. `main()` only adds the hardware (display,
+  inputs) and the loop, so `tests/test_main.py` can drive the real app with a
+  fake display. The renderer must be started (subscribed) before the plugins,
+  because `StateManager.set` publishes synchronously. After the plugins have
+  started, `build_app()` chooses the first screen with `navigate_to`, so the
+  order of the plugin files cannot change it. At shutdown the inputs (the
+  producers of events) are stopped first, then the display, then the plugins.
 - **Logging**: with the console display, logs go to a file (`app.log`,
   ignored by git), otherwise they would be mixed with the menu on the
   terminal. The file rotates: when it reaches `LOG_MAX_BYTES` it becomes
